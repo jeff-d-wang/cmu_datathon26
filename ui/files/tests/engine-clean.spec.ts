@@ -10,14 +10,14 @@ test('engine clean: Jaipur 302001, chest pressure shows heading, needs, real pin
   await page.getByLabel('District, town or PIN').fill('302001');
   await page.getByRole('option', { name: /302001/ }).first().click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+  await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Chest pressure' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
 
   await expect(page.getByRole('article').first()).toBeVisible({ timeout: 120_000 });
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Heart care near Jaipur');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Health care near Jaipur');
   await expect(page.getByText('Clean data (local preview)')).toHaveCount(0);
   await expect(page.getByTestId('engine-needs')).toContainText('Emergency care');
   await expect(page.getByRole('button', { name: 'What similar visits involved' })).toHaveAttribute('aria-expanded', 'false');
@@ -35,14 +35,14 @@ test('engine clean: Delhi shows all places, outside rows, details, no forbidden 
   await page.getByLabel('District, town or PIN').fill('110001');
   await page.getByRole('option', { name: /110001/ }).first().click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+  await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Chest pressure' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
 
   await expect(page.getByRole('article').first()).toBeVisible({ timeout: 120_000 });
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Heart care near New Delhi');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Health care near New Delhi');
   await expect(page.getByText(/For .+ · \d+ places?/)).toBeVisible();
   await page.waitForTimeout(2500);
   await page.screenshot({ path: 'tests/screenshots/ec-results.png' });
@@ -105,7 +105,7 @@ test('engine clean: mobile 390x844 hides the map on step 1 and shows a strip on 
   await page.getByRole('option', { name: /110001/ }).first().click();
   await expect(page.locator('.leaflet-container')).toHaveCount(0);
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+  await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Chest pressure' }).click();

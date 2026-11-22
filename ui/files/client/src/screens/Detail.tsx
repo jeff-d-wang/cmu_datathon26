@@ -17,11 +17,11 @@ import { HowOrdered, TierTag, WarningList, WhyList } from './parts';
 
 const CENTRAL_LINE_MIN = 10;
 
-function PhoneValue({ number, sharedBy, name }: { number: string; sharedBy: number; name: string }) {
+function PhoneValue({ number, sharedBy }: { number: string; sharedBy: number }) {
   const t = useT();
   return (
     <span className="flex min-w-0 flex-col gap-0.5">
-      <a className="whitespace-nowrap font-semibold text-[var(--hc-primary-dark)] underline underline-offset-2" href={`tel:${number}`} aria-label={t('call_place', { name })}>{number}</a>
+      <span className="whitespace-nowrap font-semibold tabular-nums">{number}</span>
       {sharedBy >= CENTRAL_LINE_MIN && (
         <span className="flex items-start gap-1.5 text-[15px] text-[var(--hc-primary-dark)]">
           <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
@@ -118,15 +118,8 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
           </Section>
 
           <Section title={t('ask_title')}>
-            <ul className="space-y-1 text-[15px]">
-              {(['ask_1', 'ask_2', 'ask_3', 'ask_4', 'ask_5'] as const).map((k) => (
-                <li key={k}>
-                  <label className="flex min-h-8 cursor-pointer items-start gap-2">
-                    <input type="checkbox" className="mt-1 h-5 w-5" />
-                    {t(k)}
-                  </label>
-                </li>
-              ))}
+            <ul className="list-disc space-y-1 pl-5 text-[15px]">
+              {(['ask_1', 'ask_2', 'ask_3', 'ask_4', 'ask_5'] as const).map((k) => <li key={k}>{t(k)}</li>)}
             </ul>
           </Section>
 
@@ -134,12 +127,12 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
             <dl className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2 text-[16px]">
               <dt className="flex items-center gap-1.5 whitespace-nowrap font-semibold"><PhoneIcon className="h-4 w-4" aria-hidden />{t('phone_main')}</dt>
               <dd>
-                {f.official_phone ? <PhoneValue number={f.official_phone} sharedBy={f.official_phone_shared_by} name={f.name} /> : <span className="text-[var(--hc-muted)]">{t('no_phone')}</span>}
+                {f.official_phone ? <PhoneValue number={f.official_phone} sharedBy={f.official_phone_shared_by} /> : <span className="text-[var(--hc-muted)]">{t('no_phone')}</span>}
               </dd>
               {f.alt_phone && (
                 <>
                   <dt className="flex items-center gap-1.5 whitespace-nowrap font-semibold"><PhoneIcon className="h-4 w-4" aria-hidden />{t('phone_other')}</dt>
-                  <dd><PhoneValue number={f.alt_phone} sharedBy={0} name={f.name} /></dd>
+                  <dd><PhoneValue number={f.alt_phone} sharedBy={0} /></dd>
                 </>
               )}
               <dt className="flex items-center gap-1.5 whitespace-nowrap font-semibold"><MapPin className="h-4 w-4" aria-hidden />{t('address')}</dt>

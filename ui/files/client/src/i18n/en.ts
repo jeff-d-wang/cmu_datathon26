@@ -1,6 +1,6 @@
 // UI strings (English). Facility content from the data stays English in every language.
 export const en = {
-  app_name: 'Heart care finder',
+  app_name: 'Health care finder',
   language: 'Language:',
   emergency_banner: 'Emergency? Call {112} (any emergency) or {108} (ambulance). Do not drive yourself.',
   any_emergency: 'any emergency',
@@ -17,11 +17,11 @@ export const en = {
   back: 'Back',
 
   // Step 1
-  hello: 'Hi, I will help you find heart care you can trust. It takes about a minute.',
+  hello: 'Hi, I will help you find health care you can trust. It takes about a minute.',
   intent_title: 'What do you need today?',
   intent_now: 'Emergency: get help now',
   intent_now_sub: 'Shows 112 and 108 straight away.',
-  intent_soon: 'Find heart care near me',
+  intent_soon: 'Find health care near me',
   intent_soon_sub: 'Hospitals and clinics that list heart services',
   intent_surgery: 'My doctor referred me for a procedure',
   intent_surgery_sub: 'For example angiography, bypass surgery or a pacemaker',
@@ -35,7 +35,7 @@ export const en = {
 
   // Emergency
   emergency_title: 'Call now. Do not wait for results.',
-  emergency_label: 'Heart care finder · Emergency',
+  emergency_label: 'Health care finder · Emergency',
   call_112: 'Call 112',
   call_108: 'Call 108',
   while_you_wait: 'While you wait',
@@ -55,9 +55,9 @@ export const en = {
   i_am_patient: 'I am the patient',
   someone_else: 'It is for someone else',
   age_label: 'Patient’s age in years',
-  age_help: 'Type a number. Under 18? We will show a note about children’s heart care.',
+  age_help: 'Type a number. Under 18? We will show a note about children’s care.',
   age_error: 'Please type a whole number from 0 to 120, or leave it blank.',
-  child_note: 'Under 18: we move places that list children’s heart care up the list.',
+  child_note: 'Under 18: we move places that list children’s care up the list.',
   sex: 'Sex',
   woman: 'Woman',
   man: 'Man',
@@ -103,7 +103,7 @@ export const en = {
   soft_flag_profile: 'Chest pressure at age 40 or over, with diabetes or a known heart condition.',
   soft_flag_body: 'If it is happening right now, call 112 or 108. Otherwise you can continue.',
   soft_flag_button: 'It is happening now: get help',
-  background_search: 'Looking up heart care near {p} in the background…',
+  background_search: 'Looking up health care near {p} in the background…',
   background_ready: 'Places near {p} are ready.',
   safety_title: 'Quick safety check: any of these right now?',
   safety_sub: 'Ticking a box opens emergency help at once.',

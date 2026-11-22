@@ -68,7 +68,7 @@ function PlaceCountPanel() {
       {(l) => {
         const n = l.rows.length;
         const note = l.loading || l.error || l.warming || n === 0 ? GENERIC_NOTE
-          : `${n >= FETCH_LIMIT ? `${FETCH_LIMIT}+` : n} places within ${formatDistance(FETCH_RADIUS_KM, s.unit)} of ${place} mention heart care. Your answers narrow them down to the ones that fit.`;
+          : `${n >= FETCH_LIMIT ? `${FETCH_LIMIT}+` : n} places within ${formatDistance(FETCH_RADIUS_KM, s.unit)} of ${place} mention health care. Your answers narrow them down to the ones that fit.`;
         return <IntroPanel note={note} />;
       }}
     </Candidates>

@@ -11,7 +11,7 @@ import { DetailScreen } from './screens/Detail';
 import { HowScoreScreen } from './screens/HowScore';
 
 /**
- * Heart care finder: a state machine with no accounts.
+ * Health care finder: a state machine with no accounts.
  * Privacy: state is held in memory only (no cookies, no localStorage). A shared link carries
  * only the place and filters, in the URL #fragment, which browsers never send to the server.
  */

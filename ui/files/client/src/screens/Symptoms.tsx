@@ -347,7 +347,6 @@ export function SymptomsScreen() {
               {softWords.length > 0 && <p>{t('soft_flag_words', { w: softWords.map((w) => `“${w}”`).join(', ') })}</p>}
               {softProfile && <p>{t('soft_flag_profile')}</p>}
               <p>{t('soft_flag_body')}</p>
-              <button type="button" onClick={() => dispatch({ type: 'emergency' })} className="self-start min-h-11 rounded-[var(--hc-r-control)] bg-[var(--hc-em-btn)] px-4 text-[16px] font-semibold text-white">{t('soft_flag_button')}</button>
             </div>
           )}
                     <PrimaryButton onClick={submit}>{t('continue')}</PrimaryButton>

@@ -266,7 +266,7 @@ function EngineView({ entry, status }: { entry: EngineEntry | null; status: 'loa
       right={
         <>
           <div className="flex flex-col gap-1">
-            <ScreenTitle>{entry ? `Heart care near ${placeShort(place)}` : 'Results'}</ScreenTitle>
+            <ScreenTitle>{entry ? `Health care near ${placeShort(place)}` : 'Results'}</ScreenTitle>
             {entry && <p className="text-[16px] text-[var(--hc-muted)] [text-wrap:balance]">For {entry.label.replace(/\s*\([^)]*\.\.\.$/, '')} · {all.length === 1 ? '1 place' : `${all.length} places`}</p>}
           </div>
           {status === 'loading' ? (

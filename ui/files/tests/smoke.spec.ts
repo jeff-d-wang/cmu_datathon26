@@ -33,7 +33,7 @@ test('"Help right now" opens the emergency screen in one click', async ({ page }
 
 test('full planned flow to results and detail', async ({ page }) => {
   await toIntent(page);
-  await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+  await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('heading', { name: 'Who is this for?' })).toBeVisible();
   await page.getByRole('radio', { name: 'I am the patient' }).click();
@@ -89,7 +89,7 @@ test('full planned flow to results and detail', async ({ page }) => {
 
 test('a safety-check tick goes straight to emergency', async ({ page }) => {
   await toIntent(page);
-  await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+  await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByLabel('Breathless while resting').click();
@@ -98,7 +98,7 @@ test('a safety-check tick goes straight to emergency', async ({ page }) => {
 
 test('picking stroke signs opens the emergency screen', async ({ page }) => {
   await toIntent(page);
-  await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+  await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('combobox', { name: 'Describe your symptoms' }).fill('slurred');
@@ -108,7 +108,7 @@ test('picking stroke signs opens the emergency screen', async ({ page }) => {
 
 test('a worrying word warns but does not hijack the flow', async ({ page }) => {
   await toIntent(page);
-  await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+  await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('combobox', { name: 'Describe your symptoms' }).fill('sweating a lot');
