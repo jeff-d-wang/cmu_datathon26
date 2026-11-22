@@ -220,7 +220,7 @@ def find_facilities_never_empty(spark, symptoms, context="", pin=None,
         if n:
             return {"needs": needs, "needs_meta": meta, "rows": rows[:top_n],
                     "banners": banners, "radius_km": radius}
-        banners.append("no facilities within %d km; widened search" % radius)
+        banners.append("no ranked match within %d km; widened search" % radius)
 
     # critical needs may have hard-filtered everything: penalize, never hide
     softened = [dict(n, critical=False) for n in needs]

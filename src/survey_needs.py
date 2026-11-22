@@ -226,14 +226,13 @@ def needs_vector(code, profiles, crosswalk=SERVICE_CROSSWALK,
         target = crosswalk.get(s)
         if v["share"] < min_share and not (code in pathways and
                                             pathways[code]["escalation"] == s):
-            if target is None and v["share"] >= 0.01:
-                context.append({"engine_service": s, "share": v["share"]})
             continue
         if target is None:
             context.append({"engine_service": s, "share": v["share"]})
             continue
         src = ("survey share %.3f (Wilson 95%% CI [%.3f, %.3f], "
-               "Kish n_eff %.0f; NHAMCS 2022 ED visits, US workup proxy)"
+               "category Kish n_eff %.0f; NHAMCS 2022 ED visits, US "
+                "workup proxy)"
                % (v["share"], v["ci_lo"] or 0, v["ci_hi"] or 0, prof["n_eff"]))
         if code in pathways and pathways[code]["escalation"] == s:
             w = max(v["share"], w_escalation)
