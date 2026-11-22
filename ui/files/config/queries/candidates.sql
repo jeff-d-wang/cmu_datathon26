@@ -6,12 +6,15 @@
 -- The client rounds the box OUTWARD to a 0.5-degree grid so the exact user location is never sent.
 -- services column format: 'service:band:n_channels:n_required_missing' entries joined by '|';
 -- bands are high/medium/low/unverified; a service absent from the map means no evidence rows
--- (unknown, not disproven). All filtering by need happens in the browser, so the server never
--- learns which services the patient is looking for.
+-- (unknown, not disproven). Ranking by need happens in the browser.
+-- need_service: '' = any place (symptom path). A catalog service key (service path) keeps only places with
+-- high/medium evidence for it, so the 400-row cap applies to places that can actually offer the service
+-- (otherwise, in rural areas, nearby places without it fill the cap and hide farther ones that have it).
 -- @param min_lat DOUBLE = 17.0
 -- @param max_lat DOUBLE = 19.0
 -- @param min_lon DOUBLE = 78.0
 -- @param max_lon DOUBLE = 80.0
+-- @param need_service STRING = ''
 WITH f0 AS (
  SELECT unique_id, name, facilityTypeId ft, operatorTypeId op, address_city city, replace(trim(address_zipOrPostcode),' ','') pin,
   latitude_final la, longitude_final lo, officialWebsite,
@@ -79,5 +82,7 @@ SELECT l.unique_id, l.name,
   coalesce(l.addr1,'') address
 FROM loc l LEFT JOIN phc p1 ON p1.n10 = substr(regexp_replace(coalesce(l.officialPhone,''),'[^0-9]',''),-10)
 WHERE l.y BETWEEN :min_lat AND :max_lat AND l.x BETWEEN :min_lon AND :max_lon
+  AND (:need_service = '' OR concat('|', coalesce(l.services,'')) LIKE concat('%|', :need_service, ':high:%')
+       OR concat('|', coalesce(l.services,'')) LIKE concat('%|', :need_service, ':medium:%'))
 ORDER BY pow(l.y-(:min_lat+:max_lat)/2,2)+pow(l.x-(:min_lon+:max_lon)/2,2)
 LIMIT 400

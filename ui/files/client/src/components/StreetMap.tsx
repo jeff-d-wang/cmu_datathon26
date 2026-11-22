@@ -51,13 +51,15 @@ const dotIcon = (muted: boolean, selected: boolean) =>
 const youIcon = (label: string) =>
   L.divIcon({ className: 'hc-pin', html: `<span class="hc-you"></span><span class="hc-you-label">${label}</span>`, iconSize: [22, 22], iconAnchor: [11, 11] });
 
-function FitBounds({ bounds }: { bounds: LatLngBoundsExpression }) {
+/** Fits the view once per change of `fitKey` (not on every re-render), so a manual zoom or pan is not undone. */
+function FitBounds({ bounds, fitKey }: { bounds: LatLngBoundsExpression; fitKey: string }) {
   const map = useMap();
   useEffect(() => {
     // Leave room for the map switch (top) and the legend (bottom).
     const small = map.getSize().y < 400;
-    map.fitBounds(bounds, small ? { padding: [24, 24], maxZoom: 13 } : { paddingTopLeft: [48, 96], paddingBottomRight: [48, 150], maxZoom: 13 });
-  }, [map, bounds]);
+    map.fitBounds(bounds, small ? { padding: [24, 24], maxZoom: 14 } : { paddingTopLeft: [48, 96], paddingBottomRight: [48, 150], maxZoom: 14 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, fitKey]);
   return null;
 }
 
@@ -140,16 +142,28 @@ function Pins({ points, origin, selectedId, onSelect }: { points: StreetPoint[];
 }
 
 export function StreetMap({ origin, points, radiusKm, selectedId, onSelect, ariaLabel, youLabel }: { origin: Point; points: StreetPoint[]; radiusKm?: number; selectedId?: string | null; onSelect?: (id: string) => void; ariaLabel: string; youLabel: string }) {
+  // Fit to you plus the numbered pins of the list (not every dot or far grey place, which zoomed the map out too far).
+  // With no numbered pins, fall back to the radius circle, then to all points.
+  const focus = points.filter((p) => !p.dot && !p.muted);
+  const fitKey = `${origin.lat},${origin.lon}|${radiusKm ?? ''}|${(focus.length ? focus : points).map((p) => p.id).join(',')}`;
   const bounds = useMemo<LatLngBoundsExpression>(() => {
+    const pts = focus.length ? focus : [];
+    if (pts.length) return [[origin.lat, origin.lon] as [number, number], ...pts.map((p) => [p.lat, p.lon] as [number, number])];
+    if (radiusKm) {
+      const dLat = radiusKm / 111;
+      const dLon = dLat / Math.cos((origin.lat * Math.PI) / 180);
+      return [[origin.lat - dLat, origin.lon - dLon], [origin.lat + dLat, origin.lon + dLon]];
+    }
     const all = [[origin.lat, origin.lon] as [number, number], ...points.map((p) => [p.lat, p.lon] as [number, number])];
     return all.length > 1 ? all : [[origin.lat - 0.2, origin.lon - 0.2], [origin.lat + 0.2, origin.lon + 0.2]];
-  }, [origin, points]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitKey]);
   return (
     <div className="h-full w-full" role="region" aria-label={ariaLabel}>
-      <MapContainer center={[origin.lat, origin.lon]} zoom={10} minZoom={5} maxBounds={INDIA_BOUNDS} maxBoundsViscosity={1} className="h-full w-full" scrollWheelZoom attributionControl zoomControl={false}>
+      <MapContainer center={[origin.lat, origin.lon]} zoom={10} minZoom={5} maxZoom={18} zoomSnap={0.5} zoomDelta={0.5} wheelPxPerZoomLevel={90} maxBounds={INDIA_BOUNDS} maxBoundsViscosity={1} className="h-full w-full" scrollWheelZoom attributionControl zoomControl={false}>
         <TileLayer url={TILE_URL} attribution={ATTRIBUTION} maxZoom={19} />
         <ZoomControl position="bottomright" />
-        <FitBounds bounds={bounds} />
+        <FitBounds bounds={bounds} fitKey={fitKey} />
         {radiusKm && (
           <Polygon positions={[WORLD_RING, circleRing(origin, radiusKm)]} interactive={false} pathOptions={{ stroke: false, fillColor: '#1f2a28', fillOpacity: 0.3 }} />
         )}

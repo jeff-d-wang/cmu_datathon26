@@ -16,6 +16,8 @@ declare module "@databricks/appkit-ui/react" {
           min_lon: SQLNumberMarker;
           /** DOUBLE - use sql.double() */
           max_lon: SQLNumberMarker;
+          /** STRING - use sql.string() */
+          need_service: SQLStringMarker;
         };
         result: Array<{
           /** @sqlType STRING */
@@ -88,6 +90,43 @@ declare module "@databricks/appkit-ui/react" {
           website: string;
           /** @sqlType STRING */
           address: string;
+        }>;
+      };
+    district_rating: {
+        name: "district_rating";
+        parameters: {
+          /** STRING - use sql.string() */
+          state: SQLStringMarker;
+          /** STRING - use sql.string() */
+          district: SQLStringMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          district_name: string;
+          /** @sqlType STRING */
+          state_ut: string;
+          /** @sqlType STRING */
+          access_status: string;
+          /** @sqlType STRING */
+          band_equal: string;
+          /** @sqlType DOUBLE */
+          composite: number;
+          /** @sqlType BIGINT */
+          n_facilities: number;
+          /** @sqlType DOUBLE */
+          doctors_per_fac: number;
+          /** @sqlType DOUBLE */
+          critical_cov: number;
+          /** @sqlType DOUBLE */
+          score_maternal: number;
+          /** @sqlType DOUBLE */
+          score_immunisation: number;
+          /** @sqlType DOUBLE */
+          score_ncd: number;
+          /** @sqlType DOUBLE */
+          score_access: number;
+          /** @sqlType BIGINT */
+          n_districts: number;
         }>;
       };
     emergency_candidates: {
@@ -276,6 +315,37 @@ declare module "@databricks/appkit-ui/react" {
           capability: string;
           /** @sqlType STRING */
           description: string;
+        }>;
+      };
+    facility_record: {
+        name: "facility_record";
+        parameters: {
+          /** STRING - use sql.string() */
+          id: SQLStringMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          unique_id: string;
+          /** @sqlType STRING */
+          name: string;
+          /** @sqlType STRING */
+          description: string;
+          /** @sqlType STRING */
+          specialties: string;
+          /** @sqlType STRING */
+          procedures: string;
+          /** @sqlType STRING */
+          equipment: string;
+          /** @sqlType STRING */
+          capability: string;
+          /** @sqlType STRING */
+          source_urls: string;
+          /** @sqlType STRING */
+          channels: string;
+          /** @sqlType STRING */
+          specialties_canon: string;
+          /** @sqlType STRING */
+          matched_phrases: string;
         }>;
       };
     heart_candidates: {
@@ -538,6 +608,49 @@ declare module "@databricks/appkit-ui/react" {
           state: string;
           /** @sqlType BIGINT */
           pins: number;
+        }>;
+      };
+    team_rank: {
+        name: "team_rank";
+        parameters: {
+          /** STRING - use sql.string() */
+          needs_json: SQLStringMarker;
+          /** DOUBLE - use sql.double() */
+          lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          lon: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_km: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          row_cap: SQLNumberMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          unique_id: string;
+          /** @sqlType STRING */
+          name: string;
+          /** @sqlType STRING */
+          facility_class: string;
+          /** @sqlType DOUBLE */
+          km: number;
+          /** @sqlType STRING */
+          coord_source: string;
+          /** @sqlType DOUBLE */
+          lat: number;
+          /** @sqlType DOUBLE */
+          lon: number;
+          /** @sqlType BOOLEAN */
+          nabh: boolean;
+          /** @sqlType INT */
+          beds: number;
+          /** @sqlType BIGINT */
+          n_needs_met: number;
+          /** @sqlType STRING */
+          matched_json: string;
+          /** @sqlType DOUBLE */
+          score: number;
+          /** @sqlType BOOLEAN */
+          crit_fail: boolean;
         }>;
       };
   }

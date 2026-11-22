@@ -13,3 +13,6 @@ playwright-report/
 shared/appkit-types/serving.d.ts
 
 tests/screenshots/
+
+# design-tool cache (local only)
+.impeccable/hook.cache.json

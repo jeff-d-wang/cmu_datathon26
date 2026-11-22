@@ -9,11 +9,14 @@ import { isRelevant, rankFacilities, type Ranked } from '../domain/ranking';
 import { detectSymptoms, needsForSymptoms, showsEmergencyBannerFirst } from '../domain/symptoms';
 import { assessLayerA, CARE_LEVEL_LABEL } from '../domain/severity';
 import { splitByRadius } from '../domain/radius';
+import { outsideBar, outsideReason } from '../domain/outside';
 import { WEIGHTS, type ComponentId } from '../domain/score';
+import { requestById, requiredService } from '../domain/requests';
 import { LayerAPanel } from './CarePanels';
 import { parseAge } from '../domain/redflags';
 import type { Facility } from '../domain/types';
-import { Candidates, DATA_SOURCE } from '../data/source';
+import { Candidates, DATA_SOURCE, FacilityRecordQuery } from '../data/source';
+import { DistrictPanel } from './DistrictPanel';
 import { EngineResults } from './EngineResults';
 import { EngineCandidates } from '../engine/live';
 import { Shell } from '../components/Shell';
@@ -21,6 +24,7 @@ import { IndiaInset } from '../components/MapPanel';
 import { StreetMap } from '../components/StreetMap';
 import { Building2, ChevronDown, Info, Ruler, ShieldCheck, Siren } from 'lucide-react';
 import { CallLink, Chip, LinkButton, Notice, SampleBadge, ScreenTitle, SecondaryButton, Spinner, titleCase } from '../components/ui';
+import { TeamResults } from './TeamResults';
 import { HowOrdered, TierTag, WarningList, ConfidenceBars, ScoreMeter } from './parts';
 import { COMPONENT_TEXT } from './HowScore';
 
@@ -38,10 +42,11 @@ export function useRankedResults(s: FlowState, facilities: Facility[]) {
     if (!s.place) return { ranked: [] as Ranked[], needs: [] as Need[], radiusKm: 25, widened: false, auto: true };
     const origin: Point = s.place;
     const age = parseAge(s.ageRaw).age;
-    const mode = modeFor(s.intent);
+    const mode = modeFor(s.intent, s.service);
+    const request = s.intent === 'service' && s.service ? requestById(s.service) : undefined;
     // Symptom rules -> weighted needs vector over the 192-service catalog, built in the
     // browser (Layer A). Critical needs hard-filter; the rest only order.
-    const needs = needsForSymptoms(detectSymptoms(s.freeText, s.chips), mode);
+    const needs = request ? request.needs : needsForSymptoms(detectSymptoms(s.freeText, s.chips), mode);
     const pool = facilities.filter(
       (f) => (s.ownership === 'any' || f.ownership === s.ownership) && (s.serviceFilter === 'any' || parseServices(f.services).has(s.serviceFilter)),
     );
@@ -50,7 +55,7 @@ export function useRankedResults(s: FlowState, facilities: Facility[]) {
     const auto = chooseRadius(all.filter(isRelevant).map((r) => r.km), s.showN);
     const radiusKm = s.radiusKm ?? auto.radiusKm;
     return { ranked: all, needs, radiusKm, widened: s.radiusKm === null && auto.widened, auto: s.radiusKm === null };
-  }, [s.radiusKm, s.place, s.ageRaw, s.intent, s.freeText, s.chips, s.serviceFilter, s.ownership, s.conditions, s.showN, s.unit, facilities]);
+  }, [s.radiusKm, s.place, s.ageRaw, s.intent, s.service, s.freeText, s.chips, s.serviceFilter, s.ownership, s.conditions, s.showN, s.unit, facilities]);
 }
 
 function ShareBar() {
@@ -97,7 +102,7 @@ function ScoreDetails({ r }: { r: Ranked }) {
   );
 }
 
-function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number; onOpen: () => void; muted?: boolean; unit: 'km' | 'mi' }) {
+function ResultCard({ r, rank, onOpen, onPrefetch, muted, unit }: { r: Ranked; rank: number; onOpen: () => void; onPrefetch?: () => void; muted?: boolean; unit: 'km' | 'mi' }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const sc = r.score;
@@ -145,13 +150,13 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
       )}
       <div className="flex gap-2">
         {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={t('call')} className="flex min-h-11 flex-1 items-center justify-center rounded-[var(--hc-r-control)] bg-[var(--hc-primary)] px-3 text-[16px] font-semibold text-white hover:bg-[var(--hc-primary-dark)]" />}
-        <SecondaryButton className="flex-1" onClick={onOpen} aria-label={`${t('full_details')}: ${f.name}`}>{t('full_details')}</SecondaryButton>
+        <span className="flex flex-1" onMouseEnter={onPrefetch} onFocus={onPrefetch}><SecondaryButton className="flex-1" onClick={onOpen} aria-label={`${t('full_details')}: ${f.name}`}>{t('full_details')}</SecondaryButton></span>
       </div>
     </article>
   );
 }
 
-function OutsideRow({ r, num, onOpen, unit }: { r: Ranked; num: string | null; onOpen: () => void; unit: 'km' | 'mi' }) {
+function OutsideRow({ r, num, onOpen, unit, reason }: { r: Ranked; num: string | null; onOpen: () => void; unit: 'km' | 'mi'; reason?: string }) {
   const sc = r.score;
   const f = r.facility;
   return (
@@ -166,6 +171,7 @@ function OutsideRow({ r, num, onOpen, unit }: { r: Ranked; num: string | null; o
           <ConfidenceBars small level={sc.confidence} />
           {f.loc_approx && <span className="rounded-full border border-[var(--hc-warn-border)] bg-[var(--hc-warn-bg)] px-2 text-[13px] font-medium text-[var(--hc-warn-text)]">Approximate location</span>}
         </span>
+        {reason && <span className="mt-1 block text-[14px] text-[var(--hc-text-2)]">{reason}</span>}
       </span>
     </button>
   );
@@ -201,7 +207,11 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const t = useT();
   const [showMap, setShowMap] = useState(true);
   const [more, setMore] = useState(0);
+  // Details-page records load in the background: the first 3 results, plus any place whose 'Full details' is hovered or focused.
+  const [warm, setWarm] = useState<string[]>([]);
+  const warmRecord = (id: string) => setWarm((w) => (w.includes(id) ? w : [...w, id].slice(-8)));
   const [showWeak, setShowWeak] = useState(false);
+  const [order, setOrder] = useState<'app' | 'team'>('app');
   const { ranked, needs, radiusKm, widened, auto } = useRankedResults(s, facilities);
   const { inside: insideAll, outside: outsideAll } = useMemo(() => splitByRadius(ranked, radiusKm), [ranked, radiusKm]);
   // The list is every place inside the radius with evidence for this care (tier A/B), in ranked order, paged by "Show more".
@@ -209,16 +219,19 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   // Places inside the radius with little or no evidence for this care: behind a toggle, nearest first.
   const weak = useMemo(() => insideAll.filter((r) => !isRelevant(r)).sort((a, b) => a.km - b.km), [insideAll]);
   const shown = inside.slice(0, BATCH * (1 + more));
-  // Beyond the radius: only places with strong evidence for this case (tier A) get a lettered grey pin and a row in the
-  // grey list, nearest first. Moderate-evidence places (tier B) are only small grey dots on the map; weaker ones are not shown.
-  const outside = useMemo(() => outsideAll.filter((r) => r.tier === 'A').slice(0, 10), [outsideAll]);
-  const outsideDots = useMemo(() => outsideAll.filter((r) => r.tier === 'B').slice(0, 60), [outsideAll]);
+  // Beyond the radius: a lettered grey pin and a row in the grey list only for places that are really relevant: strong
+  // evidence for this case (tier A) AND a match score close to the best places inside the radius (outsideBar), nearest
+  // first. Other places with strong or moderate evidence (tier A/B) are small grey dots on the map; weaker ones are hidden.
+  const bar = useMemo(() => outsideBar(inside), [inside]);
+  const outside = useMemo(() => outsideAll.filter((r) => r.tier === 'A' && r.score.score >= bar).slice(0, 10), [outsideAll, bar]);
+  const outsideDots = useMemo(() => outsideAll.filter((r) => (r.tier === 'A' || r.tier === 'B') && !outside.includes(r)).slice(0, 60), [outsideAll, outside]);
   const origin = s.place as Point;
   const symptomIds = detectSymptoms(s.freeText, s.chips);
   const ageNum = parseAge(s.ageRaw).age;
-  const mode = modeFor(s.intent);
+  const mode = modeFor(s.intent, s.service);
+  const request = s.intent === 'service' && s.service ? requestById(s.service) : undefined;
   const layerA = useMemo(() => assessLayerA(symptomIds, false, mode, ageNum !== null && ageNum < 18), [symptomIds, mode, ageNum]);
-  const chestFirst = showsEmergencyBannerFirst(symptomIds);
+  const chestFirst = !request && showsEmergencyBannerFirst(symptomIds);
   const capped = !sample && facilities.length >= FETCH_LIMIT;
   const set = (patch: Partial<FlowState>) => dispatch({ type: 'set', patch });
   const unit = s.unit;
@@ -278,20 +291,29 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           <Assumed
             rows={[
               { label: 'Place', value: s.place ? [s.place.district, s.place.state].filter(Boolean).map(titleCase).join(', ') : '', screen: 'place' },
-              { label: 'Need', value: s.intent === 'surgery' ? t('intent_surgery') : t('intent_soon'), screen: 'intent' },
-              { label: 'Patient', value: patient, screen: 'who' },
-              { label: 'Symptoms', value: symptomIds.map((id) => symptomLabel(t, id)).join(', '), screen: 'symptoms' },
-              { label: 'Severity', value: t(`tier_${layerA.tier}` as StringKey), screen: null },
-              { label: 'Care level', value: layerA.careLevels.map(CARE_LEVEL_LABEL).join(', '), screen: null },
+              ...(request
+                ? [
+                    { label: 'Service', value: request.name, screen: 'service' as const },
+                    { label: 'Patient', value: patient, screen: 'who' as const },
+                  ]
+                : [
+                    { label: 'Need', value: t('intent_soon'), screen: 'intent' as const },
+                    { label: 'Patient', value: patient, screen: 'who' as const },
+                    { label: 'Symptoms', value: symptomIds.map((id) => symptomLabel(t, id)).join(', '), screen: 'symptoms' as const },
+                    { label: 'Severity', value: t(`tier_${layerA.tier}` as StringKey), screen: null },
+                    { label: 'Care level', value: layerA.careLevels.map(CARE_LEVEL_LABEL).join(', '), screen: null },
+                  ]),
               { label: 'Radius', value: `${d(radiusKm)}${auto ? ' (automatic)' : ''}`, screen: null },
               { label: 'What changed the order', value: `Mostly ${top2.join(' and ')}.${condNotes.length ? ` ${condNotes.join('; ')}.` : ''}`, screen: null },
             ]}
           />
+          <DistrictPanel state={s.place?.state ?? ''} district={s.place?.district ?? ''} />
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-3">
               <ScreenTitle>{(inside.length === 1 ? t('match_title_one') : t('matches_title', { n: inside.length }))}</ScreenTitle>
               {sample && <SampleBadge />}
             </div>
+            {request?.note && <Notice status="info">{request.note}</Notice>}
             <p role="status" className="sr-only">{(inside.length === 1 ? t('match_title_one') : t('matches_title', { n: inside.length }))}</p>
             <p className="text-[15px] text-[var(--hc-muted)]">Scores have a range. The range is wide when we do not know much about this place.</p>
             <LinkButton className="self-start" onClick={() => dispatch({ type: 'go', screen: 'howscore' })}>How we score</LinkButton>
@@ -313,10 +335,17 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               <p className="flex items-start gap-1.5 text-[15px] text-[var(--hc-primary-dark)]"><Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{t('widened', { from: d(25), to: d(radiusKm) })}</p>
             )}
           </div>
-          <p className="text-[15px] text-[var(--hc-muted)]">{t('matches_note', { order: t(mode === 'urgent' ? 'order_urgent' : 'order_planned') })}</p>
+          <p className="text-[15px] text-[var(--hc-muted)]">{t('matches_note', { order: request ? `evidence that they offer ${request.name.toLowerCase()}` : t(mode === 'urgent' ? 'order_urgent' : 'order_planned') })}</p>
           <HowOrdered mode={mode} />
           {capped && <Notice status="info">{t('capped_note')}</Notice>}
-          <LayerAPanel a={layerA} tier={layerA.tier} />
+          {!request && <LayerAPanel a={layerA} tier={layerA.tier} chips={symptomIds} />}
+          <div role="radiogroup" aria-label="Order by">
+            <p className="mb-1 text-[16px] font-semibold">Order by</p>
+            <div className="flex flex-wrap gap-2">
+              <Chip radio on={order === 'app'} onClick={() => setOrder('app')}>Match score</Chip>
+              <Chip radio on={order === 'team'} onClick={() => setOrder('team')}>Team evidence ranking</Chip>
+            </div>
+          </div>
           <div role="group" aria-label={t('filter_title')}>
             <p className="mb-1 text-[16px] font-semibold">{t('filter_title')}</p>
             <div className="flex flex-wrap gap-2">
@@ -329,10 +358,11 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               ))}
             </div>
             <p className="mt-1 text-[15px] text-[var(--hc-muted)]">
-              {suggestedChips.length > 0 && <>The first {suggestedChips.length === 1 ? 'one is' : `${suggestedChips.length} are`} suggested from your symptoms. </>}
+              {suggestedChips.length > 0 && <>The first {suggestedChips.length === 1 ? 'one is' : `${suggestedChips.length} are`} {request ? 'from the service you asked for' : 'suggested from your symptoms'}. </>}
               Numbers are places within {d(radiusKm)} that list it. {t('truncation_note')}
             </p>
           </div>
+          {order === 'team' ? <TeamResults needs={needs} facilities={facilities} onOpen={toSelect} unit={unit} /> : <>
           {warming && <Spinner label={t('warehouse_starting')} />}
           {loading && !warming && <Spinner label={t('loading_results')} />}
           {error && <Notice status="bad">{t('error_data')} ({error})</Notice>}
@@ -342,13 +372,17 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
                 No places within {d(radiusKm)}. The nearest ones are listed under Outside your radius.{' '}
                 <LinkButton onClick={() => set({ radiusKm: null })}>Widen automatically</LinkButton>
               </Notice>
+            ) : request ? (
+              <Notice status="unknown">
+                No place within {d(radiusKm)} has medium or high evidence for {request.name.toLowerCase()} in our data. That does not prove none offers it: the data covers about 10,000 places and its lists are incomplete. Ask the nearest district hospital, and in an emergency call 108 or 112.
+              </Notice>
             ) : (
               <Notice status="unknown">{t('no_results')} {t('no_results_hint')}</Notice>
             )
           )}
           <h2 className="sr-only">{t('matches_heading')}</h2>
           {shown.map((r, i) => (
-            <ResultCard key={r.facility.unique_id} r={r} rank={i + 1} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} />
+            <ResultCard key={r.facility.unique_id} r={r} rank={i + 1} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} onPrefetch={() => warmRecord(r.facility.unique_id)} />
           ))}
           {(inside.length > shown.length || more > 0) && (
             <div className="flex gap-2">
@@ -365,11 +399,11 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           {outside.length > 0 && shown.length >= inside.length && (
             <>
               <h2 className="text-[18px] font-bold">Outside your radius</h2>
-              <p className="-mt-2 text-[14px] text-[var(--hc-muted)]">Strong matches for your case just beyond {d(radiusKm)}, nearest first. Letters, not ranks. Other places beyond the radius are small grey dots on the map.</p>
+              <p className="-mt-2 text-[14px] text-[var(--hc-muted)]">Places beyond {d(radiusKm)} that still score {Math.round(bar)} or more, close to the best inside your radius, nearest first. Letters, not ranks. Other places beyond the radius are small grey dots on the map.</p>
               <ul className="flex flex-col gap-2">
                 {outside.map((r, i) => (
                   <li key={r.facility.unique_id}>
-                    <OutsideRow r={r} num={letter(i)} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} />
+                    <OutsideRow r={r} num={letter(i)} unit={unit} reason={outsideReason(r, inside, radiusKm, unit)} onOpen={() => toSelect(r.facility.unique_id)} />
                   </li>
                 ))}
               </ul>
@@ -387,6 +421,8 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               )}
             </>
           )}
+          </>}
+          {[...new Set([...shown.slice(0, 3).map((r) => r.facility.unique_id), ...warm])].map((id) => <FacilityRecordQuery key={id} id={id}>{() => null}</FacilityRecordQuery>)}
           <ShareBar />
         </>
       }
@@ -399,7 +435,7 @@ export function ResultsScreen() {
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
   if (DATA_SOURCE === 'engine_clean') return <EngineResults />;
-  return <Candidates bbox={bbox}>{(l) => <ResultsBody facilities={l.rows} loading={l.loading} error={l.error} warming={l.warming} sample={l.sample} />}</Candidates>;
+  return <Candidates bbox={bbox} service={s.intent === 'service' ? requiredService(s.service) : ''}>{(l) => <ResultsBody facilities={l.rows} loading={l.loading} error={l.error} warming={l.warming} sample={l.sample} />}</Candidates>;
 }
 
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import type { FacilityRecord } from '../domain/citations';
 import { useAnalyticsQuery } from '@databricks/appkit-ui/react';
 import { sql } from '@databricks/appkit-ui/js';
 import type { Facility } from '../domain/types';
@@ -27,6 +28,7 @@ export interface Loaded<T> {
 
 const bool = (v: unknown) => v === true || v === 'true';
 const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number(v));
+const jtext = (v: unknown): string => (v === null || v === undefined ? '' : typeof v === 'object' ? JSON.stringify(v) : str(v));
 const str = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' || typeof v === 'boolean' ? String(v) : '');
 
 /** Typed mapper for the 35-column platinum contract (config/queries/candidates.sql). */
@@ -71,8 +73,8 @@ const warmingState = (s: { state: string } | null) => s !== null && s.state !== 
 
 // ---- Live components: mounted only in live mode, so the hooks never run against sample data. ----
 
-function LiveCandidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
-  const params = useMemo(() => bboxParams(bbox), [bbox]);
+function LiveCandidates({ bbox, service, children }: { bbox: BBox; service: string; children: (l: Loaded<Facility[]>) => ReactNode }) {
+  const params = useMemo(() => ({ ...bboxParams(bbox), need_service: sql.string(service) }), [bbox, service]);
   const { data, loading, error, warehouseStatus } = useAnalyticsQuery('candidates', params);
   useQueryTiming('candidates', loading, data?.length ?? 0);
   const rows = useMemo(() => (data ?? []).map((r) => toFacility(r)), [data]);
@@ -81,9 +83,13 @@ function LiveCandidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<F
 
 const NONE = { loading: false, error: null, warming: false, sample: false } as const;
 
-export function Candidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
+/**
+ * Facilities in the search box. `service` (a catalog key, service path only) keeps only places with high/medium
+ * evidence for it, so the row cap applies to places that can offer it; '' (default) loads any place.
+ */
+export function Candidates({ bbox, service = '', children }: { bbox: BBox; service?: string; children: (l: Loaded<Facility[]>) => ReactNode }) {
   if (DATA_SOURCE === 'engine_clean') return <>{children({ rows: [], ...NONE })}</>;
-  return <LiveCandidates bbox={bbox}>{children}</LiveCandidates>;
+  return <LiveCandidates bbox={bbox} service={service}>{children}</LiveCandidates>;
 }
 
 export interface EmergencyPlace {
@@ -164,3 +170,22 @@ export function Needs({ prompt, children }: { prompt: string; children: (l: Load
   return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
 }
 
+
+/**
+ * One facility's own record text (config/queries/facility_record.sql), loaded only on the details page so every
+ * service claim there can quote the facility's text. Null while loading or if the query fails (the page still works).
+ */
+export function FacilityRecordQuery({ id, children }: { id: string; children: (record: FacilityRecord | null) => ReactNode }) {
+  const params = useMemo(() => ({ id: sql.string(id) }), [id]);
+  const { data } = useAnalyticsQuery('facility_record', params);
+  const record = useMemo<FacilityRecord | null>(() => {
+    const r = data?.[0];
+    return r ? {
+      // The server parses JSON-looking text into arrays/objects; turn those back into JSON text for the parsers.
+      description: jtext(r.description), specialties: jtext(r.specialties), procedures: jtext(r.procedures), equipment: jtext(r.equipment),
+      capability: jtext(r.capability), source_urls: jtext(r.source_urls), channels: jtext(r.channels),
+      specialties_canon: jtext(r.specialties_canon), matched_phrases: jtext(r.matched_phrases),
+    } : null;
+  }, [data]);
+  return <>{children(record)}</>;
+}

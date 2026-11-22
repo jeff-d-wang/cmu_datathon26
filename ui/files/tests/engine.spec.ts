@@ -7,7 +7,7 @@ test('engine fixture: Jaipur, chest pressure shows advisory, needs panel and top
   await page.goto('/');
   await page.getByRole('radio', { name: /302001/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: /Find health care near me/ }).click();
+  await page.getByRole('radio', { name: /I have symptoms/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Chest pressure' }).click();
