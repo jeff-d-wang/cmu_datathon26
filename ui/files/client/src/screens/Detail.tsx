@@ -6,7 +6,8 @@ import { LABEL_CODES, parseLabelFields, parseLabelQuotes } from '../domain/label
 import { coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point } from '../domain/geo';
 import type { Ranked } from '../domain/ranking';
 import type { Facility } from '../domain/types';
-import { Candidates } from '../data/source';
+import { Candidates, DATA_SOURCE } from '../data/source';
+import { EngineDetail } from './EngineDetail';
 import { Shell } from '../components/Shell';
 import { StreetMap } from '../components/StreetMap';
 import { Clock, Info, MapPin, Phone as PhoneIcon } from 'lucide-react';
@@ -76,9 +77,9 @@ function DetailBody({ r, rank, total, sample }: { r: Ranked; rank: number; total
           </p>
           {(f.doctors !== null || f.beds !== null) && <p className="text-[15px]">{t('doctors_beds', { d: f.doctors ?? '?', b: f.beds ?? '?' })}</p>}
           <div className="flex flex-wrap gap-2 hc-no-print">
-            {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={`${t('call')} ${f.official_phone}`} className="flex min-h-[46px] items-center justify-center rounded-xl bg-[var(--hc-primary)] px-4 text-[16px] font-semibold text-white" />}
-            <a href={`https://www.google.com/maps/dir/?api=1&destination=${f.lat},${f.lon}`} target="_blank" rel="noreferrer noopener" title={t('directions_note')} className="grid min-h-[46px] place-items-center rounded-xl border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('directions')} ↗</a>
-            {f.website && <a href={f.website.startsWith('http') ? f.website : `https://${f.website}`} target="_blank" rel="noreferrer noopener" className="grid min-h-[46px] place-items-center rounded-xl border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('website')} ↗</a>}
+            {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={`${t('call')} ${f.official_phone}`} className="flex min-h-[46px] items-center justify-center rounded-[var(--hc-r-control)] bg-[var(--hc-primary)] px-4 text-[16px] font-semibold text-white" />}
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${f.lat},${f.lon}`} target="_blank" rel="noreferrer noopener" title={t('directions_note')} className="grid min-h-[46px] place-items-center rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('directions')} ↗</a>
+            {f.website && <a href={f.website.startsWith('http') ? f.website : `https://${f.website}`} target="_blank" rel="noreferrer noopener" className="grid min-h-[46px] place-items-center rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('website')} ↗</a>}
           </div>
           <p className="text-[15px] text-[var(--hc-muted)]">{t('directions_note')}</p>
 
@@ -167,5 +168,6 @@ export function DetailScreen() {
   const { s } = useFlow();
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
+  if (DATA_SOURCE === 'engine_fixture' || DATA_SOURCE === 'engine_clean') return <EngineDetail />;
   return <Candidates bbox={bbox}>{(l) => <DetailFromData facilities={l.rows} loading={l.loading} sample={l.sample} />}</Candidates>;
 }

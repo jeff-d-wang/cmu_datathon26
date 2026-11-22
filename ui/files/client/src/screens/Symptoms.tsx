@@ -6,8 +6,8 @@ import { symptomLabel, useT } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { checkRedFlags, isHardFlag, parseAge, redFlagWordsIn, type SafetyChecks } from '../domain/redflags';
 import { detectSymptoms, isOwnWords, normalise, OWN_PREFIX, ownWordsText, QUICK_PICK_IDS, suggestSymptoms } from '../domain/symptoms';
-import { placeLabel, searchPlaces, type Place } from '../domain/places';
-import { Candidates, Places, States } from '../data/source';
+import { placeLabel, placeTowns, searchPlaces, type Place } from '../domain/places';
+import { Candidates, DATA_SOURCE, ENGINE_PLACES, Places, States } from '../data/source';
 import { coarseBBox, FETCH_RADIUS_KM } from '../domain/geo';
 import { Shell } from '../components/Shell';
 import { IntroPanel } from '../components/MapPanel';
@@ -62,7 +62,7 @@ function PlaceSearch({ places, onPick, onClear, chosen }: { places: Place[]; onP
           onBlur={() => setOpen(false)}
           onKeyDown={onKey}
           placeholder={t('place_placeholder')}
-          className={`min-h-12 w-full rounded-xl border-[1.5px] bg-white pl-10 pr-11 text-[16px] ${chosen && !editing ? 'border-[var(--hc-primary)] font-semibold text-[var(--hc-primary-dark)]' : 'border-[var(--hc-control)]'}`}
+          className={`min-h-12 w-full rounded-[var(--hc-r-control)] border-[1.5px] bg-white pl-10 pr-11 text-[16px] ${chosen && !editing ? 'border-[var(--hc-primary)] font-semibold text-[var(--hc-primary-dark)]' : 'border-[var(--hc-control)]'}`}
         />
         {q && (
           <button type="button" aria-label={t('clear_place')} onClick={() => { setQ(''); onClear(); inputRef.current?.focus(); }} className="absolute right-1.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-lg text-[var(--hc-muted)] hover:bg-[var(--hc-bg)]">
@@ -70,7 +70,7 @@ function PlaceSearch({ places, onPick, onClear, chosen }: { places: Place[]; onP
           </button>
         )}
         {showList && (
-          <ul id="place-list" role="listbox" aria-label={t('place_label')} className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-xl border-[1.5px] border-[var(--hc-border)] bg-white py-1 shadow-[0_8px_24px_rgb(23_33_31/0.12)]">
+          <ul id="place-list" role="listbox" aria-label={t('place_label')} className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white py-1 shadow-[0_8px_24px_rgb(23_33_31/0.12)]">
             {hits.length === 0 && <li role="presentation" className="px-3 py-2 text-[15px] text-[var(--hc-muted)]">{t('place_none')}</li>}
             {hits.map((p, i) => (
               <li
@@ -82,7 +82,10 @@ function PlaceSearch({ places, onPick, onClear, chosen }: { places: Place[]; onP
                 onMouseEnter={() => setActive(i)}
                 className={`flex min-h-11 cursor-pointer items-center gap-2 px-3 text-[16px] ${i === active ? 'bg-[var(--hc-tint)] text-[var(--hc-primary-dark)]' : ''}`}
               >
-                <span className="flex-1">{placeLabel(p)}</span>
+                <span className="flex-1 py-1.5">
+                  {placeLabel(p)}
+                  {placeTowns(p) && <span className="block text-[14px] text-[var(--hc-muted)]">{placeTowns(p)}</span>}
+                </span>
                 <span className="text-[14px] text-[var(--hc-muted)]">{p.kind === 'pin' ? 'PIN' : t('district_word')}</span>
               </li>
             ))}
@@ -113,7 +116,7 @@ function UseMyLocation({ onPlace }: { onPlace: (p: Place) => void }) {
   };
   return (
     <div>
-      <button type="button" onClick={go} className="inline-flex min-h-11 items-center gap-2 rounded-xl border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)] hover:bg-[var(--hc-tint)]">
+      <button type="button" onClick={go} className="inline-flex min-h-11 items-center gap-2 rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)] hover:bg-[var(--hc-tint)]">
         <MapPin className="h-5 w-5" aria-hidden />
         {t('use_location')}
       </button>
@@ -158,7 +161,7 @@ function SymptomSearch({ text, onText, picked, onPick, onRemove }: { text: strin
   return (
     <div className="relative">
       <label htmlFor="symptoms" className="block text-[16px] font-semibold">{t('describe_label')}</label>
-      <div className="mt-1 flex min-h-12 flex-wrap items-center gap-1.5 rounded-xl border-[1.5px] border-[var(--hc-control)] bg-white px-2 py-1.5 focus-within:border-[var(--hc-primary)] focus-within:ring-2 focus-within:ring-[var(--hc-primary)]/30" onClick={() => inputRef.current?.focus()}>
+      <div className="mt-1 flex min-h-12 flex-wrap items-center gap-1.5 rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-control)] bg-white px-2 py-1.5 focus-within:border-[var(--hc-primary)] focus-within:ring-2 focus-within:ring-[var(--hc-primary)]/30" onClick={() => inputRef.current?.focus()}>
         {picked.map((id) => (
           <span key={id} className="inline-flex min-h-8 items-center gap-1 rounded-full bg-[var(--hc-tint)] pl-3 pr-1 text-[15px] font-medium text-[var(--hc-primary-dark)]">
             {labelFor(id)}
@@ -189,7 +192,7 @@ function SymptomSearch({ text, onText, picked, onPick, onRemove }: { text: strin
         />
       </div>
       {showList && (
-        <ul id="symptom-list" role="listbox" aria-label={t('describe_label')} className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-xl border-[1.5px] border-[var(--hc-border)] bg-white py-1 shadow-[0_8px_24px_rgb(23_33_31/0.12)]">
+        <ul id="symptom-list" role="listbox" aria-label={t('describe_label')} className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white py-1 shadow-[0_8px_24px_rgb(23_33_31/0.12)]">
           {options.map((h, i) => (
             <li
               key={h.id}
@@ -213,7 +216,7 @@ function SymptomSearch({ text, onText, picked, onPick, onRemove }: { text: strin
 }
 
 /** Shows that the facility search already started when the place was picked (see PrefetchForPlace). */
-function BackgroundSearch() {
+function BackgroundSearch({ quiet }: { quiet?: boolean } = {}) {
   const { s } = useFlow();
   const t = useT();
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
@@ -221,7 +224,7 @@ function BackgroundSearch() {
   const p = placeLabel(s.place);
   return (
     <Candidates bbox={bbox}>
-      {({ loading, error }) => error ? null : (
+      {({ loading, error }) => error || (quiet && !loading) ? null : (
         <p role="status" className="-mt-2 flex items-center gap-1.5 text-[15px] text-[var(--hc-muted)]">
           {loading ? t('background_search', { p }) : <><Check className="h-4 w-4 text-[var(--hc-primary)]" aria-hidden />{t('background_ready', { p })}</>}
         </p>
@@ -285,8 +288,8 @@ export function SymptomsScreen() {
             actionLabel={t('change')}
             onAction={() => dispatch({ type: 'go', screen: 'place' })}
           />
-          <BackgroundSearch />
-          <section className="flex flex-col gap-2 rounded-2xl border-2 border-[var(--hc-primary)] p-4">
+          <BackgroundSearch quiet />
+          <section className="flex flex-col gap-2 rounded-[var(--hc-r-card)] border-2 border-[var(--hc-primary)] p-4">
             <Bubble>{t('describe_prompt')}</Bubble>
             <SymptomSearch
               text={s.freeText}
@@ -308,7 +311,7 @@ export function SymptomsScreen() {
             <p id="symptom-hint" className="text-[15px] text-[var(--hc-muted)]">{t('describe_hint')}</p>
           </section>
 
-          <fieldset className="rounded-[14px] border-[1.5px] border-[var(--hc-em-border)] bg-[#fff8f7] p-3">
+          <fieldset className="rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-em-border)] bg-[#fff8f7] p-3">
             {/* Legend floated inside the box so a long, translated title never sits on the border. */}
             <legend className="float-left mb-2 w-full">
               <span className="block text-[17px] font-bold text-[var(--hc-em-text)]">{t('safety_title')}</span>
@@ -317,7 +320,7 @@ export function SymptomsScreen() {
             <div className="clear-both grid grid-cols-2 gap-2">
               {SAFETY.map(({ key, label }) => (
                 <label key={key} className="flex items-start gap-2 text-[15px]">
-                  <input type="checkbox" className="mt-1 h-[18px] w-[18px] accent-[var(--hc-em-btn)]" checked={s.safety[key]} onChange={(e) => {
+                  <input type="checkbox" className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--hc-em-btn)]" checked={s.safety[key]} onChange={(e) => {
                       set({ safety: { ...s.safety, [key]: e.target.checked } });
                       // Any tick opens the Emergency screen at once (no facility list).
                       if (e.target.checked) dispatch({ type: 'emergency' });
@@ -339,12 +342,12 @@ export function SymptomsScreen() {
           </section>
 
           {s.place && (softWords.length > 0 || softProfile) && (
-            <div role="alert" className="flex flex-col gap-2 rounded-[14px] border-[1.5px] border-[var(--hc-em-border)] bg-[#fff8f7] p-3 text-[15px] text-[var(--hc-em-text)]">
+            <div role="alert" className="flex flex-col gap-2 rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-em-border)] bg-[#fff8f7] p-3 text-[15px] text-[var(--hc-em-text)]">
               <p className="text-[16px] font-bold">{t('soft_flag_title')}</p>
               {softWords.length > 0 && <p>{t('soft_flag_words', { w: softWords.map((w) => `“${w}”`).join(', ') })}</p>}
               {softProfile && <p>{t('soft_flag_profile')}</p>}
               <p>{t('soft_flag_body')}</p>
-              <button type="button" onClick={() => dispatch({ type: 'emergency' })} className="self-start min-h-11 rounded-xl bg-[var(--hc-em-btn)] px-4 text-[16px] font-semibold text-white">{t('soft_flag_button')}</button>
+              <button type="button" onClick={() => dispatch({ type: 'emergency' })} className="self-start min-h-11 rounded-[var(--hc-r-control)] bg-[var(--hc-em-btn)] px-4 text-[16px] font-semibold text-white">{t('soft_flag_button')}</button>
             </div>
           )}
                     <PrimaryButton onClick={submit}>{t('continue')}</PrimaryButton>
@@ -367,8 +370,16 @@ export function PlaceScreen() {
           <StepHeader step={1} />
           <Bubble>{t('hello')}</Bubble>
           <ScreenTitle>{t('where_title')}</ScreenTitle>
-          <section className="flex flex-col gap-2 rounded-2xl border-[1.5px] border-[var(--hc-border)] p-4">
+          <section className="flex flex-col gap-2 rounded-[var(--hc-r-card)] border-[1.5px] border-[var(--hc-border)] p-4">
             <UseMyLocation onPlace={(p) => set({ place: p })} />
+            {DATA_SOURCE === 'engine_fixture' ? (
+              <div role="radiogroup" aria-label="Demo places from the engine fixture" className="flex flex-col gap-2">
+                <p className="text-[15px] font-semibold">Demo places from the engine fixture</p>
+                {ENGINE_PLACES.map((p) => (
+                  <Chip radio key={p.code} on={s.place?.code === p.code} onClick={() => set({ state: p.state, place: p })}>{p.code} · {p.towns}</Chip>
+                ))}
+              </div>
+            ) : <>
             <p className="text-[15px] font-semibold">{t('or_choose')}</p>
             <States>
               {({ rows, loading, error, sample }) => (
@@ -379,7 +390,7 @@ export function PlaceScreen() {
                   ) : error ? (
                     <Notice status="bad">{t('error_data')}</Notice>
                   ) : (
-                    <select id="state" value={s.state} onChange={(e) => set({ state: e.target.value, place: null })} className="mt-1 min-h-11 w-full rounded-xl border-[1.5px] border-[var(--hc-control)] bg-white px-3 text-[16px]">
+                    <select id="state" value={s.state} onChange={(e) => set({ state: e.target.value, place: null })} className="mt-1 min-h-11 w-full rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-control)] bg-white px-3 text-[16px]">
                       <option value="">{t('choose_state')}</option>
                       {rows.map((st) => (
                         <option key={st} value={st}>{titleCase(st)}</option>
@@ -396,6 +407,7 @@ export function PlaceScreen() {
                 }
               </Places>
             )}
+            </>}
             <p className="text-[15px] text-[var(--hc-muted)]">{t('radius_auto')}</p>
           </section>
           {s.place && <BackgroundSearch />}

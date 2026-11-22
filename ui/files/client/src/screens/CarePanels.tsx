@@ -9,7 +9,7 @@ const TIER_STATUS: Record<SeverityTier, Status> = { EMERGENCY_NOW: 'bad', URGENT
 export function LayerAPanel({ a, tier }: { a: LayerAAssessment; tier: SeverityTier }) {
   const t = useT();
   return (
-    <section className="rounded-xl border-[1.5px] border-[var(--hc-border)] bg-white px-4 py-3" aria-labelledby="next-title">
+    <section className="rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white px-4 py-3" aria-labelledby="next-title">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id="next-title" className="flex items-center gap-2 text-[17px] font-bold"><ClipboardList className="h-5 w-5 text-[var(--hc-primary)]" aria-hidden />{t('next_title')}</h2>
         <StatusTag status={TIER_STATUS[tier]}>{t(`tier_${tier}` as StringKey)}</StatusTag>

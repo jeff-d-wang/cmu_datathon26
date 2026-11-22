@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { Circle, MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip, ZoomControl, useMap } from 'react-leaflet';
+import { useEffect, useMemo, useState } from 'react';
+import { Circle, MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import L, { type LatLngBoundsExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Point } from '../domain/geo';
@@ -12,6 +12,8 @@ export interface StreetPoint {
   name: string;
   warn?: boolean;
   muted?: boolean;
+  /** Small dot instead of a numbered pin (ranked places not currently shown in the list). Dots stay at their true location. */
+  dot?: boolean;
 }
 
 /**
@@ -34,6 +36,9 @@ const pinIcon = (label: string, warn: boolean, selected: boolean, muted: boolean
     iconAnchor: [18, 18],
   });
 
+const dotIcon = (muted: boolean, selected: boolean) =>
+  L.divIcon({ className: 'hc-pin', html: `<span class="hc-dot${muted ? ' hc-dot-muted' : ''}${selected ? ' hc-pin-sel' : ''}"></span>`, iconSize: [18, 18], iconAnchor: [9, 9] });
+
 const youIcon = (label: string) =>
   L.divIcon({ className: 'hc-pin', html: `<span class="hc-you"></span><span class="hc-you-label">${label}</span>`, iconSize: [22, 22], iconAnchor: [11, 11] });
 
@@ -41,7 +46,8 @@ function FitBounds({ bounds }: { bounds: LatLngBoundsExpression }) {
   const map = useMap();
   useEffect(() => {
     // Leave room for the map switch (top) and the legend (bottom).
-    map.fitBounds(bounds, { paddingTopLeft: [48, 96], paddingBottomRight: [48, 150], maxZoom: 13 });
+    const small = map.getSize().y < 400;
+    map.fitBounds(bounds, small ? { padding: [24, 24], maxZoom: 13 } : { paddingTopLeft: [48, 96], paddingBottomRight: [48, 150], maxZoom: 13 });
   }, [map, bounds]);
   return null;
 }
@@ -58,26 +64,67 @@ function circleRing(c: Point, radiusKm: number, steps = 120): [number, number][]
 /** Covers the whole map; the radius circle is cut out of it so everything outside the radius is greyed. */
 const WORLD_RING: [number, number][] = [[-85, -179.9], [-85, 179.9], [85, 179.9], [85, -179.9]];
 
-/** Spread pins that share (almost) the same spot so every number stays readable. */
-function spread(points: StreetPoint[], origin: Point): StreetPoint[] {
-  // The user's own position counts as occupied, so a pin never hides under "You".
-  const seen = new Map<string, number>([[`${origin.lat.toFixed(2)},${origin.lon.toFixed(2)}`, 1]]);
-  return points.map((p) => {
-    const key = `${p.lat.toFixed(2)},${p.lon.toFixed(2)}`;
-    const n = seen.get(key) ?? 0;
-    seen.set(key, n + 1);
-    if (n === 0) return p;
-    const angle = (n * 2 * Math.PI) / 6;
-    return { ...p, lat: p.lat + 0.012 * Math.sin(angle), lon: p.lon + 0.012 * Math.cos(angle) };
+const MIN_PX = 40;
+/**
+ * At the current zoom, pins closer than MIN_PX on screen are pushed apart (pairwise relaxation, repeated until none
+ * overlap or 60 passes), so no number hides another, including pins that a first nudge would have pushed onto a neighbour.
+ */
+function spreadOnScreen(map: L.Map, points: StreetPoint[]): StreetPoint[] {
+  const px = points.map((p) => map.project([p.lat, p.lon]));
+  const pos = px.map((q, i) => ({ x: q.x + (i % 2 ? 0.01 : -0.01) * (i + 1), y: q.y + (i % 3 ? 0.01 : -0.01) * (i + 1) }));
+  for (let pass = 0; pass < 60; pass++) {
+    let moved = false;
+    for (let i = 0; i < pos.length; i++) {
+      for (let j = i + 1; j < pos.length; j++) {
+        const dx = pos[j].x - pos[i].x;
+        const dy = pos[j].y - pos[i].y;
+        const dist = Math.hypot(dx, dy);
+        if (dist >= MIN_PX) continue;
+        const ux = dist > 0.001 ? dx / dist : Math.cos(i + j);
+        const uy = dist > 0.001 ? dy / dist : Math.sin(i + j);
+        const push = (MIN_PX - dist) / 2 + 0.5;
+        pos[i].x -= ux * push; pos[i].y -= uy * push;
+        pos[j].x += ux * push; pos[j].y += uy * push;
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  return points.map((p, i) => {
+    if (Math.hypot(pos[i].x - px[i].x, pos[i].y - px[i].y) < 1) return p;
+    const ll = map.unproject([pos[i].x, pos[i].y]);
+    return { ...p, lat: ll.lat, lon: ll.lng };
   });
 }
 
+function Pins({ points, origin, selectedId, onSelect }: { points: StreetPoint[]; origin: Point; selectedId?: string | null; onSelect?: (id: string) => void }) {
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+  const [hover, setHover] = useState<string | null>(null);
+  useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
+  // Re-spread whenever the pin set changes (not only on zoom).
+  const key = points.map((p) => `${p.id}:${p.lat}:${p.lon}`).join('|');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Only numbered pins are spread apart; dots keep their real position.
+  const placed = useMemo(() => [...points.filter((p) => p.dot), ...spreadOnScreen(map, points.filter((p) => !p.dot))], [map, key, zoom]);
+  const lineTo = placed.find((p) => p.id === (hover ?? selectedId));
+  return (
+    <>
+      {lineTo && <Polyline positions={[[origin.lat, origin.lon], [lineTo.lat, lineTo.lon]]} pathOptions={{ color: '#4f5b58', weight: 1.5, dashArray: '2 6', opacity: 0.8 }} />}
+      {placed.map((p) => (
+        <Marker key={p.id} position={[p.lat, p.lon]} icon={p.dot ? dotIcon(!!p.muted, p.id === selectedId) : pinIcon(p.label, !!p.warn, p.id === selectedId, !!p.muted)} title={`${p.label}. ${p.name}`} alt={`${p.label}. ${p.name}`} eventHandlers={{ click: () => onSelect?.(p.id), mouseover: () => setHover(p.id), mouseout: () => setHover(null) }}>
+          <Tooltip direction="top" offset={[0, p.dot ? -8 : -18]}>{`${p.label}. ${p.name}`}</Tooltip>
+        </Marker>
+      ))}
+    </>
+  );
+}
+
 export function StreetMap({ origin, points, radiusKm, selectedId, onSelect, ariaLabel, youLabel }: { origin: Point; points: StreetPoint[]; radiusKm?: number; selectedId?: string | null; onSelect?: (id: string) => void; ariaLabel: string; youLabel: string }) {
-  const placed = useMemo(() => spread(points, origin), [points, origin]);
   const bounds = useMemo<LatLngBoundsExpression>(() => {
-    const all = [[origin.lat, origin.lon] as [number, number], ...placed.map((p) => [p.lat, p.lon] as [number, number])];
+    const all = [[origin.lat, origin.lon] as [number, number], ...points.map((p) => [p.lat, p.lon] as [number, number])];
     return all.length > 1 ? all : [[origin.lat - 0.2, origin.lon - 0.2], [origin.lat + 0.2, origin.lon + 0.2]];
-  }, [origin, placed]);
+  }, [origin, points]);
   return (
     <div className="h-full w-full" role="region" aria-label={ariaLabel}>
       <MapContainer center={[origin.lat, origin.lon]} zoom={10} minZoom={5} maxBounds={INDIA_BOUNDS} maxBoundsViscosity={1} className="h-full w-full" scrollWheelZoom attributionControl zoomControl={false}>
@@ -88,15 +135,8 @@ export function StreetMap({ origin, points, radiusKm, selectedId, onSelect, aria
           <Polygon positions={[WORLD_RING, circleRing(origin, radiusKm)]} interactive={false} pathOptions={{ stroke: false, fillColor: '#1f2a28', fillOpacity: 0.3 }} />
         )}
         {radiusKm && <Circle center={[origin.lat, origin.lon]} radius={radiusKm * 1000} pathOptions={{ color: '#0b5f58', weight: 2, dashArray: '8 6', fill: false }} />}
-        {placed.map((p) => (
-          <Polyline key={`l-${p.id}`} positions={[[origin.lat, origin.lon], [p.lat, p.lon]]} pathOptions={{ color: '#4f5b58', weight: 1.5, dashArray: '2 6', opacity: 0.7 }} />
-        ))}
         <Marker position={[origin.lat, origin.lon]} icon={youIcon(youLabel)} keyboard={false} />
-        {placed.map((p) => (
-          <Marker key={p.id} position={[p.lat, p.lon]} icon={pinIcon(p.label, !!p.warn, p.id === selectedId, !!p.muted)} title={`${p.label}. ${p.name}`} alt={`${p.label}. ${p.name}`} eventHandlers={{ click: () => onSelect?.(p.id) }}>
-            <Tooltip direction="top" offset={[0, -18]}>{`${p.label}. ${p.name}`}</Tooltip>
-          </Marker>
-        ))}
+        <Pins points={points} origin={origin} selectedId={selectedId} onSelect={onSelect} />
       </MapContainer>
     </div>
   );

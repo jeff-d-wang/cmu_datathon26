@@ -108,7 +108,7 @@ export function WhoScreen() {
               onChange={(e) => set({ ageRaw: e.target.value })}
               aria-invalid={!age.ok}
               aria-describedby="age-help"
-              className="mt-1 min-h-12 w-[110px] rounded-xl border-[1.5px] border-[var(--hc-control)] px-3 text-[18px] font-semibold"
+              className="mt-1 min-h-12 w-[110px] rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-control)] px-3 text-[18px] font-semibold"
             />
             <p id="age-help" className="mt-1 text-[15px] text-[var(--hc-muted)]">{age.ok ? t('age_help') : t('age_error')}</p>
             {age.ok && age.age !== null && age.age < 18 && <Notice status="info">{t('child_note')}</Notice>}

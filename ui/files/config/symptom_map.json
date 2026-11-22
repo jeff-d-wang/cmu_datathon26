@@ -41,7 +41,8 @@
       },
       "quick_pick": true,
       "warning_sign": "a heart attack or narrowed heart arteries (angina)",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 797
     },
     {
       "id": "breathless",
@@ -74,7 +75,8 @@
       },
       "quick_pick": true,
       "warning_sign": "heart failure or a heart valve problem; it can also come from the lungs",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 597
     },
     {
       "id": "fainting",
@@ -106,7 +108,8 @@
       },
       "quick_pick": true,
       "warning_sign": "a heart rhythm problem or a valve problem",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 129
     },
     {
       "id": "racing_heartbeat",
@@ -139,7 +142,8 @@
       },
       "quick_pick": true,
       "warning_sign": "a heart rhythm problem such as atrial fibrillation",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 130
     },
     {
       "id": "swollen_legs",
@@ -167,7 +171,7 @@
         "year": 2021,
         "verify": "to verify by clinician"
       },
-      "quick_pick": true,
+      "quick_pick": false,
       "warning_sign": "heart failure; it can also come from the kidneys or veins",
       "evidence_source": null
     },
@@ -198,7 +202,8 @@
       },
       "quick_pick": true,
       "warning_sign": "heart failure or reduced heart pumping, among many other causes",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 196
     },
     {
       "id": "dizziness",
@@ -231,9 +236,10 @@
         "year": 2018,
         "verify": "to verify by clinician"
       },
-      "quick_pick": false,
+      "quick_pick": true,
       "warning_sign": "a heart rhythm problem or low blood pressure",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 253
     },
     {
       "id": "cough",
@@ -260,9 +266,10 @@
         "year": 2021,
         "verify": "to verify by clinician"
       },
-      "quick_pick": false,
+      "quick_pick": true,
       "warning_sign": "fluid on the lungs from heart failure, when it comes with breathlessness or swelling",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 611
     },
     {
       "id": "high_bp",
@@ -292,7 +299,8 @@
       },
       "quick_pick": false,
       "warning_sign": "strain on the heart and arteries over time",
-      "evidence_source": null
+      "evidence_source": null,
+      "survey_visits": 104
     },
     {
       "id": "leg_pain_walking",
@@ -532,5 +540,6 @@
     "note": "Layer B may only RAISE the tier: if the lower bound of the 95% Wilson interval of the emergency-visit rate reaches a threshold."
   },
   "outcomes_min_cases": 30,
-  "evidence_source_note": "evidence_source is deliberately empty. Our dataset has no patient outcomes, so the app shows no percentages. Fill this only with a cited external clinical source."
+  "evidence_source_note": "evidence_source is deliberately empty. Our dataset has no patient outcomes, so the app shows no percentages. Fill this only with a cited external clinical source.",
+  "quick_pick_note": "Quick picks = the 7 most common heart-related reasons for an emergency visit in the NHAMCS 2022 survey (survey_visits = unweighted visits), most common first."
 }
