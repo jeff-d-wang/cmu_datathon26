@@ -40,13 +40,37 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from recommend import (MODEL, TOP_N, extract_needs,  # noqa: E402
+from recommend import (MODEL, TOP_N, explain, extract_needs,  # noqa: E402
                        geo_candidates, pincode_to_coords, rank)
-from survey_needs import needs_vector  # noqa: E402
+from survey_needs import SERVICE_CROSSWALK, needs_vector  # noqa: E402
 
 PROFILES_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                              "data", "complaint_profiles.json")
 RADIUS_LADDER_KM = [25, 50, 100, 300]
+PIN_TABLE = "workspace.default.pin_centroids"   # engine PIN centroids (19,550 PINs,
+# covers PINs the gold table lacks, e.g. Port Blair 744101)
+
+def _resolve_pin(spark, pin):
+    """Gold centroids first, engine pin_centroids as fallback.
+
+    Never-empty covers facilities, not geography: a PIN found in neither
+    directory raises a clear ValueError for the UI to catch (engine contract).
+    """
+    r = pincode_to_coords(spark, pin)
+    if r is not None:
+        return r, "gold pincode centroids"
+    try:
+        from pyspark.sql import functions as F
+        row = (spark.table(PIN_TABLE)
+               .where(F.col("pin") == str(pin))
+               .select("latitude", "longitude").limit(1).collect())
+        if row:
+            return ((row[0]["latitude"], row[0]["longitude"]),
+                    "engine pin_centroids fallback")
+    except Exception:
+        pass
+    raise ValueError("PIN %r is not in the pincode directories. "
+                     "Enter a 6-digit India Post PIN code." % pin)
 
 
 def load_profiles(path=PROFILES_JSON):
@@ -134,7 +158,7 @@ def _n_rows(ranked):
 def find_facilities_never_empty(spark, symptoms, context="", pin=None,
                                 top_n=TOP_N):
     """Engine policy: widen, soften, fall back -- never return nothing."""
-    lat, lng = pincode_to_coords(spark, pin)
+    (lat, lng), pin_source = _resolve_pin(spark, pin)
     needs, meta = hybrid_needs(spark, symptoms, context)
     banners = []
 
@@ -172,6 +196,70 @@ def find_facilities_never_empty(spark, symptoms, context="", pin=None,
         banners.append("no facilities in dataset within 300 km of this PIN")
     return {"needs": generic, "needs_meta": meta, "rows": rows[:top_n],
             "banners": banners, "radius_km": RADIUS_LADDER_KM[-1]}
+
+
+# ---------------------------------------------------------------------------
+# demo-ready evidence cards: his explain() + our CIs + verbatim quotes
+# ---------------------------------------------------------------------------
+QUOTES_TABLE = "workspace.default.facility_services"
+# engine evidence table: facility_id, service_id, evidence_status,
+# evidence_value, source_field, source_quote -- same unique_id space as gold.
+UNMET_NOTE = ("no evidence found (unknown, not disproven -- absence of "
+              "evidence is not evidence of absence)")
+
+
+def evidence_card(spark, symptoms, context="", pin=None, top_n=TOP_N):
+    """One call -> complete demo card per facility.
+
+    Joins three layers onto find_facilities_never_empty:
+      1. his explain(): per-need confidence band, corroborating channels,
+         token counts, scale note, score contribution, and the unmet list;
+      2. our needs_meta: every weight's provenance -- survey share with
+         Wilson 95% CI and Kish n_eff, or 'LLM-estimated, no CI';
+      3. verbatim quotes from the engine evidence table (same unique_id
+         space), so every 'offers X' claim cites the facility's own text.
+    Unmet needs are spelled out with the unknown-not-disproven note, never
+    silently dropped. Quote lookup failures degrade gracefully (band and
+    channels still shown) -- enrichment never breaks the card.
+    """
+    out = find_facilities_never_empty(spark, symptoms, context, pin, top_n)
+    exp = explain(spark, out["needs"], out["rows"])
+
+    # best quote per (facility, his-service name), forward-crosswalked
+    qmap = {}
+    try:
+        fids = [r["unique_id"] for r in exp] or ["-"]
+        from pyspark.sql import functions as F
+        qrows = (spark.table(QUOTES_TABLE)
+                 .where(F.col("facility_id").isin(fids)).collect())
+        for r in qrows:
+            his_name = SERVICE_CROSSWALK.get(r["service_id"])
+            if his_name:
+                qmap.setdefault((r["facility_id"], his_name), []).append(
+                    (r["evidence_value"], r["source_field"],
+                     r["source_quote"], r["evidence_status"]))
+        for k in qmap:
+            qmap[k].sort(key=lambda t: -t[0])   # best-documented first
+    except Exception as e:
+        qmap = {}   # enrichment must never break the card
+        print("quote enrichment skipped (%s)" % str(e)[:120])
+
+    wsrc = out["needs_meta"]["weight_source"]
+    weight_of = {n["service"]: n["weight"] for n in out["needs"]}
+    for row in exp:
+        for need in row.get("needs", []):
+            need["weight_source"] = wsrc.get(need["service"], "")
+            quotes = qmap.get((row["unique_id"], need["service"]))
+            if quotes:
+                v, field, text, status = quotes[0]
+                need["quote"] = {"source_field": field, "text": text,
+                                 "evidence_status": status}
+        row["unmet_detail"] = [
+            {"service": s, "weight": weight_of.get(s),
+             "weight_source": wsrc.get(s, ""), "note": UNMET_NOTE}
+            for s in row.get("unmet", [])]
+    return {"cards": exp, "needs_meta": out["needs_meta"],
+            "banners": out["banners"], "radius_km": out["radius_km"]}
 
 
 # ------------------------------------------------------------------ QA --
