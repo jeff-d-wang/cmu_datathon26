@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Circle, MapContainer, Marker, Polygon, Polyline, TileLayer, Tooltip, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import L, { type LatLngBoundsExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -28,16 +28,25 @@ const INDIA_BOUNDS: LatLngBoundsExpression = [[5.0, 66.0], [38.5, 99.0]];
 
 const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
+// Icons are cached by look: re-rendering a marker with an identical icon object does not touch its DOM,
+// so hovering one pin no longer rebuilds every marker on the map.
+const iconCache = new Map<string, L.DivIcon>();
+const cached = (key: string, make: () => L.DivIcon): L.DivIcon => {
+  let icon = iconCache.get(key);
+  if (!icon) { icon = make(); iconCache.set(key, icon); }
+  return icon;
+};
+
 const pinIcon = (label: string, warn: boolean, selected: boolean, muted: boolean) =>
-  L.divIcon({
+  cached(`p|${label}|${+warn}|${+selected}|${+muted}`, () => L.divIcon({
     className: 'hc-pin',
     html: `<span class="hc-pin-dot${muted ? ' hc-pin-muted' : warn ? ' hc-pin-warn' : ''}${selected ? ' hc-pin-sel' : ''}">${label}</span>`,
     iconSize: [36, 36],
     iconAnchor: [18, 18],
-  });
+  }));
 
 const dotIcon = (muted: boolean, selected: boolean) =>
-  L.divIcon({ className: 'hc-pin', html: `<span class="hc-dot${muted ? ' hc-dot-muted' : ''}${selected ? ' hc-pin-sel' : ''}"></span>`, iconSize: [18, 18], iconAnchor: [9, 9] });
+  cached(`d|${+muted}|${+selected}`, () => L.divIcon({ className: 'hc-pin', html: `<span class="hc-dot${muted ? ' hc-dot-muted' : ''}${selected ? ' hc-pin-sel' : ''}"></span>`, iconSize: [18, 18], iconAnchor: [9, 9] }));
 
 const youIcon = (label: string) =>
   L.divIcon({ className: 'hc-pin', html: `<span class="hc-you"></span><span class="hc-you-label">${label}</span>`, iconSize: [22, 22], iconAnchor: [11, 11] });
@@ -97,6 +106,16 @@ function spreadOnScreen(map: L.Map, points: StreetPoint[]): StreetPoint[] {
   });
 }
 
+/** One marker; memoised so a hover elsewhere does not re-render (and re-bind) every marker. */
+const PinMarker = memo(function PinMarker({ p, selected, onSelect, onHover }: { p: StreetPoint; selected: boolean; onSelect: (id: string) => void; onHover: (id: string | null) => void }) {
+  const handlers = useMemo(() => ({ click: () => onSelect(p.id), mouseover: () => onHover(p.id), mouseout: () => onHover(null) }), [p.id, onSelect, onHover]);
+  return (
+    <Marker position={[p.lat, p.lon]} icon={p.dot ? dotIcon(!!p.muted, selected) : pinIcon(p.label, !!p.warn, selected, !!p.muted)} title={`${p.label}. ${p.name}`} alt={`${p.label}. ${p.name}`} eventHandlers={handlers}>
+      <Tooltip direction="top" offset={[0, p.dot ? -8 : -18]}>{`${p.label}. ${p.name}`}</Tooltip>
+    </Marker>
+  );
+});
+
 function Pins({ points, origin, selectedId, onSelect }: { points: StreetPoint[]; origin: Point; selectedId?: string | null; onSelect?: (id: string) => void }) {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
@@ -108,14 +127,14 @@ function Pins({ points, origin, selectedId, onSelect }: { points: StreetPoint[];
   // Only numbered pins are spread apart; dots keep their real position.
   const placed = useMemo(() => [...points.filter((p) => p.dot), ...spreadOnScreen(map, points.filter((p) => !p.dot))], [map, key, zoom]);
   const lineTo = placed.find((p) => p.id === (hover ?? selectedId));
+  // Stable select callback (the parent's may be a new arrow each render).
+  const selectRef = useRef(onSelect);
+  selectRef.current = onSelect;
+  const select = useMemo(() => (id: string) => selectRef.current?.(id), []);
   return (
     <>
       {lineTo && <Polyline positions={[[origin.lat, origin.lon], [lineTo.lat, lineTo.lon]]} pathOptions={{ color: '#4f5b58', weight: 1.5, dashArray: '2 6', opacity: 0.8 }} />}
-      {placed.map((p) => (
-        <Marker key={p.id} position={[p.lat, p.lon]} icon={p.dot ? dotIcon(!!p.muted, p.id === selectedId) : pinIcon(p.label, !!p.warn, p.id === selectedId, !!p.muted)} title={`${p.label}. ${p.name}`} alt={`${p.label}. ${p.name}`} eventHandlers={{ click: () => onSelect?.(p.id), mouseover: () => setHover(p.id), mouseout: () => setHover(null) }}>
-          <Tooltip direction="top" offset={[0, p.dot ? -8 : -18]}>{`${p.label}. ${p.name}`}</Tooltip>
-        </Marker>
-      ))}
+      {placed.map((p) => <PinMarker key={p.id} p={p} selected={p.id === selectedId} onSelect={select} onHover={setHover} />)}
     </>
   );
 }

@@ -5,6 +5,91 @@ import type { SQLTypeMarker, SQLStringMarker, SQLNumberMarker, SQLBooleanMarker,
 
 declare module "@databricks/appkit-ui/react" {
   interface QueryRegistry {
+    candidates: {
+        name: "candidates";
+        parameters: {
+          /** DOUBLE - use sql.double() */
+          min_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          min_lon: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lon: SQLNumberMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          unique_id: string;
+          /** @sqlType STRING */
+          name: string;
+          /** @sqlType STRING */
+          facility_class: string;
+          /** @sqlType STRING */
+          ownership: string;
+          /** @sqlType STRING */
+          city: string;
+          /** @sqlType STRING */
+          state: string;
+          /** @sqlType STRING */
+          district: string;
+          /** @sqlType STRING */
+          pin: string;
+          /** @sqlType DOUBLE */
+          lat: number;
+          /** @sqlType DOUBLE */
+          lon: number;
+          /** @sqlType BOOLEAN */
+          loc_approx: boolean;
+          /** @sqlType STRING */
+          services: string;
+          /** @sqlType BIGINT */
+          n_services: number;
+          /** @sqlType BIGINT */
+          n_high: number;
+          /** @sqlType BOOLEAN */
+          list_truncated: boolean;
+          /** @sqlType BOOLEAN */
+          merge_suspect: boolean;
+          /** @sqlType INT */
+          merge_signals: number;
+          /** @sqlType STRING */
+          source_class: string;
+          /** @sqlType BOOLEAN */
+          small_facility: boolean;
+          /** @sqlType BOOLEAN */
+          single_specialty_name: boolean;
+          /** @sqlType INT */
+          doctors: number;
+          /** @sqlType INT */
+          beds: number;
+          /** @sqlType BOOLEAN */
+          claims_247: boolean;
+          /** @sqlType BOOLEAN */
+          ambulance: boolean;
+          /** @sqlType BOOLEAN */
+          icu_equipment: boolean;
+          /** @sqlType BOOLEAN */
+          equipment_listed: boolean;
+          /** @sqlType BOOLEAN */
+          says_nabh: boolean;
+          /** @sqlType STRING */
+          emergency_quote: string;
+          /** @sqlType STRING */
+          icu_quote: string;
+          /** @sqlType STRING */
+          nabh_quote: string;
+          /** @sqlType STRING */
+          official_phone: string;
+          /** @sqlType BIGINT */
+          official_phone_shared_by: number;
+          /** @sqlType STRING */
+          alt_phone: string;
+          /** @sqlType STRING */
+          website: string;
+          /** @sqlType STRING */
+          address: string;
+        }>;
+      };
     emergency_candidates: {
         name: "emergency_candidates";
         parameters: {
@@ -81,6 +166,49 @@ declare module "@databricks/appkit-ui/react" {
           claims_247: boolean;
           /** @sqlType BOOLEAN */
           icu_equipment: boolean;
+          /** @sqlType BOOLEAN */
+          ambulance: boolean;
+          /** @sqlType STRING */
+          emergency_quote: string;
+          /** @sqlType STRING */
+          official_phone: string;
+          /** @sqlType BIGINT */
+          official_phone_shared_by: number;
+        }>;
+      };
+    emergency_candidates_platinum: {
+        name: "emergency_candidates_platinum";
+        parameters: {
+          /** DOUBLE - use sql.double() */
+          min_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          min_lon: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lon: SQLNumberMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          unique_id: string;
+          /** @sqlType STRING */
+          name: string;
+          /** @sqlType STRING */
+          facility_class: string;
+          /** @sqlType STRING */
+          city: string;
+          /** @sqlType STRING */
+          state: string;
+          /** @sqlType DOUBLE */
+          lat: number;
+          /** @sqlType DOUBLE */
+          lon: number;
+          /** @sqlType BOOLEAN */
+          loc_approx: boolean;
+          /** @sqlType STRING */
+          emergency_band: string;
+          /** @sqlType BOOLEAN */
+          claims_247: boolean;
           /** @sqlType BOOLEAN */
           ambulance: boolean;
           /** @sqlType STRING */
@@ -362,6 +490,21 @@ declare module "@databricks/appkit-ui/react" {
           cathlab_level: number;
           /** @sqlType BIGINT */
           surgery_level: number;
+        }>;
+      };
+    needs_extract: {
+        name: "needs_extract";
+        parameters: {
+          /** STRING - use sql.string() */
+          prompt: SQLStringMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          service: string;
+          /** @sqlType DOUBLE */
+          weight: number;
+          /** @sqlType BOOLEAN */
+          critical: boolean;
         }>;
       };
     place_lookup: {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { distanceFactor, parseNeeds } from './contract';
-import { FIXTURE_ENTRIES, getEngineResult, mapQuery } from './source';
+import { FIXTURE_ENTRIES, getEngineResult } from './fixture';
+import { mapQuery } from './source';
 
 describe('contract', () => {
   it('parseNeeds turns tuples into objects, None to null', () => {

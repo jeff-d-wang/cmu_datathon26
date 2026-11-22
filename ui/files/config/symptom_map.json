@@ -1,6 +1,6 @@
 {
   "status": "DRAFT: needs clinician review",
-  "note": "Layer A (always on). Keyword rules map symptoms to a severity tier, a care level and service labels. Every tier, care level, treatment sentence and threshold is a DRAFT that a clinician must review. Guideline references name real published guidelines; the exact recommendation must be verified by a clinician.",
+  "note": "Layer A (always on). Keyword rules map symptoms to a severity tier, a care level and service keys from the 192-service catalog (config/service_registry.json). Every tier, care level, treatment sentence and threshold is a DRAFT that a clinician must review. Guideline references name real published guidelines; the exact recommendation must be verified by a clinician.",
   "symptoms": [
     {
       "id": "chest_pressure",
@@ -21,10 +21,9 @@
         "chhati me dard"
       ],
       "labels": [
-        "L04",
-        "L05",
-        "L09",
-        "L01"
+        "interventionalCardiology",
+        "icu",
+        "cardiology"
       ],
       "emergency_banner_first": true,
       "advice": "advice_chest",
@@ -57,10 +56,9 @@
         "saans lene mein dikkat"
       ],
       "labels": [
-        "L01",
-        "L03",
-        "L10",
-        "L02"
+        "cardiology",
+        "echocardiography",
+        "diagnosticServices"
       ],
       "advice": "advice_soon",
       "severity": "URGENT",
@@ -89,10 +87,10 @@
         "syncope"
       ],
       "labels": [
-        "L01",
-        "L02",
-        "L08",
-        "L03"
+        "cardiology",
+        "diagnosticServices",
+        "pacemakerImplantation",
+        "echocardiography"
       ],
       "advice": "advice_soon",
       "severity": "URGENT",
@@ -124,9 +122,9 @@
         "dhadkan tez"
       ],
       "labels": [
-        "L01",
-        "L02",
-        "L08"
+        "cardiology",
+        "diagnosticServices",
+        "pacemakerImplantation"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -156,9 +154,8 @@
         "edema"
       ],
       "labels": [
-        "L01",
-        "L03",
-        "L10"
+        "cardiology",
+        "echocardiography"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -185,9 +182,9 @@
         "no energy"
       ],
       "labels": [
-        "L01",
-        "L02",
-        "L03"
+        "cardiology",
+        "diagnosticServices",
+        "echocardiography"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -220,9 +217,9 @@
         "sar ghoomna"
       ],
       "labels": [
-        "L01",
-        "L08",
-        "L02"
+        "cardiology",
+        "pacemakerImplantation",
+        "diagnosticServices"
       ],
       "advice": "advice_soon",
       "severity": "URGENT",
@@ -252,8 +249,8 @@
         "khaansi"
       ],
       "labels": [
-        "L01",
-        "L03"
+        "cardiology",
+        "echocardiography"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -283,8 +280,8 @@
         "bp zyada"
       ],
       "labels": [
-        "L01",
-        "L03"
+        "cardiology",
+        "echocardiography"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -313,8 +310,8 @@
         "claudication"
       ],
       "labels": [
-        "L01",
-        "L03"
+        "cardiology",
+        "echocardiography"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -342,9 +339,9 @@
         "narrow valve"
       ],
       "labels": [
-        "L01",
-        "L03",
-        "L06"
+        "cardiology",
+        "echocardiography",
+        "cardiothoracicSurgery"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -374,9 +371,9 @@
         "heart failure"
       ],
       "labels": [
-        "L01",
-        "L03",
-        "L04"
+        "cardiology",
+        "echocardiography",
+        "interventionalCardiology"
       ],
       "advice": "advice_soon",
       "severity": "ROUTINE",
@@ -408,7 +405,9 @@
         "paralysis"
       ],
       "labels": [
-        "L09"
+        "emergencyCare",
+        "neurology",
+        "icu"
       ],
       "advice": "advice_soon",
       "severity": "EMERGENCY_NOW",
@@ -458,15 +457,13 @@
     "heart failure"
   ],
   "planned_surgery_labels": [
-    "L06",
-    "L07",
-    "L05",
-    "L04"
+    "cardiothoracicSurgery",
+    "interventionalCardiology"
   ],
   "default_labels": [
-    "L01",
-    "L02",
-    "L03"
+    "cardiology",
+    "diagnosticServices",
+    "echocardiography"
   ],
   "version": 2,
   "severity_tiers": {
@@ -487,44 +484,41 @@
     "checkup_tests": {
       "label": "Heart check-up and tests",
       "labels": [
-        "L01",
-        "L02",
-        "L03"
+        "cardiology",
+        "diagnosticServices",
+        "echocardiography"
       ]
     },
     "cath_lab": {
       "label": "Heart scan lab (cath lab)",
       "labels": [
-        "L04",
-        "L05"
+        "interventionalCardiology"
       ]
     },
     "heart_surgery": {
       "label": "Heart surgery",
       "labels": [
-        "L06",
-        "L07"
+        "cardiothoracicSurgery"
       ]
     },
     "rhythm_care": {
       "label": "Heart rhythm care",
       "labels": [
-        "L08",
-        "L02"
+        "pacemakerImplantation",
+        "diagnosticServices"
       ]
     },
     "childrens_heart": {
       "label": "Children's heart care",
       "labels": [
-        "L11"
+        "pediatricCardiology"
       ]
     },
     "emergency_department": {
       "label": "Emergency department",
       "labels": [
-        "L09",
-        "L04",
-        "L05"
+        "icu",
+        "interventionalCardiology"
       ]
     }
   },

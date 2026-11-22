@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { formatDistance } from '../domain/geo';
-import { useT, type T } from '../i18n';
+import { serviceName } from '../domain/services';
+import { useT } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import type { Ranked, Tier } from '../domain/ranking';
 import type { DataWarning } from '../domain/warnings';
@@ -8,8 +9,6 @@ import { TriangleAlert } from 'lucide-react';
 import { StatusTag, type Status } from '../components/ui';
 
 const TIER_STATUS: Record<Tier, Status> = { A: 'ok', B: 'info', C: 'unknown', D: 'unknown' };
-
-export const labelName = (t: T, l: string) => t(`label_${l}` as StringKey);
 
 export function TierTag({ tier }: { tier: Tier }) {
   const t = useT();
@@ -45,7 +44,7 @@ export function WhyList({ r, unit }: { r: Ranked; unit: 'km' | 'mi' }) {
   const best = r.matched[0];
   const tierText =
     r.tier === 'A' || r.tier === 'B'
-      ? t(r.tier === 'A' ? 'why_A' : 'why_B', { service: best ? labelName(t, best.label) : '' })
+      ? t(r.tier === 'A' ? 'why_A' : 'why_B', { service: best ? serviceName(best.service) : '' })
       : t(r.tier === 'C' ? 'why_C' : 'why_D');
   const items = [
     tierText,

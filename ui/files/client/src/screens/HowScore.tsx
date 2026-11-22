@@ -13,7 +13,7 @@ export const COMPONENT_TEXT: Record<ComponentId, { name: string; explain: string
   emergency: { name: 'Emergency readiness', explain: 'Emergency care, ambulance and 24/7 claims, and whether anything else in the record supports the claim (an ambulance or intensive-care equipment).' },
   reputation: { name: 'Reputation signals', explain: 'Self-reported web signals, not patient ratings: NABH accreditation mentioned, a source other than a directory, its own website. We never invent ratings.' },
   distance: { name: 'Distance', explain: 'Straight-line distance. Road distance is longer. When a place only has its PIN-code centre as a location, the range is widened.' },
-  accommodate: { name: 'Can they look after this patient', explain: "Children's heart care for under-18s, maternity and newborn care in pregnancy, dialysis for kidney disease, neurology for a past stroke, diabetes care. These only add points; they never hide a place." },
+  accommodate: { name: 'Can they look after this patient', explain: "Children's care for under-18s, maternity and newborn care in pregnancy, dialysis for kidney disease, neurology for a past stroke, diabetes care. These only add points; they never hide a place." },
   quality: { name: 'Data quality', explain: 'Points off for lists cut at 50 items, an approximate location, or signs that the record mixes several branches.' },
 };
 
@@ -75,7 +75,6 @@ export function HowScoreScreen() {
           </section>
 
           <p className="text-[15px] text-[var(--hc-muted)]">{t('not_advice')} Our data has no patient outcomes, so we never show how often a symptom leads to hospital.</p>
-          <LinkButton className="self-start" onClick={back}>← Back to results</LinkButton>
         </>
       }
     />

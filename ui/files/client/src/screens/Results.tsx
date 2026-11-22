@@ -3,11 +3,11 @@ import { useFlow } from '../flow/context';
 import { modeFor, shareFragment, type FlowState } from '../flow/state';
 import { symptomLabel, useT } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { FILTER_LABELS, parseLabelFields } from '../domain/labels';
+import { parseServices, serviceName, type Need } from '../domain/services';
 import { chooseRadius, coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point, haversineKm } from '../domain/geo';
 import { isRelevant, rankFacilities, type Ranked } from '../domain/ranking';
-import { detectSymptoms, showsEmergencyBannerFirst } from '../domain/symptoms';
-import { assessLayerA, CARE_LEVEL_LABEL, CARE_LEVEL_SERVICES } from '../domain/severity';
+import { detectSymptoms, needsForSymptoms, showsEmergencyBannerFirst } from '../domain/symptoms';
+import { assessLayerA, CARE_LEVEL_LABEL } from '../domain/severity';
 import { splitByRadius } from '../domain/radius';
 import { WEIGHTS, type ComponentId } from '../domain/score';
 import { LayerAPanel } from './CarePanels';
@@ -21,28 +21,35 @@ import { IndiaInset } from '../components/MapPanel';
 import { StreetMap } from '../components/StreetMap';
 import { Building2, ChevronDown, Info, Ruler, ShieldCheck, Siren } from 'lucide-react';
 import { CallLink, Chip, LinkButton, Notice, SampleBadge, ScreenTitle, SecondaryButton, Spinner, titleCase } from '../components/ui';
-import { HowOrdered, labelName, TierTag, WarningList, ConfidenceBars, ScoreMeter } from './parts';
+import { HowOrdered, TierTag, WarningList, ConfidenceBars, ScoreMeter } from './parts';
 import { COMPONENT_TEXT } from './HowScore';
 
 export const FETCH_LIMIT = 400;
 
+/** Common general services shown as filter chips beyond the symptom-suggested ones. */
+const DEFAULT_CHIPS: readonly string[] = ['healthCheckupPackages', 'diagnosticServices', 'emergencyCare', 'icu'];
+/** Places added per "Show more". */
+const BATCH = 10;
+/** Grey pins outside the radius get letters, not ranks. */
+const letter = (i: number) => String.fromCharCode(65 + (i % 26));
+
 export function useRankedResults(s: FlowState, facilities: Facility[]) {
   return useMemo(() => {
-    if (!s.place) return { ranked: [] as Ranked[], radiusKm: 25, widened: false, auto: true };
+    if (!s.place) return { ranked: [] as Ranked[], needs: [] as Need[], radiusKm: 25, widened: false, auto: true };
     const origin: Point = s.place;
     const age = parseAge(s.ageRaw).age;
     const mode = modeFor(s.intent);
-    // Layer A treatment mapping -> care levels -> service labels to match.
-    const layerA = assessLayerA(detectSymptoms(s.freeText, s.chips), false, mode, age !== null && age < 18);
-    const wanted = s.serviceFilter !== 'any' ? [s.serviceFilter] : [...new Set(layerA.careLevels.flatMap(CARE_LEVEL_SERVICES))];
+    // Symptom rules -> weighted needs vector over the 192-service catalog, built in the
+    // browser (Layer A). Critical needs hard-filter; the rest only order.
+    const needs = needsForSymptoms(detectSymptoms(s.freeText, s.chips), mode);
     const pool = facilities.filter(
-      (f) => (s.ownership === 'any' || f.ownership === s.ownership) && (s.serviceFilter === 'any' || parseLabelFields(f.label_fields).has(s.serviceFilter)),
+      (f) => (s.ownership === 'any' || f.ownership === s.ownership) && (s.serviceFilter === 'any' || parseServices(f.services).has(s.serviceFilter)),
     );
-    const all = rankFacilities(pool, { mode, origin, wantedLabels: wanted, conditions: s.conditions, age, unit: s.unit });
+    const all = rankFacilities(pool, { mode, origin, needs, conditions: s.conditions, age, unit: s.unit });
     // Widen until enough places WITH EVIDENCE (tier A/B) are in range, not just any place.
     const auto = chooseRadius(all.filter(isRelevant).map((r) => r.km), s.showN);
     const radiusKm = s.radiusKm ?? auto.radiusKm;
-    return { ranked: all, radiusKm, widened: s.radiusKm === null && auto.widened, auto: s.radiusKm === null };
+    return { ranked: all, needs, radiusKm, widened: s.radiusKm === null && auto.widened, auto: s.radiusKm === null };
   }, [s.radiusKm, s.place, s.ageRaw, s.intent, s.freeText, s.chips, s.serviceFilter, s.ownership, s.conditions, s.showN, s.unit, facilities]);
 }
 
@@ -79,7 +86,7 @@ function ScoreDetails({ r }: { r: Ranked }) {
               <li key={i} className={e.flag ? 'rounded bg-[var(--hc-warn-bg)] px-1 text-[var(--hc-warn-text)]' : ''}>
                 {e.text}
                 {e.quote && <> <em>“{e.quote}”</em></>}
-                {e.source && <> <a className="underline" href={e.source} target="_blank" rel="noopener noreferrer">source</a></>}
+                {e.source && <span className="text-[var(--hc-muted)]"> · Source: {e.source}</span>}
                 {e.unknown && <span className="ml-1 rounded border border-[var(--hc-control)] px-1 text-[13px] text-[var(--hc-muted)]">unknown</span>}
               </li>
             ))}
@@ -108,7 +115,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
             {f.name}
           </h3>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[15px] text-[var(--hc-muted)]">
-            <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" aria-hidden />{titleCase(f.facility_type)}, {own}</span>
+            <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" aria-hidden />{titleCase(f.facility_class)}, {own}</span>
             <span aria-hidden>·</span>
             <span className="inline-flex items-center gap-1 whitespace-nowrap"><Ruler className="h-4 w-4" aria-hidden />{distText(r.km, unit)} (straight line)</span>
           </p>
@@ -124,7 +131,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
       <p className="text-[15px]"><span className="font-semibold">Why it is here:</span> {sc.why}</p>
       <dl className="grid grid-cols-[20px_1fr] gap-x-2 gap-y-1.5 text-[16px]">
         <dt><ShieldCheck className="mt-0.5 h-5 w-5 text-[var(--hc-primary)]" aria-label={t('evidence_word')} /></dt>
-        <dd>{r.matched.length > 0 ? r.matched.slice(0, 3).map((m) => labelName(t, m.label)).join(', ') : t('why_D')}</dd>
+        <dd>{r.matched.length > 0 ? r.matched.slice(0, 3).map((m) => serviceName(m.service)).join(', ') : t('why_D')}</dd>
         <dt><Siren className="mt-0.5 h-5 w-5 text-[var(--hc-em-btn)]" aria-label={t('emergency_row')} /></dt>
         <dd>{t(r.emergency === 'backed' ? 'em_backed_short' : r.emergency === 'claimed' ? 'em_claimed_short' : 'em_none')}</dd>
       </dl>
@@ -144,12 +151,12 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
   );
 }
 
-function OutsideRow({ r, rank, onOpen, unit }: { r: Ranked; rank: number; onOpen: () => void; unit: 'km' | 'mi' }) {
+function OutsideRow({ r, num, onOpen, unit }: { r: Ranked; num: string | null; onOpen: () => void; unit: 'km' | 'mi' }) {
   const sc = r.score;
   const f = r.facility;
   return (
     <button type="button" onClick={onOpen} aria-label={`Full details: ${f.name}`} className="flex min-h-14 w-full items-center gap-3 rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white px-3 py-2 text-left opacity-70 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--hc-primary)]">
-      <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--hc-primary)] text-[15px] font-bold text-white">{rank}</span>
+      {num !== null && <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#6b7472] text-[15px] font-bold text-white">{num}</span>}
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[16px] font-bold">{f.name}</span>
         <span className="flex flex-wrap items-center gap-x-2 text-[14px] text-[var(--hc-muted)]">
@@ -193,10 +200,19 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const { s, dispatch } = useFlow();
   const t = useT();
   const [showMap, setShowMap] = useState(true);
-  const { ranked, radiusKm, widened, auto } = useRankedResults(s, facilities);
-  const { inside, outside: outsideAll } = useMemo(() => splitByRadius(ranked, radiusKm), [ranked, radiusKm]);
-  const shown = inside.slice(0, s.showN);
-  const outside = outsideAll.slice(0, 10);
+  const [more, setMore] = useState(0);
+  const [showWeak, setShowWeak] = useState(false);
+  const { ranked, needs, radiusKm, widened, auto } = useRankedResults(s, facilities);
+  const { inside: insideAll, outside: outsideAll } = useMemo(() => splitByRadius(ranked, radiusKm), [ranked, radiusKm]);
+  // The list is every place inside the radius with evidence for this care (tier A/B), in ranked order, paged by "Show more".
+  const inside = useMemo(() => insideAll.filter(isRelevant), [insideAll]);
+  // Places inside the radius with little or no evidence for this care: behind a toggle, nearest first.
+  const weak = useMemo(() => insideAll.filter((r) => !isRelevant(r)).sort((a, b) => a.km - b.km), [insideAll]);
+  const shown = inside.slice(0, BATCH * (1 + more));
+  // Beyond the radius: only places with strong evidence for this case (tier A) get a lettered grey pin and a row in the
+  // grey list, nearest first. Moderate-evidence places (tier B) are only small grey dots on the map; weaker ones are not shown.
+  const outside = useMemo(() => outsideAll.filter((r) => r.tier === 'A').slice(0, 10), [outsideAll]);
+  const outsideDots = useMemo(() => outsideAll.filter((r) => r.tier === 'B').slice(0, 60), [outsideAll]);
   const origin = s.place as Point;
   const symptomIds = detectSymptoms(s.freeText, s.chips);
   const ageNum = parseAge(s.ageRaw).age;
@@ -208,10 +224,13 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const unit = s.unit;
   const d = (km: number) => distText(km, unit);
 
+  // The map shows every ranked place inside the radius: numbered pins for the places shown in the list, small dots for the
+  // rest of the ranking (true location, rank on hover), and lettered grey pins for good matches just outside the radius.
   const pins = [
-    ...shown.map((r, i) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: String(i + 1), name: r.facility.name, warn: r.warnings.length > 0 })),
-    ...outside.map((r, i) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: String(shown.length + i + 1), name: r.facility.name, muted: true })),
-  ];
+    ...inside.map((r, i) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: String(i + 1), name: r.facility.name, warn: r.warnings.length > 0, dot: i >= shown.length })),
+    ...outside.map((r, i) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: letter(i), name: r.facility.name, muted: true })),
+    ...outsideDots.map((r) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: 'Outside your radius', name: r.facility.name, muted: true, dot: true })),
+  ].filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon));
   const toSelect = (id: string) => set({ selectedId: id, screen: 'detail' });
   const left = !showMap ? (
     <div className="grid h-full place-items-center bg-[var(--hc-map)]">
@@ -219,7 +238,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
     </div>
   ) : (
     <div className="relative h-full">
-      <StreetMap origin={origin} radiusKm={radiusKm} points={pins} onSelect={toSelect} ariaLabel={t('map_name', { n: shown.length, d: d(radiusKm) })} youLabel={t('you')} />
+      <StreetMap origin={origin} radiusKm={radiusKm} points={pins} onSelect={toSelect} ariaLabel={t('map_name', { n: inside.length, d: d(radiusKm) })} youLabel={t('you')} />
       <div className="pointer-events-none absolute inset-x-4 top-4 z-[1000] flex items-start justify-between gap-2">
         <button type="button" onClick={() => setShowMap(false)} className="pointer-events-auto min-h-9 rounded-full bg-white px-4 text-[15px] font-semibold text-[var(--hc-text-2)] underline shadow-[0_2px_8px_rgb(23_33_31/0.18)]">{t('hide_map')}</button>
         <div className="pointer-events-auto"><IndiaInset at={origin} /></div>
@@ -232,19 +251,19 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
 
   const top2 = Object.entries(WEIGHTS[mode]).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([id]) => COMPONENT_TEXT[id as ComponentId].name.toLowerCase());
   const condNotes = (Object.keys(CONDITION_TEXT) as (keyof typeof s.conditions)[]).filter((k) => s.conditions[k]).map((k) => CONDITION_TEXT[k]);
-  if (ageNum !== null && ageNum < 18) condNotes.push("places listing children's heart care get extra points");
+  if (ageNum !== null && ageNum < 18) condNotes.push("places listing children's care get extra points");
   const condNames = (Object.keys(CONDITION_TEXT) as (keyof typeof s.conditions)[]).filter((k) => s.conditions[k]);
   const patient = [ageNum !== null ? `age ${ageNum}` : null, s.sex ? t(s.sex === 'other' ? 'sex_other' : s.sex) : null, ...condNames].filter(Boolean).join(', ');
 
-  // Service chips: those suggested by the symptoms first, then the usual procedures, each with a count inside the radius.
-  const suggestedChips = useMemo(() => [...new Set(layerA.careLevels.flatMap(CARE_LEVEL_SERVICES))].slice(0, 4), [layerA]);
-  const chipOrder = useMemo(() => [...suggestedChips, ...FILTER_LABELS.filter((l) => !suggestedChips.includes(l))], [suggestedChips]);
+  // Service chips: the needs suggested by the symptoms first, then common general services, each with a count inside the radius.
+  const suggestedChips = useMemo(() => [...new Set(needs.map((n) => n.service))].slice(0, 4), [needs]);
+  const chipOrder = useMemo(() => [...suggestedChips, ...DEFAULT_CHIPS.filter((l) => !suggestedChips.includes(l))], [suggestedChips]);
   const chipCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const f of facilities) {
       if (s.ownership !== 'any' && f.ownership !== s.ownership) continue;
       if (haversineKm(origin, f) > radiusKm) continue;
-      for (const l of parseLabelFields(f.label_fields).keys()) m.set(l, (m.get(l) ?? 0) + 1);
+      for (const l of parseServices(f.services).keys()) m.set(l, (m.get(l) ?? 0) + 1);
     }
     return m;
   }, [facilities, s.ownership, origin, radiusKm]);
@@ -270,27 +289,19 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           />
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-3">
-              <ScreenTitle>{(shown.length === 1 ? t('match_title_one') : t('matches_title', { n: shown.length }))}</ScreenTitle>
+              <ScreenTitle>{(inside.length === 1 ? t('match_title_one') : t('matches_title', { n: inside.length }))}</ScreenTitle>
               {sample && <SampleBadge />}
             </div>
-            <p role="status" className="sr-only">{(shown.length === 1 ? t('match_title_one') : t('matches_title', { n: shown.length }))}</p>
+            <p role="status" className="sr-only">{(inside.length === 1 ? t('match_title_one') : t('matches_title', { n: inside.length }))}</p>
             <p className="text-[15px] text-[var(--hc-muted)]">Scores have a range. The range is wide when we do not know much about this place.</p>
             <LinkButton className="self-start" onClick={() => dispatch({ type: 'go', screen: 'howscore' })}>How we score</LinkButton>
             <div className="flex items-center justify-between gap-3 text-[15px] text-[var(--hc-muted)]">
               <span className="inline-flex items-center gap-1.5"><Ruler className="h-4 w-4" aria-hidden />within {d(radiusKm)} (straight line)</span>
-              <label className="inline-flex items-center gap-2 text-[15px] font-semibold text-[var(--hc-text)]">
-                {t('show')}
-                <select value={s.showN} onChange={(e) => set({ showN: Number(e.target.value) === 20 ? 20 : Number(e.target.value) === 10 ? 10 : 5 })} className="min-h-9 rounded-lg border-[1.5px] border-[var(--hc-control)] bg-white px-2 font-normal">
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                </select>
-              </label>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-[15px]">
               <label className="inline-flex items-center gap-2 font-semibold">
                 Search radius
-                <input type="range" min={5} max={250} step={5} value={radiusKm} onChange={(e) => set({ radiusKm: Number(e.target.value) })} className="w-40" />
+                <input type="range" min={5} max={250} step={5} value={radiusKm} onChange={(e) => { setMore(0); set({ radiusKm: Number(e.target.value) }); }} className="w-40" />
                 <span className="font-normal tabular-nums">{d(radiusKm)}</span>
               </label>
               <div role="radiogroup" aria-label="Distance unit" className="flex gap-2">
@@ -309,10 +320,10 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           <div role="group" aria-label={t('filter_title')}>
             <p className="mb-1 text-[16px] font-semibold">{t('filter_title')}</p>
             <div className="flex flex-wrap gap-2">
-              <Chip radio on={s.serviceFilter === 'any'} onClick={() => set({ serviceFilter: 'any' })}>{t('any_heart_care')}</Chip>
+              <Chip radio on={s.serviceFilter === 'any'} onClick={() => set({ serviceFilter: 'any' })}>{t('any_care')}</Chip>
               {chipOrder.map((l) => (
                 <Chip radio key={l} on={s.serviceFilter === l} onClick={() => set({ serviceFilter: l })}>
-                  {labelName(t, l)}
+                  {serviceName(l)}
                   <span className={`ml-1 rounded-full px-1.5 text-[13px] tabular-nums ${chipCount(l) === 0 ? 'text-[var(--hc-muted)]' : 'bg-[var(--hc-bg)] text-[var(--hc-text)]'}`}>{chipCount(l)}</span>
                 </Chip>
               ))}
@@ -337,18 +348,43 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           )}
           <h2 className="sr-only">{t('matches_heading')}</h2>
           {shown.map((r, i) => (
-            <ResultCard key={r.facility.unique_id} r={r} rank={i + 1} unit={unit} onOpen={() => set({ selectedId: r.facility.unique_id, screen: 'detail' })} />
+            <ResultCard key={r.facility.unique_id} r={r} rank={i + 1} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} />
           ))}
-          {outside.length > 0 && (
+          {(inside.length > shown.length || more > 0) && (
+            <div className="flex gap-2">
+              {inside.length > shown.length && (
+                <SecondaryButton className="flex-1" onClick={() => setMore(more + 1)}>Show more ({inside.length - shown.length} left)</SecondaryButton>
+              )}
+              {more > 0 && <SecondaryButton className="flex-1" onClick={() => setMore(Math.max(0, more - 1))}>Show less</SecondaryButton>}
+            </div>
+          )}
+          {outside.length > 0 && shown.length < inside.length && (
+            <p className="text-[14px] text-[var(--hc-muted)]">{outside.length} strong {outside.length === 1 ? 'match is' : 'matches are'} just beyond {d(radiusKm)}: grey pins {letter(0)}{outside.length > 1 ? `–${letter(outside.length - 1)}` : ''} on the map. They are listed after the places inside your radius.</p>
+          )}
+          {/* Places beyond the radius are listed only after the whole in-radius list, so they never jump ahead of unseen closer options. */}
+          {outside.length > 0 && shown.length >= inside.length && (
             <>
               <h2 className="text-[18px] font-bold">Outside your radius</h2>
+              <p className="-mt-2 text-[14px] text-[var(--hc-muted)]">Strong matches for your case just beyond {d(radiusKm)}, nearest first. Letters, not ranks. Other places beyond the radius are small grey dots on the map.</p>
               <ul className="flex flex-col gap-2">
                 {outside.map((r, i) => (
                   <li key={r.facility.unique_id}>
-                    <OutsideRow r={r} rank={shown.length + i + 1} unit={unit} onOpen={() => set({ selectedId: r.facility.unique_id, screen: 'detail' })} />
+                    <OutsideRow r={r} num={letter(i)} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} />
                   </li>
                 ))}
               </ul>
+            </>
+          )}
+          {weak.length > 0 && (
+            <>
+              <button type="button" aria-expanded={showWeak} onClick={() => setShowWeak(!showWeak)} className="inline-flex min-h-11 items-center gap-1 self-start text-[15px] font-semibold text-[var(--hc-primary)] underline underline-offset-2">
+                Show {weak.length} {weak.length === 1 ? 'place' : 'places'} with little or no evidence for this care<ChevronDown className={`h-4 w-4 transition-transform${showWeak ? ' rotate-180' : ''}`} aria-hidden />
+              </button>
+              {showWeak && (
+                <ul className="flex flex-col gap-2">
+                  {weak.map((r) => <li key={r.facility.unique_id}><OutsideRow r={r} num={null} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} /></li>)}
+                </ul>
+              )}
             </>
           )}
           <ShareBar />
@@ -362,7 +398,7 @@ export function ResultsScreen() {
   const { s } = useFlow();
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
-  if (DATA_SOURCE === 'engine_fixture' || DATA_SOURCE === 'engine_clean') return <EngineResults />;
+  if (DATA_SOURCE === 'engine_clean') return <EngineResults />;
   return <Candidates bbox={bbox}>{(l) => <ResultsBody facilities={l.rows} loading={l.loading} error={l.error} warming={l.warming} sample={l.sample} />}</Candidates>;
 }
 

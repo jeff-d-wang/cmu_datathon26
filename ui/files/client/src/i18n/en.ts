@@ -1,6 +1,6 @@
 // UI strings (English). Facility content from the data stays English in every language.
 export const en = {
-  app_name: 'Heart care finder',
+  app_name: 'Health care finder',
   language: 'Language:',
   emergency_banner: 'Emergency? Call {112} (any emergency) or {108} (ambulance). Do not drive yourself.',
   any_emergency: 'any emergency',
@@ -17,12 +17,12 @@ export const en = {
   back: 'Back',
 
   // Step 1
-  hello: 'Hi, I will help you find heart care you can trust. It takes about a minute.',
+  hello: 'Hi, I will help you find health care you can trust. It takes about a minute.',
   intent_title: 'What do you need today?',
   intent_now: 'Emergency: get help now',
   intent_now_sub: 'Shows 112 and 108 straight away.',
-  intent_soon: 'Find heart care near me',
-  intent_soon_sub: 'Hospitals and clinics that list heart services',
+  intent_soon: 'Find health care near me',
+  intent_soon_sub: 'Ordered by emergency readiness and distance',
   intent_surgery: 'My doctor referred me for a procedure',
   intent_surgery_sub: 'For example angiography, bypass surgery or a pacemaker',
   intent_other: 'Help someone else',
@@ -35,7 +35,7 @@ export const en = {
 
   // Emergency
   emergency_title: 'Call now. Do not wait for results.',
-  emergency_label: 'Heart care finder · Emergency',
+  emergency_label: 'Health care finder · Emergency',
   call_112: 'Call 112',
   call_108: 'Call 108',
   while_you_wait: 'While you wait',
@@ -51,13 +51,13 @@ export const en = {
 
   // Step 2
   details_intro: 'Good. A few quick details help me pick the right kind of care.',
-  who_title: 'Who is this for?',
+  who_title: 'About the patient',
   i_am_patient: 'I am the patient',
   someone_else: 'It is for someone else',
   age_label: 'Patient’s age in years',
-  age_help: 'Type a number. Under 18? We will show a note about children’s heart care.',
+  age_help: 'Type a number. Under 18? We will show a note about children’s care.',
   age_error: 'Please type a whole number from 0 to 120, or leave it blank.',
-  child_note: 'Under 18: we move places that list children’s heart care up the list.',
+  child_note: 'Under 18: we move places that list children’s care up the list.',
   sex: 'Sex',
   woman: 'Woman',
   man: 'Man',
@@ -103,7 +103,7 @@ export const en = {
   soft_flag_profile: 'Chest pressure at age 40 or over, with diabetes or a known heart condition.',
   soft_flag_body: 'If it is happening right now, call 112 or 108. Otherwise you can continue.',
   soft_flag_button: 'It is happening now: get help',
-  background_search: 'Looking up heart care near {p} in the background…',
+  background_search: 'Looking up health care near {p} in the background…',
   background_ready: 'Places near {p} are ready.',
   safety_title: 'Quick safety check: any of these right now?',
   safety_sub: 'Ticking a box opens emergency help at once.',
@@ -146,7 +146,7 @@ export const en = {
   print: 'Print',
   share_note: 'Shared links include the place and filters only, never symptoms, age, sex or conditions.',
   filter_title: 'Show places that list:',
-  any_heart_care: 'Any heart care',
+  any_care: 'Any care',
   truncation_note: 'Lists are cut at 50 items, so a place that is not shown may still offer it.',
   services: 'Services:',
   km_straight: '{d} (straight line)',
@@ -154,7 +154,7 @@ export const en = {
   call: 'Call',
   why_here: 'Why it is listed here',
   no_results: 'No place in our data matches within 250 km.',
-  no_results_hint: 'Try “Any heart care”, or call 108 if this is urgent.',
+  no_results_hint: 'Try “Any care”, or call 108 if this is urgent.',
   loading_results: 'Searching our data… this can take up to 20 seconds.',
   warehouse_starting: 'Starting the data service… this can take a minute.',
   load_map: 'Show map',
@@ -176,10 +176,10 @@ export const en = {
   // Warnings
   w_location_approx: 'Approximate location',
   w_icu_no_equipment: 'Intensive care mentioned, no ICU equipment listed',
-  w_tag_only: 'Cardiology listed, services not described',
+  w_unverified_need: 'A service you need has only a single unverified mention',
   w_emergency_not_backed: 'Emergency claim not backed by other details',
   w_merged: 'May combine several branches',
-  w_large_procedure_small_facility: 'Large procedure listed by a small facility',
+  w_scale_mismatch: 'Service listed that the facility’s size makes doubtful',
 
   // Score breakdown
   score_title: 'How this was ranked',
@@ -191,7 +191,7 @@ export const en = {
   c_quality: 'Data quality',
   c_level: 'Cath lab or surgery level',
   boosts: 'Moved up because:',
-  b_child: 'lists children’s heart care',
+  b_child: 'lists children’s care',
   b_pregnant_obgyn: 'lists maternity care',
   b_pregnant_nicu: 'lists a NICU',
   b_kidney: 'lists dialysis or kidney care',
@@ -250,11 +250,11 @@ export const en = {
   how_ordered_planned: 'Planning: places with the strongest evidence for the care you need come first. Then places with fewer data warnings. Then places that also list care for your conditions. Then distance.',
   tier_A: 'Strong evidence',
   tier_B: 'Some evidence',
-  tier_C: 'Tag only, services not described',
+  tier_C: 'Unverified single mention',
   tier_D: 'Does not list this care',
-  why_A: 'Lists {service} in its service text, backed by a second mention or by equipment.',
-  why_B: 'Lists {service} in its service text (one mention).',
-  why_C: 'Only tagged “cardiology”. No heart service is described.',
+  why_A: 'Well-evidenced {service}: found by more than one independent source.',
+  why_B: 'Lists {service}, with some supporting evidence.',
+  why_C: 'A single unverified mention of the care you need.',
   why_D: 'Does not list the care you need. Our lists are cut at 50 items, so ask when you call.',
   em_backed: 'Claims emergency care, with an ambulance or ICU equipment listed (not verified).',
   em_claimed: 'Claims emergency care, but nothing else in the record backs it up (not verified).',
@@ -318,19 +318,7 @@ export const en = {
   stats_capability: '{n} of the {total} places near you in our data list both emergency care and a cath lab.',
   fixture_banner: 'SAMPLE FIXTURE, NOT REAL DATA (development build only)',
 
-  // Service labels (12, from findings/label_map.csv)
-  label_L01: 'Heart specialist (cardiology)',
-  label_L02: 'Heart tests (ECG / TMT / Holter)',
-  label_L03: 'Heart scan (Echo)',
-  label_L04: 'Angiography / cath lab',
-  label_L05: 'Angioplasty and stents',
-  label_L06: 'Bypass surgery (CABG)',
-  label_L07: 'Heart and valve surgery',
-  label_L08: 'Heart rhythm and pacemaker',
-  label_L09: 'Cardiac intensive care (CCU)',
-  label_L10: 'Heart failure care',
-  label_L11: 'Children’s heart care',
-  label_L12: 'Cardiac rehabilitation',
+  // Service names come from the 192-service registry (domain/services.ts serviceName), not i18n.
 } as const;
 
 export type StringKey = keyof typeof en;

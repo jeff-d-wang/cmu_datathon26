@@ -9,7 +9,7 @@ resources:
   apps:
     app:
       name: "heartcare-finder"
-      description: "Heart-care finder (read-only)"
+      description: "Health care finder (read-only)"
       source_code_path: ./
 
       # Start the app automatically on deploy.
@@ -35,8 +35,10 @@ targets:
     variables:
       sql_warehouse_id: 77508c86864ebc9e
 
-  # Team workspace (cmu-datathon profile). The dataset is not attached there, so this target runs on SAMPLE data
-  # and the cloud build reuses the committed query types in shared/appkit-types/.
+  # Team workspace (cmu-datathon profile). The platinum dataset (labuser_jdw2) is attached here, so production
+  # builds run LIVE platinum queries: client/.env.production sets VITE_DATA_SOURCE=platinum for `vite build`
+  # (local dev stays on sample data unless you set it in client/.env.local). The app's service principal needs
+  # USE/SELECT grants on the queried tables. The cloud build reuses the committed query types in shared/appkit-types/.
   team:
     workspace:
       host: https://dbc-4b8f5b5b-58be.cloud.databricks.com

@@ -1,13 +1,14 @@
 import { formatDistance } from './geo';
-import { CATH_LAB_LABELS, parseLabelEvidence, parseLabelQuotes, type LabelCode } from './labels';
+import { confScore, CONDITION_SERVICES, CHILD_SERVICES, parseServices, registryEntry, serviceName, type Need, type ServiceEvidence, type ServiceKey } from './services';
 import type { Conditions, Facility, Mode } from './types';
 
 /**
  * Match score 0-100 with a SCORE RANGE (not a statistical confidence interval).
  *
- *  - lower bound: only evidence the record actually lists counts.
+ *  - lower bound: only the platinum evidence the record actually has counts
+ *    (per-service confidence bands: high 1.0 / medium 0.5 / unverified 0.3 / low 0.05).
  *  - upper bound: also credits what may exist but is hidden (lists cut at 50 items,
- *    "cardiology" tag only, equipment never listed). Unknown is "possibly present", never absent.
+ *    equipment never listed). Unknown is "possibly present", never absent.
  *  - score: lower + 40% of the gap, so lower <= score <= upper always.
  *
  * Pure function, no I/O. Every component returns its weight, its lower/upper fraction and the
@@ -33,21 +34,8 @@ export const DISTANCE_HALF_KM: Record<Mode, number> = { urgent: 25, planned: 60 
 /** Extra uncertainty (km) when a place's location is only the PIN-code centre. */
 export const APPROX_LOCATION_KM = 10;
 
-export const PROCEDURE_LABELS: readonly LabelCode[] = ['L04', 'L05', 'L06', 'L07', 'L08'];
-export const LABEL_NAMES: Record<LabelCode, string> = {
-  L01: 'Heart specialist (cardiology)',
-  L02: 'Heart tests (ECG, TMT, Holter)',
-  L03: 'Heart scan (echo)',
-  L04: 'Angiography (cath lab)',
-  L05: 'Angioplasty and stents',
-  L06: 'Bypass surgery',
-  L07: 'Heart and valve surgery',
-  L08: 'Heart rhythm care and pacemaker',
-  L09: 'Cardiac intensive care',
-  L10: 'Heart failure care',
-  L11: "Children's heart care",
-  L12: 'Cardiac rehabilitation',
-};
+/** Default needs when nothing was extracted: a general checkup with emergency backup. */
+const DEFAULT_NEED_KEYS: readonly ServiceKey[] = ['healthCheckupPackages', 'emergencyCare'];
 
 export interface Evidence {
   /** Plain-words statement. */
@@ -76,7 +64,7 @@ export interface ScoreResult {
   lo: number;
   hi: number;
   confidence: Confidence;
-  /** Independent fields/sources behind the strongest match. */
+  /** Independent source channels behind the strongest match. */
   sources: number;
   components: ScoreComponent[];
   /** One sentence: why this place is in the list. */
@@ -86,40 +74,32 @@ export interface ScoreResult {
 export interface ScoreInput {
   mode: Mode;
   km: number;
-  wantedLabels: readonly LabelCode[];
+  /** Weighted need vector over the 192-service catalog (LLM extraction or symptom map). */
+  needs: readonly Need[];
   conditions: Conditions;
   age: number | null;
   unit?: 'km' | 'mi';
 }
 
-type Level = 'A' | 'B' | 'C' | 'D';
-const LO: Record<Level, number> = { A: 1, B: 0.8, C: 0.3, D: 0 };
-
-function labelLevel(f: Facility, label: LabelCode, ev: { fields: number; text: boolean } | undefined): Level {
-  if (!ev) return 'D';
-  if (!ev.text) return 'C';
-  const equipment = (CATH_LAB_LABELS.includes(label) && f.cath_equipment) || (label === 'L09' && f.icu_equipment);
-  return ev.fields >= 2 || equipment ? 'A' : 'B';
-}
-
-/** Upper-bound credit for a label: hidden by the 50-item cap or behind a "cardiology" tag. */
-function labelHi(level: Level, truncated: boolean, cardioTag: boolean): number {
-  if (level === 'A' || level === 'B') return LO[level];
-  if (level === 'C') return 0.8;
-  return truncated ? 0.6 : cardioTag ? 0.3 : 0;
-}
-
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 
-function labelEvidence(f: Facility, labels: readonly LabelCode[], levels: Map<LabelCode, Level>, quotes: Map<LabelCode, string>, truncated: boolean): Evidence[] {
-  const src = f.website || undefined;
-  return labels.map((l) => {
-    const lv = levels.get(l) ?? 'D';
-    const name = LABEL_NAMES[l];
-    if (lv === 'A') return { text: `${name}: listed, backed by another field or equipment`, quote: quotes.get(l), source: src };
-    if (lv === 'B') return { text: `${name}: listed in the service text`, quote: quotes.get(l), source: src };
-    if (lv === 'C') return { text: `${name}: only a "cardiology" tag, no service described`, unknown: true };
+/** Upper-bound credit for a band: unverified may hide a second source; absent may hide behind the 50-item cap. */
+function bandHi(band: ServiceEvidence['band'] | undefined, truncated: boolean): number {
+  if (band === undefined) return truncated ? 0.5 : 0;
+  return band === 'unverified' ? 0.6 : confScore(band);
+}
+
+function needEvidence(f: Facility, keys: readonly ServiceKey[], svcs: Map<ServiceKey, ServiceEvidence>): Evidence[] {
+  const src = 'facility record';
+  const truncated = f.list_truncated;
+  return keys.map((k) => {
+    const ev = svcs.get(k);
+    const name = serviceName(k);
+    if (ev?.band === 'high') return { text: `${name}: well evidenced (${ev.channels} source${ev.channels === 1 ? '' : 's'})`, source: src };
+    if (ev?.band === 'medium') return { text: `${name}: listed, with some supporting evidence`, source: src };
+    if (ev?.band === 'unverified') return { text: `${name}: a single mention we could not corroborate`, source: src, flag: true };
+    if (ev?.band === 'low') return { text: `${name}: listed, but contradicted by the facility's size`, source: src, flag: true };
     return truncated
       ? { text: `${name}: not in the record, but its lists were cut at 50 items, so it may exist`, unknown: true }
       : { text: `${name}: not listed` };
@@ -128,48 +108,44 @@ function labelEvidence(f: Facility, labels: readonly LabelCode[], levels: Map<La
 
 export function scoreBreakdown(f: Facility, input: ScoreInput): ScoreResult {
   const w = WEIGHTS[input.mode];
-  const ev = parseLabelEvidence(f.label_fields);
-  const quotes = parseLabelQuotes(f.label_quotes);
+  const svcs = parseServices(f.services);
   const truncated = f.list_truncated;
-  const cardioTag = ev.has('L01') && !ev.get('L01')?.text;
-  const wanted: LabelCode[] = input.wantedLabels.length ? [...input.wantedLabels] : ['L01', 'L02', 'L03'];
-  const levels = new Map<LabelCode, Level>();
-  for (const l of new Set<LabelCode>([...wanted, ...PROCEDURE_LABELS, 'L09'])) levels.set(l, labelLevel(f, l, ev.get(l)));
-  const lvl = (l: LabelCode) => levels.get(l) ?? 'D';
-  const src = f.website || undefined;
+  const needs: Need[] = input.needs.length
+    ? [...input.needs]
+    : DEFAULT_NEED_KEYS.map((k) => ({ service: k, weight: 1, critical: false }));
+  const wSum = needs.reduce((s, n) => s + Math.max(0.001, n.weight), 0);
+  const needKeys = needs.map((n) => n.service);
+  const src = 'facility record';
   const comps: ScoreComponent[] = [];
   const add = (id: ComponentId, lo: number, hi: number, evidence: Evidence[]) =>
     comps.push({ id, weight: w[id], lo: w[id] * clamp01(lo), hi: w[id] * clamp01(Math.max(lo, hi)), evidence });
 
-  // Treatment match: does it list the services this patient likely needs?
-  add('treatment', mean(wanted.map((l) => LO[lvl(l)])), mean(wanted.map((l) => labelHi(lvl(l), truncated, cardioTag))), labelEvidence(f, wanted, levels, quotes, truncated));
+  // Treatment match: confidence bands for the services this patient needs, weighted by need importance.
+  const treatLo = needs.reduce((s, n) => s + n.weight * confScore(svcs.get(n.service)?.band), 0) / wSum;
+  const treatHi = needs.reduce((s, n) => s + n.weight * bandHi(svcs.get(n.service)?.band, truncated), 0) / wSum;
+  add('treatment', treatLo, treatHi, needEvidence(f, needKeys, svcs));
 
-  // Procedures it carries out (the needed ones, or any listed when only a check-up is needed).
-  const neededProc = wanted.filter((l) => PROCEDURE_LABELS.includes(l));
-  if (neededProc.length) {
-    add('procedures', mean(neededProc.map((l) => LO[lvl(l)])), mean(neededProc.map((l) => labelHi(lvl(l), truncated, cardioTag))), labelEvidence(f, neededProc, levels, quotes, truncated));
+  // Procedures it carries out (the needed ones, or any listed procedure when only a check-up is needed).
+  const procedureNeeds = needs.filter((n) => registryEntry(n.service)?.type === 'procedure').map((n) => n.service);
+  const listedProcedures = [...svcs.entries()].filter(([k]) => registryEntry(k)?.type === 'procedure');
+  if (procedureNeeds.length) {
+    const lo = mean(procedureNeeds.map((k) => confScore(svcs.get(k)?.band)));
+    const hi = mean(procedureNeeds.map((k) => bandHi(svcs.get(k)?.band, truncated)));
+    add('procedures', lo, hi, needEvidence(f, procedureNeeds, svcs));
   } else {
-    const listed = PROCEDURE_LABELS.filter((l) => lvl(l) === 'A' || lvl(l) === 'B');
-    const lo = Math.max(0, ...PROCEDURE_LABELS.map((l) => LO[lvl(l)]));
-    const hi = Math.max(0, ...PROCEDURE_LABELS.map((l) => labelHi(lvl(l), truncated, cardioTag)));
-    add('procedures', lo, hi, listed.length ? labelEvidence(f, listed, levels, quotes, truncated) : [{ text: truncated ? 'No heart procedures listed; lists were cut at 50 items, so some may exist' : 'No heart procedures listed', unknown: truncated }]);
+    const best = Math.max(0, ...listedProcedures.map(([, ev]) => confScore(ev.band)));
+    add('procedures', best, best, listedProcedures.length
+      ? needEvidence(f, listedProcedures.map(([k]) => k), svcs)
+      : [{ text: truncated ? 'No procedures listed; lists were cut at 50 items, so some may exist' : 'No procedures listed', unknown: truncated }]);
   }
 
   // Right equipment for those treatments.
-  const needCath = wanted.some((l) => CATH_LAB_LABELS.includes(l));
-  const needIcu = input.mode === 'urgent' || wanted.includes('L09');
+  const needIcu = input.mode === 'urgent' || needKeys.includes('icu') || needKeys.includes('emergencyCare');
   const eqEv: Evidence[] = [];
   const checks: { met: boolean; hi: number }[] = [];
-  if (needCath) {
-    const claimed = CATH_LAB_LABELS.some((l) => ev.get(l)?.text);
-    if (f.cath_equipment) eqEv.push({ text: 'Cath-lab equipment listed', source: src });
-    else if (claimed) eqEv.push({ text: 'Lists cath-lab procedures, but no cath-lab equipment is listed', flag: true, unknown: !f.equipment_listed });
-    else eqEv.push({ text: f.equipment_listed ? 'No cath-lab equipment listed' : 'Equipment not listed, unknown', unknown: !f.equipment_listed });
-    checks.push({ met: f.cath_equipment, hi: f.cath_equipment || !f.equipment_listed ? 1 : 0 });
-  }
   if (needIcu) {
     if (f.icu_equipment) eqEv.push({ text: 'Intensive-care equipment listed (ventilator, monitor or defibrillator)', quote: f.icu_quote || undefined, source: src });
-    else if (f.icu_claim) eqEv.push({ text: 'Claims an ICU, but no ventilator, monitor or defibrillator is listed', flag: true, unknown: !f.equipment_listed });
+    else if (f.icu_quote) eqEv.push({ text: 'Mentions intensive care, but no ventilator, monitor or defibrillator is listed', quote: f.icu_quote, source: src, flag: true, unknown: !f.equipment_listed });
     else eqEv.push({ text: f.equipment_listed ? 'No intensive-care equipment listed' : 'Equipment not listed, unknown', unknown: !f.equipment_listed });
     checks.push({ met: f.icu_equipment, hi: f.icu_equipment || !f.equipment_listed ? 1 : 0 });
   }
@@ -177,20 +153,23 @@ export function scoreBreakdown(f: Facility, input: ScoreInput): ScoreResult {
   else add('equipment', 1, 1, [{ text: 'No special equipment needed for this kind of care' }]);
 
   // Emergency readiness, and whether other details support the claim.
-  const backed = f.emergency_claim && (f.ambulance || f.icu_equipment);
+  const claimed = svcs.has('emergencyCare') || f.emergency_quote !== '' || f.claims_247;
+  const backed = claimed && (f.ambulance || f.icu_equipment);
   const emEv: Evidence[] = [];
-  if (f.emergency_claim) emEv.push({ text: backed ? 'Lists emergency care, supported by ambulance or ICU equipment' : 'Lists emergency care, nothing else in the record supports it', quote: f.emergency_quote || undefined, source: src, flag: !backed });
+  const emBand = svcs.get('emergencyCare')?.band;
+  if (claimed) emEv.push({ text: backed ? 'Lists emergency care, supported by ambulance or ICU equipment' : 'Lists emergency care, nothing else in the record supports it', quote: f.emergency_quote || undefined, source: src, flag: !backed });
   else emEv.push({ text: truncated ? 'Emergency care not listed; lists were cut, so it may exist' : 'Emergency care not listed', unknown: truncated });
+  if (emBand) emEv.push({ text: `Emergency care evidence: ${emBand} confidence` });
   if (f.claims_247) emEv.push({ text: 'Says open 24/7 (not verified)' });
   if (f.ambulance) emEv.push({ text: 'Ambulance listed' });
-  add('emergency', f.emergency_claim ? (backed ? 1 : 0.6) : 0, f.emergency_claim ? 1 : truncated ? 0.4 : 0, emEv);
+  add('emergency', claimed ? (backed ? 1 : 0.6) : 0, claimed ? 1 : truncated ? 0.4 : 0, emEv);
 
   // Reputation: self-reported web signals only, never patient ratings.
   const indep = f.source_class === 'non_directory' || f.source_class === 'gov';
   const repEv: Evidence[] = [];
   if (f.says_nabh) repEv.push({ text: 'Mentions NABH accreditation (self-reported)', quote: f.nabh_quote || undefined, source: src });
   if (indep) repEv.push({ text: f.source_class === 'gov' ? 'Found on a government source' : 'Found on a source other than a directory' });
-  if (f.website) repEv.push({ text: 'Has its own website', source: f.website });
+  if (f.website) repEv.push({ text: 'Has its own website', source: f.website.replace(/^https?:\/\//i, '').replace(/\/$/, '') });
   if (!repEv.length) repEv.push({ text: 'No accreditation or independent source found in the data' });
   const rep = (f.says_nabh ? 0.5 : 0) + (indep ? 0.3 : 0) + (f.website ? 0.2 : 0);
   add('reputation', rep, rep, repEv);
@@ -205,15 +184,16 @@ export function scoreBreakdown(f: Facility, input: ScoreInput): ScoreResult {
   ]);
 
   // Can they accommodate this patient? Boosts only; never hides a place.
-  const needs: { met: boolean; text: string }[] = [];
-  if (input.age !== null && input.age < 18) needs.push({ met: lvl('L11') === 'A' || lvl('L11') === 'B', text: "Children's heart care (patient under 18)" });
-  if (input.conditions.pregnant) needs.push({ met: f.has_obgyn || f.has_nicu, text: 'Maternity and newborn care (pregnant)' });
-  if (input.conditions.kidney) needs.push({ met: f.has_dialysis, text: 'Dialysis (kidney disease)' });
-  if (input.conditions.stroke) needs.push({ met: f.has_neuro_stroke, text: 'Neurology and stroke care (past stroke)' });
-  if (input.conditions.diabetes) needs.push({ met: f.has_diabetes_care, text: 'Diabetes care' });
-  if (needs.length) {
-    add('accommodate', mean(needs.map((n) => (n.met ? 1 : 0))), mean(needs.map((n) => (n.met ? 1 : truncated ? 0.5 : 0))),
-      needs.map((n) => ({ text: `${n.text}: ${n.met ? 'listed' : truncated ? 'not listed, may exist (lists were cut)' : 'not listed'}`, unknown: !n.met && truncated, source: n.met ? src : undefined })));
+  const condMet = (keys: readonly ServiceKey[]) => keys.some((k) => svcs.has(k));
+  const conds: { met: boolean; text: string }[] = [];
+  if (input.age !== null && input.age < 18) conds.push({ met: condMet(CHILD_SERVICES), text: "Children's care (patient under 18)" });
+  if (input.conditions.pregnant) conds.push({ met: condMet(CONDITION_SERVICES.pregnant), text: 'Maternity and newborn care (pregnant)' });
+  if (input.conditions.kidney) conds.push({ met: condMet(CONDITION_SERVICES.kidney), text: 'Dialysis (kidney disease)' });
+  if (input.conditions.stroke) conds.push({ met: condMet(CONDITION_SERVICES.stroke), text: 'Neurology care (past stroke)' });
+  if (input.conditions.diabetes) conds.push({ met: condMet(CONDITION_SERVICES.diabetes), text: 'Diabetes care' });
+  if (conds.length) {
+    add('accommodate', mean(conds.map((c) => (c.met ? 1 : 0))), mean(conds.map((c) => (c.met ? 1 : truncated ? 0.5 : 0))),
+      conds.map((c) => ({ text: `${c.text}: ${c.met ? 'listed' : truncated ? 'not listed, may exist (lists were cut)' : 'not listed'}`, unknown: !c.met && truncated, source: c.met ? src : undefined })));
   } else add('accommodate', 1, 1, [{ text: 'Nothing extra entered about the patient' }]);
 
   // Data quality.
@@ -231,17 +211,19 @@ export function scoreBreakdown(f: Facility, input: ScoreInput): ScoreResult {
   const lo = Math.floor(loSum + 1e-9);
   const hi = Math.ceil(hiSum - 1e-9);
   const score = Math.min(hi, Math.max(lo, Math.round(loSum + SCORE_POSITION * (hiSum - loSum))));
-  const sources = Math.max(0, ...wanted.map((l) => ev.get(l)?.fields ?? 0)) + (indep ? 1 : 0);
+  const sources = Math.max(0, ...needKeys.map((k) => svcs.get(k)?.channels ?? 0)) + (indep ? 1 : 0);
   const width = hi - lo;
   const confidence = confidenceFromRange(width, sources);
-  return { score, lo, hi, confidence, sources, components: comps, why: whySentence(f, input, wanted, levels, backed) };
+  return { score, lo, hi, confidence, sources, components: comps, why: whySentence(f, input, needKeys, svcs, backed) };
 }
 
-function whySentence(f: Facility, input: ScoreInput, wanted: LabelCode[], levels: Map<LabelCode, Level>, backed: boolean): string {
-  const listed = wanted.filter((l) => levels.get(l) === 'A' || levels.get(l) === 'B').map((l) => LABEL_NAMES[l].replace(/^[A-Z][a-z]/, (m) => m.toLowerCase()));
+function whySentence(f: Facility, input: ScoreInput, needKeys: ServiceKey[], svcs: Map<ServiceKey, ServiceEvidence>, backed: boolean): string {
+  const listed = needKeys
+    .filter((k) => { const b = svcs.get(k)?.band; return b === 'high' || b === 'medium'; })
+    .map((k) => serviceName(k).replace(/^[A-Z][a-z]/, (m) => m.toLowerCase()));
   const parts: string[] = [];
   parts.push(listed.length ? `Lists ${listed.slice(0, 2).join(' and ')}` : 'Does not clearly list the care you need');
-  if (input.mode === 'urgent') parts.push(f.emergency_claim ? (backed ? 'emergency care with support' : 'emergency care (not backed)') : 'no emergency care listed');
+  if (input.mode === 'urgent') parts.push(svcs.has('emergencyCare') ? (backed ? 'emergency care with support' : 'emergency care (not backed)') : 'no emergency care listed');
   parts.push(`${formatDistance(input.km, input.unit ?? 'km')} away${f.loc_approx ? ' (approximate)' : ''}`);
   return parts.join(', ') + '.';
 }

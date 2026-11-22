@@ -7,7 +7,7 @@ import type { StringKey } from '../i18n/en';
 import { checkRedFlags, isHardFlag, parseAge, redFlagWordsIn, type SafetyChecks } from '../domain/redflags';
 import { detectSymptoms, isOwnWords, normalise, OWN_PREFIX, ownWordsText, QUICK_PICK_IDS, suggestSymptoms } from '../domain/symptoms';
 import { placeLabel, placeTowns, searchPlaces, type Place } from '../domain/places';
-import { Candidates, DATA_SOURCE, ENGINE_PLACES, Places, States } from '../data/source';
+import { Candidates, Places, States } from '../data/source';
 import { coarseBBox, FETCH_RADIUS_KM } from '../domain/geo';
 import { Shell } from '../components/Shell';
 import { IntroPanel } from '../components/MapPanel';
@@ -347,7 +347,6 @@ export function SymptomsScreen() {
               {softWords.length > 0 && <p>{t('soft_flag_words', { w: softWords.map((w) => `“${w}”`).join(', ') })}</p>}
               {softProfile && <p>{t('soft_flag_profile')}</p>}
               <p>{t('soft_flag_body')}</p>
-              <button type="button" onClick={() => dispatch({ type: 'emergency' })} className="self-start min-h-11 rounded-[var(--hc-r-control)] bg-[var(--hc-em-btn)] px-4 text-[16px] font-semibold text-white">{t('soft_flag_button')}</button>
             </div>
           )}
                     <PrimaryButton onClick={submit}>{t('continue')}</PrimaryButton>
@@ -372,14 +371,6 @@ export function PlaceScreen() {
           <ScreenTitle>{t('where_title')}</ScreenTitle>
           <section className="flex flex-col gap-2 rounded-[var(--hc-r-card)] border-[1.5px] border-[var(--hc-border)] p-4">
             <UseMyLocation onPlace={(p) => set({ place: p })} />
-            {DATA_SOURCE === 'engine_fixture' ? (
-              <div role="radiogroup" aria-label="Demo places from the engine fixture" className="flex flex-col gap-2">
-                <p className="text-[15px] font-semibold">Demo places from the engine fixture</p>
-                {ENGINE_PLACES.map((p) => (
-                  <Chip radio key={p.code} on={s.place?.code === p.code} onClick={() => set({ state: p.state, place: p })}>{p.code} · {p.towns}</Chip>
-                ))}
-              </div>
-            ) : <>
             <p className="text-[15px] font-semibold">{t('or_choose')}</p>
             <States>
               {({ rows, loading, error, sample }) => (
@@ -407,7 +398,6 @@ export function PlaceScreen() {
                 }
               </Places>
             )}
-            </>}
             <p className="text-[15px] text-[var(--hc-muted)]">{t('radius_auto')}</p>
           </section>
           {s.place && <BackgroundSearch />}

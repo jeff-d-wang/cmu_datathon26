@@ -8,14 +8,13 @@ import { chooseRadius, coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point }
 import { Shell, useDesktop } from '../components/Shell';
 import { placeShort } from '../domain/places';
 import { StreetMap } from '../components/StreetMap';
-import { CallLink, Chip, Collapse, LinkButton, Notice, ScreenTitle, SecondaryButton, SkeletonCards, StatusTag, titleCase } from '../components/ui';
+import { CallLink, Chip, Collapse, LinkButton, Notice, ScreenTitle, SecondaryButton, SkeletonCards, titleCase } from '../components/ui';
 import { ConfidenceBars, ScoreMeter } from './parts';
 import { clean, isPresent } from '../engine/present';
 import { distanceFactor, parseNeeds, type EngineEntry, type EngineResult, type Need } from '../engine/contract';
-import { getEngineResult, ownWordsOf } from '../engine/source';
+import { ownWordsOf } from '../engine/source';
 import { findEntry, chipsToQuery, splitRelevant, MIN_MATCH } from '../engine/method';
 import { EngineCandidates, type EngineLoaded } from '../engine/live';
-import { DATA_SOURCE } from '../data/source';
 
 const SERVICE_NAME: Record<string, string> = {
   emergency: 'Emergency care', ecg: 'ECG', xray: 'X-ray', lab: 'Lab tests', ct: 'CT scan', mri: 'MRI', ultrasound: 'Ultrasound',
@@ -188,11 +187,7 @@ export function EntryProvider({ children }: { children: (entry: EngineEntry | nu
   const ids = useMemo(() => [...detectSymptoms(s.freeText, s.chips), ...(s.conditions.kidney ? ['kidney'] : [])], [s.freeText, s.chips, s.conditions.kidney]);
   const bbox = useMemo(() => coarseBBox(place, FETCH_RADIUS_KM), [place]);
   const own = ownWordsOf(s.chips, s.freeText);
-  const fixture = useMemo(() => (DATA_SOURCE === 'engine_clean' ? null : getEngineResult(ids, own, place.kind === 'pin' ? place.code : '')), [ids, own, place]);
-  if (DATA_SOURCE === 'engine_clean') {
-    return <EngineCandidates bbox={bbox}>{(l) => <CleanBody l={l} query={chipsToQuery(ids, own)}>{children}</CleanBody>}</EngineCandidates>;
-  }
-  return <>{children(fixture, 'ok', false)}</>;
+  return <EngineCandidates bbox={bbox}>{(l) => <CleanBody l={l} query={chipsToQuery(ids, own)}>{children}</CleanBody>}</EngineCandidates>;
 }
 
 /** engine_clean: facilities from the read-only query, ranked in full (no cut) in the browser by method.ts. */
@@ -210,7 +205,7 @@ export function EngineResults() {
   return <EntryProvider>{(entry, status, clean) => <EngineView entry={entry} status={status} clean={clean} />}</EntryProvider>;
 }
 
-function EngineView({ entry, status, clean: isClean }: { entry: EngineEntry | null; status: 'loading' | 'error' | 'ok'; clean: boolean }) {
+function EngineView({ entry, status }: { entry: EngineEntry | null; status: 'loading' | 'error' | 'ok'; clean: boolean }) {
   const { s, dispatch } = useFlow();
   const t = useT();
   const set = (patch: Partial<FlowState>) => dispatch({ type: 'set', patch });
@@ -271,16 +266,15 @@ function EngineView({ entry, status, clean: isClean }: { entry: EngineEntry | nu
       right={
         <>
           <div className="flex flex-col gap-1">
-            <ScreenTitle>{entry ? `Heart care near ${placeShort(place)}` : 'Results'}</ScreenTitle>
+            <ScreenTitle>{entry ? `Health care near ${placeShort(place)}` : 'Results'}</ScreenTitle>
             {entry && <p className="text-[16px] text-[var(--hc-muted)] [text-wrap:balance]">For {entry.label.replace(/\s*\([^)]*\.\.\.$/, '')} · {all.length === 1 ? '1 place' : `${all.length} places`}</p>}
-            {!isClean && <div><StatusTag status="warn">Demo results (fixture)</StatusTag></div>}
           </div>
           {status === 'loading' ? (
             <SkeletonCards label="Loading places near you" />
           ) : status === 'error' ? (
             <Notice status="bad">Could not load places. Please try again.</Notice>
           ) : !entry ? (
-            <Notice status="unknown">The demo results only cover Jaipur 302001, Pune 411001 and Patna 800001.</Notice>
+            <Notice status="unknown">No matching places found near here.</Notice>
           ) : (
             <>
               {!desktop && <div className="h-[220px] overflow-hidden rounded-[var(--hc-r-card)] border-[1.5px] border-[var(--hc-border)]">{left}</div>}

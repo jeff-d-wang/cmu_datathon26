@@ -4,26 +4,18 @@ import { sql } from '@databricks/appkit-ui/js';
 import type { Facility } from '../domain/types';
 import type { Place } from '../domain/places';
 import type { BBox } from '../domain/geo';
-import { SAMPLE_FACILITIES, SAMPLE_PLACES, SAMPLE_STATES } from '../sample/sampleData';
 
 /**
- * Data source switch (client env VITE_DATA_SOURCE):
- *   sample (default) - bundled fictional places, runs offline
- *   raw              - live read-only queries on the original Virtue Foundation tables
- *   engine_fixture   - recommender-engine demo results from a local fixture (no queries); only 3 demo PINs
- *   engine_clean     - Alvin's method (client/src/engine/method.ts) on the clean table, read-only query engine_candidates_clean; local copy only
- *   clean            - live read-only queries on the team's cleaned table labuser_jdw2.gold.facility_district_health_indicators
- * The legacy flag VITE_USE_SAMPLE_DATA=false still means "raw".
+ * Data source switch (client env VITE_DATA_SOURCE). Every mode reads the team's datasets; there is no sample data.
+ *   platinum     (default) - live read-only queries on gold.facility_district_health_indicators
+ *                            + platinum.facility_service_confidence (labuser_jdw2)
+ *   engine_clean           - engine method (client/src/engine/method.ts) on the gold table, query engine_candidates_clean
  */
-export type DataSource = 'sample' | 'raw' | 'clean' | 'engine_fixture' | 'engine_clean';
-const envSource = String(import.meta.env.VITE_DATA_SOURCE ?? '');
-export const DATA_SOURCE: DataSource =
-  envSource === 'clean' || envSource === 'raw' || envSource === 'sample' || envSource === 'engine_fixture' || envSource === 'engine_clean'
-    ? envSource
-    : import.meta.env.VITE_USE_SAMPLE_DATA === 'false'
-      ? 'raw'
-      : 'sample';
-export const USE_SAMPLE: boolean = DATA_SOURCE === 'sample';
+export type DataSource = 'platinum' | 'engine_clean';
+export const DATA_SOURCE: DataSource = String(import.meta.env.VITE_DATA_SOURCE ?? '') === 'engine_clean' ? 'engine_clean' : 'platinum';
+
+/** Layer B LLM needs extraction: runs inside the workspace (ai_query via needs_extract.sql), off by default. */
+export const LLM_EXTRACTION: boolean = DATA_SOURCE === 'platinum' && String(import.meta.env.VITE_LLM_EXTRACTION ?? '') === 'true';
 
 export interface Loaded<T> {
   rows: T;
@@ -37,19 +29,17 @@ const bool = (v: unknown) => v === true || v === 'true';
 const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number(v));
 const str = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' || typeof v === 'boolean' ? String(v) : '');
 
-/** Typed mapper: JSON rows can carry booleans/numbers as strings at runtime. */
+/** Typed mapper for the 35-column platinum contract (config/queries/candidates.sql). */
 export function toFacility(r: Record<string, unknown>): Facility {
   return {
-    unique_id: str(r.unique_id), name: str(r.name), facility_type: str(r.facility_type), ownership: str(r.ownership),
+    unique_id: str(r.unique_id), name: str(r.name), facility_class: str(r.facility_class), ownership: str(r.ownership),
     city: str(r.city), state: str(r.state), district: str(r.district), pin: str(r.pin),
     lat: Number(r.lat), lon: Number(r.lon), loc_approx: bool(r.loc_approx),
-    label_fields: str(r.label_fields), label_quotes: str(r.label_quotes), has_service_text: bool(r.has_service_text),
+    services: str(r.services), n_services: Number(r.n_services) || 0, n_high: Number(r.n_high) || 0,
     list_truncated: bool(r.list_truncated), merge_suspect: bool(r.merge_suspect), merge_signals: Number(r.merge_signals) || 0,
     source_class: str(r.source_class), small_facility: bool(r.small_facility), single_specialty_name: bool(r.single_specialty_name),
-    doctors: num(r.doctors), beds: num(r.beds), emergency_claim: bool(r.emergency_claim), claims_247: bool(r.claims_247),
-    ambulance: bool(r.ambulance), icu_equipment: bool(r.icu_equipment), equipment_listed: bool(r.equipment_listed),
-    icu_claim: bool(r.icu_claim), cath_equipment: bool(r.cath_equipment), has_obgyn: bool(r.has_obgyn), has_nicu: bool(r.has_nicu),
-    has_dialysis: bool(r.has_dialysis), has_neuro_stroke: bool(r.has_neuro_stroke), has_diabetes_care: bool(r.has_diabetes_care),
+    doctors: num(r.doctors), beds: num(r.beds),
+    claims_247: bool(r.claims_247), ambulance: bool(r.ambulance), icu_equipment: bool(r.icu_equipment), equipment_listed: bool(r.equipment_listed),
     says_nabh: bool(r.says_nabh), emergency_quote: str(r.emergency_quote), icu_quote: str(r.icu_quote), nabh_quote: str(r.nabh_quote),
     official_phone: str(r.official_phone), official_phone_shared_by: Number(r.official_phone_shared_by) || 0,
     alt_phone: str(r.alt_phone), website: str(r.website), address: str(r.address),
@@ -83,26 +73,16 @@ const warmingState = (s: { state: string } | null) => s !== null && s.state !== 
 
 function LiveCandidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
   const params = useMemo(() => bboxParams(bbox), [bbox]);
-  const { data, loading, error, warehouseStatus } = useAnalyticsQuery('heart_candidates', params);
-  useQueryTiming('heart_candidates', loading, data?.length ?? 0);
+  const { data, loading, error, warehouseStatus } = useAnalyticsQuery('candidates', params);
+  useQueryTiming('candidates', loading, data?.length ?? 0);
   const rows = useMemo(() => (data ?? []).map((r) => toFacility(r)), [data]);
   return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
 }
 
-function LiveCandidatesClean({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
-  const params = useMemo(() => bboxParams(bbox), [bbox]);
-  const { data, loading, error, warehouseStatus } = useAnalyticsQuery('heart_candidates_clean', params);
-  useQueryTiming('heart_candidates_clean', loading, data?.length ?? 0);
-  const rows = useMemo(() => (data ?? []).map((r) => toFacility(r)), [data]);
-  return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
-}
-
-const NONE = { loading: false, error: null, warming: false, sample: true } as const;
+const NONE = { loading: false, error: null, warming: false, sample: false } as const;
 
 export function Candidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
-  if (DATA_SOURCE === 'engine_fixture' || DATA_SOURCE === 'engine_clean') return <>{children({ rows: [], ...NONE })}</>;
-  if (DATA_SOURCE === 'sample') return <>{children({ rows: SAMPLE_FACILITIES, loading: false, error: null, warming: false, sample: true })}</>;
-  if (DATA_SOURCE === 'clean') return <LiveCandidatesClean bbox={bbox}>{children}</LiveCandidatesClean>;
+  if (DATA_SOURCE === 'engine_clean') return <>{children({ rows: [], ...NONE })}</>;
   return <LiveCandidates bbox={bbox}>{children}</LiveCandidates>;
 }
 
@@ -111,39 +91,31 @@ export interface EmergencyPlace {
   name: string;
   lat: number;
   lon: number;
+  loc_approx: boolean;
+  /** '' when the place matched only the regex fallback, not platinum emergencyCare evidence. */
+  emergency_band: string;
+  ambulance: boolean;
   claims_247: boolean;
+  emergency_quote: string;
   official_phone: string;
 }
 
 function LiveEmergency({ bbox, children }: { bbox: BBox; children: (l: Loaded<EmergencyPlace[]>) => ReactNode }) {
   const params = useMemo(() => bboxParams(bbox), [bbox]);
-  const { data, loading, error, warehouseStatus } = useAnalyticsQuery('emergency_candidates', params);
-  useQueryTiming('emergency_candidates', loading, data?.length ?? 0);
+  const { data, loading, error, warehouseStatus } = useAnalyticsQuery('emergency_candidates_platinum', params);
+  useQueryTiming('emergency_candidates_platinum', loading, data?.length ?? 0);
   const rows = useMemo(
-    () => (data ?? []).map((r) => ({ unique_id: str(r.unique_id), name: str(r.name), lat: Number(r.lat), lon: Number(r.lon), claims_247: bool(r.claims_247), official_phone: str(r.official_phone) })),
-    [data],
-  );
-  return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
-}
-
-function LiveEmergencyClean({ bbox, children }: { bbox: BBox; children: (l: Loaded<EmergencyPlace[]>) => ReactNode }) {
-  const params = useMemo(() => bboxParams(bbox), [bbox]);
-  const { data, loading, error, warehouseStatus } = useAnalyticsQuery('emergency_candidates_clean', params);
-  useQueryTiming('emergency_candidates_clean', loading, data?.length ?? 0);
-  const rows = useMemo(
-    () => (data ?? []).map((r) => ({ unique_id: str(r.unique_id), name: str(r.name), lat: Number(r.lat), lon: Number(r.lon), claims_247: bool(r.claims_247), official_phone: str(r.official_phone) })),
+    () => (data ?? []).map((r) => ({
+      unique_id: str(r.unique_id), name: str(r.name), lat: Number(r.lat), lon: Number(r.lon),
+      loc_approx: bool(r.loc_approx), emergency_band: str(r.emergency_band), ambulance: bool(r.ambulance),
+      claims_247: bool(r.claims_247), emergency_quote: str(r.emergency_quote), official_phone: str(r.official_phone),
+    })),
     [data],
   );
   return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
 }
 
 export function EmergencyPlaces({ bbox, children }: { bbox: BBox; children: (l: Loaded<EmergencyPlace[]>) => ReactNode }) {
-  if (DATA_SOURCE === 'engine_fixture') return <>{children({ rows: [], ...NONE })}</>;
-  if (DATA_SOURCE === 'clean' || DATA_SOURCE === 'engine_clean') return <LiveEmergencyClean bbox={bbox}>{children}</LiveEmergencyClean>;
-  if (USE_SAMPLE) {
-    const rows = SAMPLE_FACILITIES.filter((f) => f.emergency_claim).map((f) => ({ unique_id: f.unique_id, name: f.name, lat: f.lat, lon: f.lon, claims_247: f.claims_247, official_phone: f.official_phone }));
-    return <>{children({ rows, loading: false, error: null, warming: false, sample: true })}</>;
-  }
   return <LiveEmergency bbox={bbox}>{children}</LiveEmergency>;
 }
 
@@ -155,7 +127,6 @@ function LiveStates({ children }: { children: (l: Loaded<string[]>) => ReactNode
 }
 
 export function States({ children }: { children: (l: Loaded<string[]>) => ReactNode }) {
-  if (USE_SAMPLE) return <>{children({ rows: SAMPLE_STATES, loading: false, error: null, warming: false, sample: true })}</>;
   return <LiveStates>{children}</LiveStates>;
 }
 
@@ -168,13 +139,28 @@ function LivePlaces({ state, children }: { state: string; children: (l: Loaded<P
 }
 
 export function Places({ state, children }: { state: string; children: (l: Loaded<Place[]>) => ReactNode }) {
-  if (USE_SAMPLE) return <>{children({ rows: SAMPLE_PLACES.filter((p) => p.state === state), loading: false, error: null, warming: false, sample: true })}</>;
   return <LivePlaces state={state}>{children}</LivePlaces>;
 }
 
-/** engine_fixture mode: the only places the fixture has results for (approximate PIN centres). */
-export const ENGINE_PLACES: Place[] = [
-  { kind: 'pin', code: '302001', district: 'JAIPUR', state: 'RAJASTHAN', towns: 'Jaipur', lat: 26.92, lon: 75.82 },
-  { kind: 'pin', code: '411001', district: 'PUNE', state: 'MAHARASHTRA', towns: 'Pune', lat: 18.52, lon: 73.86 },
-  { kind: 'pin', code: '800001', district: 'PATNA', state: 'BIHAR', towns: 'Patna', lat: 25.61, lon: 85.14 },
-];
+export interface ExtractedNeed {
+  service: string;
+  weight: number;
+  critical: boolean;
+}
+
+/**
+ * Layer B: LLM needs extraction, run inside the workspace (ai_query to system.ai.gpt-oss-120b
+ * in needs_extract.sql). The prompt is a bound parameter and never logged. Mounted only when
+ * LLM_EXTRACTION is on; the caller falls back to the in-browser symptom map when it is off.
+ */
+export function Needs({ prompt, children }: { prompt: string; children: (l: Loaded<ExtractedNeed[]>) => ReactNode }) {
+  const params = useMemo(() => ({ prompt: sql.string(prompt) }), [prompt]);
+  const { data, loading, error, warehouseStatus } = useAnalyticsQuery('needs_extract', params);
+  useQueryTiming('needs_extract', loading, data?.length ?? 0);
+  const rows = useMemo(
+    () => (data ?? []).map((r) => ({ service: str(r.service), weight: Number(r.weight) || 0, critical: bool(r.critical) })),
+    [data],
+  );
+  return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
+}
+

@@ -1,0 +1,2676 @@
+{
+  "status": "DRAFT: needs clinician review",
+  "note": "Generated from labuser_jdw2.platinum.service_catalog + corroboration_rules by scripts/export_registry.py. nameSource=draft names are auto-generated from the service key (camelCase split); review before wide release. required/supporting are catalog service keys that join against the per-facility service map.",
+  "generated": "2026-11-22",
+  "services": [
+    {
+      "key": "ayushmanBharatEmpanelled",
+      "name": "Ayushman Bharat empanelled",
+      "nameSource": "curated",
+      "type": "attribute",
+      "parent": "ayushmanBharatEmpanelled",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "cashlessInsurance",
+      "name": "Cashless insurance",
+      "nameSource": "curated",
+      "type": "attribute",
+      "parent": "cashlessInsurance",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "isoCertified",
+      "name": "ISO certified",
+      "nameSource": "curated",
+      "type": "attribute",
+      "parent": "isoCertified",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "nabhAccredited",
+      "name": "NABH accredited",
+      "nameSource": "curated",
+      "type": "attribute",
+      "parent": "nabhAccredited",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "alternativeMedicine",
+      "name": "Alternative Medicine",
+      "nameSource": "draft",
+      "type": "capability",
+      "parent": "alternativeMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "ambulanceService",
+      "name": "Ambulance service",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "emergencyMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "emergencyMedicine"
+      ]
+    },
+    {
+      "key": "bloodBank",
+      "name": "Blood bank",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "pathology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "pathology"
+      ]
+    },
+    {
+      "key": "diagnosticServices",
+      "name": "Diagnostic Services",
+      "nameSource": "draft",
+      "type": "capability",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "emergencyCare",
+      "name": "Emergency care",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "emergencyMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "emergencyMedicine"
+      ]
+    },
+    {
+      "key": "healthCheckupPackages",
+      "name": "Health check-up packages",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "preventiveMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "preventiveMedicine"
+      ]
+    },
+    {
+      "key": "homeVisitService",
+      "name": "Home visits",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "homeVisitService",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "inpatientServices",
+      "name": "Inpatient services",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "inpatientServices",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "onlineAppointmentBooking",
+      "name": "Online appointment booking",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "onlineAppointmentBooking",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "open24x7",
+      "name": "Open 24x7",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "open24x7",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "outpatientServices",
+      "name": "Outpatient services",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "outpatientServices",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pharmacy",
+      "name": "Pharmacy",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "pharmacy",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "telemedicine",
+      "name": "Telemedicine",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "telemedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "wheelchairAccessibility",
+      "name": "Wheelchair accessible",
+      "nameSource": "curated",
+      "type": "capability",
+      "parent": "wheelchairAccessibility",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "cathLab",
+      "name": "Cath lab",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "interventionalCardiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "interventionalCardiology"
+      ]
+    },
+    {
+      "key": "ctScanner",
+      "name": "CT scanner",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "dentalChair",
+      "name": "Dental Chair",
+      "nameSource": "draft",
+      "type": "equipment",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "dentalEquipment",
+      "name": "Dental Equipment",
+      "nameSource": "draft",
+      "type": "equipment",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "dexaScanner",
+      "name": "DEXA scanner",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "ecgMachine",
+      "name": "Heart tests (ECG machine)",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "cardiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "cardiology"
+      ]
+    },
+    {
+      "key": "echocardiography",
+      "name": "Heart scan (echocardiography)",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "cardiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "cardiology"
+      ]
+    },
+    {
+      "key": "eegMachine",
+      "name": "EEG machine",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "neurology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "neurology"
+      ]
+    },
+    {
+      "key": "icu",
+      "name": "Intensive care unit (ICU)",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "criticalCareMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "criticalCareMedicine"
+      ]
+    },
+    {
+      "key": "mammography",
+      "name": "Mammography",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "mriScanner",
+      "name": "MRI scanner",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "nicu",
+      "name": "Neonatal intensive care unit (NICU)",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "neonatologyPerinatalMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "neonatologyPerinatalMedicine"
+      ]
+    },
+    {
+      "key": "operationTheatre",
+      "name": "Operation theatre",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "operationTheatre",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "ophthalmicEquipment",
+      "name": "Ophthalmic Equipment",
+      "nameSource": "draft",
+      "type": "equipment",
+      "parent": "ophthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "ophthalmology"
+      ]
+    },
+    {
+      "key": "pathologyLaboratory",
+      "name": "Pathology laboratory",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "pathology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "pathology"
+      ]
+    },
+    {
+      "key": "petCtScanner",
+      "name": "PET-CT scanner",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "pulmonaryFunctionTesting",
+      "name": "Pulmonary Function Testing",
+      "nameSource": "draft",
+      "type": "equipment",
+      "parent": "pulmonology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "pulmonology"
+      ]
+    },
+    {
+      "key": "ultrasoundImaging",
+      "name": "Ultrasound imaging",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "ventilator",
+      "name": "Ventilator",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "criticalCareMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "criticalCareMedicine"
+      ]
+    },
+    {
+      "key": "xrayImaging",
+      "name": "X-ray imaging",
+      "nameSource": "curated",
+      "type": "equipment",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiology"
+      ]
+    },
+    {
+      "key": "angioplasty",
+      "name": "Angioplasty and stents",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "interventionalCardiology",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "cathLab"
+      ],
+      "supporting": [
+        "cardiology",
+        "ecgMachine",
+        "icu",
+        "interventionalCardiology"
+      ]
+    },
+    {
+      "key": "appendectomy",
+      "name": "Appendectomy",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "operationTheatre"
+      ],
+      "supporting": [
+        "generalSurgery",
+        "icu"
+      ]
+    },
+    {
+      "key": "arthroscopy",
+      "name": "Arthroscopy",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "orthopedicSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "orthopedicSurgery"
+      ]
+    },
+    {
+      "key": "bloodTransfusion",
+      "name": "Blood Transfusion",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "hematology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "hematology"
+      ]
+    },
+    {
+      "key": "cabgSurgery",
+      "name": "Bypass surgery (CABG)",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "cardiacSurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "bloodBank",
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "cardiacSurgery",
+        "cardiology",
+        "echocardiography",
+        "ventilator"
+      ]
+    },
+    {
+      "key": "cataractSurgery",
+      "name": "Cataract surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "cataractAndAnteriorSegmentSurgery",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [
+        "operationTheatre"
+      ],
+      "supporting": [
+        "cataractAndAnteriorSegmentSurgery",
+        "ophthalmicEquipment",
+        "ophthalmology"
+      ]
+    },
+    {
+      "key": "chemotherapy",
+      "name": "Chemotherapy",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "medicalOncology",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "medicalOncology",
+        "pathologyLaboratory"
+      ]
+    },
+    {
+      "key": "circumcision",
+      "name": "Circumcision",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "urology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "urology"
+      ]
+    },
+    {
+      "key": "colonoscopy",
+      "name": "Colonoscopy",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "gastroenterology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "gastroenterology"
+      ]
+    },
+    {
+      "key": "crownsAndBridges",
+      "name": "Crowns and Bridges",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "cystRemoval",
+      "name": "Cyst Removal",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "generalSurgery"
+      ]
+    },
+    {
+      "key": "dentalFillings",
+      "name": "Dental fillings",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "dentalImplants",
+      "name": "Dental implants",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "dentures",
+      "name": "Dentures",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "dialysis",
+      "name": "Dialysis",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "nephrology",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "nephrology",
+        "pathologyLaboratory"
+      ]
+    },
+    {
+      "key": "endoscopy",
+      "name": "Endoscopy",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "gastroenterology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "gastroenterology"
+      ]
+    },
+    {
+      "key": "fistulaTreatment",
+      "name": "Fistula Treatment",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "colorectalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "colorectalSurgery"
+      ]
+    },
+    {
+      "key": "fractureCare",
+      "name": "Fracture care",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "orthopedicSurgery",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "operationTheatre",
+        "orthopedicSurgery",
+        "xrayImaging"
+      ]
+    },
+    {
+      "key": "fullMouthRehabilitation",
+      "name": "Full Mouth Rehabilitation",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "gallbladderSurgery",
+      "name": "Gallbladder surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "generalSurgery"
+      ]
+    },
+    {
+      "key": "glaucomaTreatment",
+      "name": "Glaucoma treatment",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "glaucomaOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "glaucomaOphthalmology"
+      ]
+    },
+    {
+      "key": "gumTreatment",
+      "name": "Gum treatment",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "periodontics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "periodontics"
+      ]
+    },
+    {
+      "key": "herniaRepair",
+      "name": "Hernia repair",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "generalSurgery"
+      ]
+    },
+    {
+      "key": "hysterectomy",
+      "name": "Hysterectomy",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "gynecologyAndObstetrics",
+      "critical": false,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "operationTheatre"
+      ],
+      "supporting": [
+        "bloodBank",
+        "gynecologyAndObstetrics",
+        "icu"
+      ]
+    },
+    {
+      "key": "icsi",
+      "name": "ICSI (fertility)",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "reproductiveEndocrinologyAndInfertility",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "ivf",
+        "pathologyLaboratory",
+        "reproductiveEndocrinologyAndInfertility"
+      ]
+    },
+    {
+      "key": "iui",
+      "name": "IUI (fertility)",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "reproductiveEndocrinologyAndInfertility",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "ivf",
+        "reproductiveEndocrinologyAndInfertility"
+      ]
+    },
+    {
+      "key": "ivf",
+      "name": "IVF (fertility)",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "reproductiveEndocrinologyAndInfertility",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "pathologyLaboratory",
+        "reproductiveEndocrinologyAndInfertility"
+      ]
+    },
+    {
+      "key": "jointReplacementSurgery",
+      "name": "Joint replacement surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "orthopedicSurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "operationTheatre"
+      ],
+      "supporting": [
+        "icu",
+        "orthopedicSurgery",
+        "xrayImaging"
+      ]
+    },
+    {
+      "key": "kidneyTransplant",
+      "name": "Kidney transplant",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "transplantSurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "bloodBank",
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "dialysis",
+        "nephrology",
+        "transplantSurgery"
+      ]
+    },
+    {
+      "key": "laparoscopicSurgery",
+      "name": "Laparoscopic (keyhole) surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "operationTheatre"
+      ],
+      "supporting": [
+        "generalSurgery",
+        "icu"
+      ]
+    },
+    {
+      "key": "laserDentistry",
+      "name": "Laser Dentistry",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "lasikSurgery",
+      "name": "LASIK surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "refractiveSurgeryOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "refractiveSurgeryOphthalmology"
+      ]
+    },
+    {
+      "key": "lithotripsy",
+      "name": "Lithotripsy",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "urology",
+      "critical": false,
+      "minFacilityClass": "clinic",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "urology",
+        "xrayImaging"
+      ]
+    },
+    {
+      "key": "liverTransplant",
+      "name": "Liver transplant",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "transplantSurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "bloodBank",
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "gastroenterology",
+        "transplantSurgery"
+      ]
+    },
+    {
+      "key": "minimallyInvasiveUrology",
+      "name": "Minimally Invasive Urology",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "urology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "urology"
+      ]
+    },
+    {
+      "key": "orthodonticBraces",
+      "name": "Braces (orthodontics)",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "orthodontics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "orthodontics"
+      ]
+    },
+    {
+      "key": "pacemakerImplantation",
+      "name": "Pacemaker implantation",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "cardiology",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "cathLab"
+      ],
+      "supporting": [
+        "cardiology",
+        "ecgMachine"
+      ]
+    },
+    {
+      "key": "plasticSurgeryProcedures",
+      "name": "Plastic Surgery Procedures",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "plasticSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "plasticSurgery"
+      ]
+    },
+    {
+      "key": "radiotherapy",
+      "name": "Radiotherapy",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "radiationOncology",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "diagnosticServices",
+        "radiationOncology"
+      ]
+    },
+    {
+      "key": "retinalCare",
+      "name": "Retinal care",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "retinaAndVitreoretinalOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "retinaAndVitreoretinalOphthalmology"
+      ]
+    },
+    {
+      "key": "rootCanalTreatment",
+      "name": "Root canal treatment",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "smileDesigning",
+      "name": "Smile Designing",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "spineSurgery",
+      "name": "Spine surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "orthopedicSpineSurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "ctScanner",
+        "mriScanner",
+        "orthopedicSpineSurgery",
+        "radiology"
+      ]
+    },
+    {
+      "key": "squintSurgery",
+      "name": "Squint surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "pediatricOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "pediatricOphthalmology"
+      ]
+    },
+    {
+      "key": "teethCleaning",
+      "name": "Teeth cleaning",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "teethWhitening",
+      "name": "Teeth whitening",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "thyroidSurgery",
+      "name": "Thyroid surgery",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "generalSurgery"
+      ]
+    },
+    {
+      "key": "toothExtraction",
+      "name": "Tooth extraction",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "tumorRemoval",
+      "name": "Tumor Removal",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "surgicalOncology",
+      "critical": false,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "operationTheatre"
+      ],
+      "supporting": [
+        "bloodBank",
+        "icu",
+        "surgicalOncology"
+      ]
+    },
+    {
+      "key": "uroCystoscopy",
+      "name": "Cystoscopy (urology)",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "urology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "urology"
+      ]
+    },
+    {
+      "key": "vaccination",
+      "name": "Vaccination",
+      "nameSource": "curated",
+      "type": "procedure",
+      "parent": "preventiveMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "preventiveMedicine"
+      ]
+    },
+    {
+      "key": "veneers",
+      "name": "Veneers",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dentistry"
+      ]
+    },
+    {
+      "key": "woundCare",
+      "name": "Wound Care",
+      "nameSource": "draft",
+      "type": "procedure",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "generalSurgery"
+      ]
+    },
+    {
+      "key": "allergyAndImmunology",
+      "name": "Allergy and Immunology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "allergyAndImmunology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "anesthesia",
+      "name": "Anesthesia",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "anesthesia",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "audiology",
+      "name": "Audiology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "audiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "bariatricSurgery",
+      "name": "Bariatric (weight-loss) surgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "bariatricSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "cardiacSurgery",
+      "name": "Heart and valve surgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "cardiacSurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "bloodBank",
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "cabgSurgery",
+        "cardiology",
+        "cathLab",
+        "echocardiography",
+        "ventilator"
+      ]
+    },
+    {
+      "key": "cardiology",
+      "name": "Heart specialist (cardiology)",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "cardiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "ecgMachine",
+        "echocardiography",
+        "pacemakerImplantation"
+      ]
+    },
+    {
+      "key": "cardiothoracicSurgery",
+      "name": "Cardiothoracic surgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "cardiothoracicSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "cataractAndAnteriorSegmentSurgery",
+      "name": "Cataract and Anterior Segment Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "cataractAndAnteriorSegmentSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "cataractSurgery"
+      ]
+    },
+    {
+      "key": "clinicalPsychology",
+      "name": "Clinical psychology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "clinicalPsychology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "colorectalSurgery",
+      "name": "Colorectal Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "colorectalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "fistulaTreatment"
+      ]
+    },
+    {
+      "key": "corneaOphthalmology",
+      "name": "Cornea Ophthalmology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "corneaOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "cosmeticDentistry",
+      "name": "Cosmetic dentistry",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "cosmeticDentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "criticalCareMedicine",
+      "name": "Critical Care Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "criticalCareMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "icu",
+        "ventilator"
+      ]
+    },
+    {
+      "key": "dentistry",
+      "name": "Dentistry",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "dentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "crownsAndBridges",
+        "dentalChair",
+        "dentalEquipment",
+        "dentalFillings",
+        "dentalImplants",
+        "dentures",
+        "fullMouthRehabilitation",
+        "laserDentistry",
+        "rootCanalTreatment",
+        "smileDesigning",
+        "teethCleaning",
+        "teethWhitening",
+        "toothExtraction",
+        "veneers"
+      ]
+    },
+    {
+      "key": "dermatology",
+      "name": "Dermatology (skin)",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "dermatology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "developmentalBehavioralPediatrics",
+      "name": "Developmental Behavioral Pediatrics",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "developmentalBehavioralPediatrics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "emergencyMedicine",
+      "name": "Emergency medicine",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "emergencyMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "ambulanceService",
+        "emergencyCare"
+      ]
+    },
+    {
+      "key": "endocrinologyAndDiabetesAndMetabolism",
+      "name": "Endocrinology and diabetes",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "endocrinologyAndDiabetesAndMetabolism",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "endodontics",
+      "name": "Endodontics",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "endodontics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "eyeTraumaAndEmergencyEyeCare",
+      "name": "Eye Trauma and Emergency Eye Care",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "eyeTraumaAndEmergencyEyeCare",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "familyMedicine",
+      "name": "Family medicine",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "familyMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "footAndAnkleOrthopedicSurgery",
+      "name": "Foot and Ankle Orthopedic Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "footAndAnkleOrthopedicSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "gastroenterology",
+      "name": "Gastroenterology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "gastroenterology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "colonoscopy",
+        "endoscopy"
+      ]
+    },
+    {
+      "key": "generalSurgery",
+      "name": "General surgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "generalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "appendectomy",
+        "cystRemoval",
+        "gallbladderSurgery",
+        "herniaRepair",
+        "laparoscopicSurgery",
+        "thyroidSurgery",
+        "woundCare"
+      ]
+    },
+    {
+      "key": "geriatrics",
+      "name": "Geriatrics",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "geriatrics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "glaucomaOphthalmology",
+      "name": "Glaucoma Ophthalmology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "glaucomaOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "glaucomaTreatment"
+      ]
+    },
+    {
+      "key": "gynecologicalOncology",
+      "name": "Gynecological Oncology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "gynecologicalOncology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "gynecologyAndObstetrics",
+      "name": "Gynaecology and obstetrics",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "gynecologyAndObstetrics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "hysterectomy"
+      ]
+    },
+    {
+      "key": "handSurgery",
+      "name": "Hand Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "handSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "hematology",
+      "name": "Hematology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "hematology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "bloodTransfusion"
+      ]
+    },
+    {
+      "key": "hospiceAndPalliativeInternalMedicine",
+      "name": "Hospice and Palliative Internal Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "hospiceAndPalliativeInternalMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "infectiousDiseases",
+      "name": "Infectious Diseases",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "infectiousDiseases",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "internalMedicine",
+      "name": "Internal medicine",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "internalMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "interventionalCardiology",
+      "name": "Interventional cardiology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "interventionalCardiology",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "cathLab"
+      ],
+      "supporting": [
+        "angioplasty",
+        "cardiology",
+        "cathLab",
+        "ecgMachine",
+        "icu"
+      ]
+    },
+    {
+      "key": "interventionalRadiology",
+      "name": "Interventional Radiology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "interventionalRadiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "maternalAndChildHealth",
+      "name": "Maternal and Child Health",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "maternalAndChildHealth",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "maternalFetalMedicineOrPerinatology",
+      "name": "Maternal Fetal Medicine Or Perinatology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "maternalFetalMedicineOrPerinatology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "medicalOncology",
+      "name": "Medical oncology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "medicalOncology",
+      "critical": false,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "chemotherapy"
+      ]
+    },
+    {
+      "key": "neonatologyPerinatalMedicine",
+      "name": "Neonatology Perinatal Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "neonatologyPerinatalMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "nicu"
+      ]
+    },
+    {
+      "key": "nephrology",
+      "name": "Nephrology (kidney care)",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "nephrology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "dialysis"
+      ]
+    },
+    {
+      "key": "neuroOncology",
+      "name": "Neuro-oncology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "neuroOncology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "neuroOphthalmology",
+      "name": "Neuro-ophthalmology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "neuroOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "neurology",
+      "name": "Neurology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "neurology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "eegMachine"
+      ]
+    },
+    {
+      "key": "neurosurgery",
+      "name": "Neurosurgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "neurosurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": 3,
+      "required": [
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "ctScanner",
+        "mriScanner",
+        "radiology",
+        "ventilator"
+      ]
+    },
+    {
+      "key": "nuclearMedicine",
+      "name": "Nuclear Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "nuclearMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "nutritionAndDietetics",
+      "name": "Nutrition and Dietetics",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "nutritionAndDietetics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "oculoplasticsAndReconstructiveOrbitalSurgery",
+      "name": "Oculoplastics and Reconstructive Orbital Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "oculoplasticsAndReconstructiveOrbitalSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "oncology",
+      "name": "Oncology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "oncology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "ophthalmology",
+      "name": "Eye care (ophthalmology)",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "ophthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "ophthalmicEquipment"
+      ]
+    },
+    {
+      "key": "oralAndMaxillofacialSurgery",
+      "name": "Oral and Maxillofacial Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "oralAndMaxillofacialSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "orthodontics",
+      "name": "Orthodontics",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "orthodontics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "orthodonticBraces"
+      ]
+    },
+    {
+      "key": "orthopedicSpineSurgery",
+      "name": "Orthopedic Spine Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "orthopedicSpineSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "spineSurgery"
+      ]
+    },
+    {
+      "key": "orthopedicSurgery",
+      "name": "Orthopaedic surgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "orthopedicSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "arthroscopy",
+        "fractureCare",
+        "jointReplacementSurgery"
+      ]
+    },
+    {
+      "key": "otolaryngology",
+      "name": "Otolaryngology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "otolaryngology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pathology",
+      "name": "Pathology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pathology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "bloodBank",
+        "pathologyLaboratory"
+      ]
+    },
+    {
+      "key": "pediatricAllergyAndImmunology",
+      "name": "Pediatric Allergy and Immunology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricAllergyAndImmunology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricCardiology",
+      "name": "Children's heart care",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "pediatricCardiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricCriticalCareMedicine",
+      "name": "Pediatric Critical Care Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricCriticalCareMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricDentistry",
+      "name": "Pediatric Dentistry",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricDentistry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricDermatology",
+      "name": "Pediatric Dermatology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricDermatology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricEmergencyMedicine",
+      "name": "Pediatric Emergency Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricEmergencyMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricEndocrinology",
+      "name": "Pediatric Endocrinology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricEndocrinology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricGastroenterology",
+      "name": "Pediatric Gastroenterology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricGastroenterology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricHematologyOncology",
+      "name": "Pediatric Hematology Oncology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricHematologyOncology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricInfectiousDiseases",
+      "name": "Pediatric Infectious Diseases",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricInfectiousDiseases",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricNephrology",
+      "name": "Pediatric Nephrology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricNephrology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricNeurodevelopmentalDisabilities",
+      "name": "Pediatric Neurodevelopmental Disabilities",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricNeurodevelopmentalDisabilities",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricNeurology",
+      "name": "Pediatric Neurology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricNeurology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricNeurosurgery",
+      "name": "Pediatric Neurosurgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricNeurosurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricOphthalmology",
+      "name": "Pediatric Ophthalmology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "squintSurgery"
+      ]
+    },
+    {
+      "key": "pediatricOrthopedicSurgery",
+      "name": "Pediatric Orthopedic Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricOrthopedicSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricOtolaryngology",
+      "name": "Pediatric Otolaryngology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricOtolaryngology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricPulmonology",
+      "name": "Pediatric Pulmonology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricPulmonology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricRheumatology",
+      "name": "Pediatric Rheumatology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricRheumatology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricSurgery",
+      "name": "Pediatric Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatricUrology",
+      "name": "Pediatric Urology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pediatricUrology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pediatrics",
+      "name": "Child care (pediatrics)",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "pediatrics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "periodontics",
+      "name": "Periodontics",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "periodontics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "gumTreatment"
+      ]
+    },
+    {
+      "key": "physicalMedicineAndRehabilitation",
+      "name": "Physical medicine and rehabilitation",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "physicalMedicineAndRehabilitation",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "plasticSurgery",
+      "name": "Plastic surgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "plasticSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "plasticSurgeryProcedures"
+      ]
+    },
+    {
+      "key": "podiatry",
+      "name": "Podiatry",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "podiatry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "preventiveMedicine",
+      "name": "Preventive Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "preventiveMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "healthCheckupPackages",
+        "vaccination"
+      ]
+    },
+    {
+      "key": "prosthodontics",
+      "name": "Prosthodontics",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "prosthodontics",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "psychiatry",
+      "name": "Psychiatry",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "psychiatry",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "publicHealth",
+      "name": "Public Health",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "publicHealth",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "pulmonology",
+      "name": "Pulmonology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "pulmonology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "pulmonaryFunctionTesting"
+      ]
+    },
+    {
+      "key": "radiationOncology",
+      "name": "Radiation Oncology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "radiationOncology",
+      "critical": false,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "radiotherapy"
+      ]
+    },
+    {
+      "key": "radiology",
+      "name": "Radiology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "radiology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "ctScanner",
+        "dexaScanner",
+        "diagnosticServices",
+        "mammography",
+        "mriScanner",
+        "petCtScanner",
+        "ultrasoundImaging",
+        "xrayImaging"
+      ]
+    },
+    {
+      "key": "reconstructivePlasticSurgery",
+      "name": "Reconstructive Plastic Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "reconstructivePlasticSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "refractiveSurgeryOphthalmology",
+      "name": "Refractive Surgery Ophthalmology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "refractiveSurgeryOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "lasikSurgery"
+      ]
+    },
+    {
+      "key": "reproductiveEndocrinologyAndInfertility",
+      "name": "Fertility medicine (REI)",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "reproductiveEndocrinologyAndInfertility",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "icsi",
+        "iui",
+        "ivf"
+      ]
+    },
+    {
+      "key": "retinaAndVitreoretinalOphthalmology",
+      "name": "Retina and Vitreoretinal Ophthalmology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "retinaAndVitreoretinalOphthalmology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "retinalCare"
+      ]
+    },
+    {
+      "key": "rheumatology",
+      "name": "Rheumatology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "rheumatology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "shoulderAndElbowOrthopedicSurgery",
+      "name": "Shoulder and Elbow Orthopedic Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "shoulderAndElbowOrthopedicSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "skullBaseNeurosurgery",
+      "name": "Skull Base Neurosurgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "skullBaseNeurosurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "sleepMedicine",
+      "name": "Sleep Medicine",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "sleepMedicine",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "spineNeurosurgery",
+      "name": "Spine Neurosurgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "spineNeurosurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    },
+    {
+      "key": "surgicalOncology",
+      "name": "Surgical Oncology",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "surgicalOncology",
+      "critical": false,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "bloodBank",
+        "chemotherapy",
+        "medicalOncology",
+        "radiotherapy",
+        "tumorRemoval"
+      ]
+    },
+    {
+      "key": "transplantSurgery",
+      "name": "Transplant surgery",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "transplantSurgery",
+      "critical": true,
+      "minFacilityClass": "hospital",
+      "minDoctors": null,
+      "required": [
+        "bloodBank",
+        "icu",
+        "operationTheatre"
+      ],
+      "supporting": [
+        "dialysis",
+        "gastroenterology",
+        "kidneyTransplant",
+        "liverTransplant",
+        "nephrology"
+      ]
+    },
+    {
+      "key": "urology",
+      "name": "Urology",
+      "nameSource": "curated",
+      "type": "specialty",
+      "parent": "urology",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": [
+        "circumcision",
+        "lithotripsy",
+        "minimallyInvasiveUrology",
+        "uroCystoscopy"
+      ]
+    },
+    {
+      "key": "vascularSurgery",
+      "name": "Vascular Surgery",
+      "nameSource": "draft",
+      "type": "specialty",
+      "parent": "vascularSurgery",
+      "critical": false,
+      "minFacilityClass": null,
+      "minDoctors": null,
+      "required": [],
+      "supporting": []
+    }
+  ]
+}

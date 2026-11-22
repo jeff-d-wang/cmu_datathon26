@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { SAMPLE_FACILITIES } from '../sample/sampleData';
 import { COMPONENT_ORDER, scoreBreakdown, WEIGHTS, type ScoreInput } from './score';
 import type { Facility } from './types';
+import type { Need } from './services';
 
 const noCond = { pregnant: false, kidney: false, stroke: false, diabetes: false };
-const urgent: ScoreInput = { mode: 'urgent', km: 12, wantedLabels: ['L01', 'L02', 'L03', 'L04'], conditions: noCond, age: 55 };
-const planned: ScoreInput = { ...urgent, mode: 'planned', wantedLabels: ['L06', 'L07'] };
+const need = (service: Need['service'], critical = false, weight = 1): Need => ({ service, weight, critical });
+const urgent: ScoreInput = { mode: 'urgent', km: 12, needs: [need('cardiology'), need('diagnosticServices'), need('echocardiography'), need('interventionalCardiology')], conditions: noCond, age: 55 };
+const planned: ScoreInput = { ...urgent, mode: 'planned', needs: [need('cardiothoracicSurgery'), need('interventionalCardiology')] };
 const base = SAMPLE_FACILITIES[0];
 const mk = (o: Partial<Facility>): Facility => ({ ...base, ...o });
 
@@ -40,8 +42,8 @@ describe('score range', () => {
         expect(hiB).toBeGreaterThanOrEqual(hiA - 1e-9);
       }
   });
-  it('tag-only cardiology gets upper-bound credit, not lower-bound', () => {
-    const r = scoreBreakdown(mk({ label_fields: 'L01:1:0', list_truncated: false }), urgent);
+  it('an unverified need gets upper-bound credit, not lower-bound', () => {
+    const r = scoreBreakdown(mk({ services: 'cardiology:unverified:1:0', list_truncated: false }), urgent);
     const t = r.components.find((c) => c.id === 'treatment')!;
     expect(t.hi).toBeGreaterThan(t.lo);
   });
@@ -55,7 +57,7 @@ describe('score range', () => {
     expect(top('planned')[0]).toBe('procedures');
   });
   it('confidence is Low when the range is wide', () => {
-    const r = scoreBreakdown(mk({ label_fields: 'L01:1:0', list_truncated: true, equipment_listed: false, emergency_claim: false }), urgent);
+    const r = scoreBreakdown(mk({ services: 'cardiology:unverified:1:0', list_truncated: true, equipment_listed: false }), urgent);
     expect(r.hi - r.lo).toBeGreaterThan(12);
     expect(r.confidence).not.toBe('High');
   });

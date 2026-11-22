@@ -22,7 +22,7 @@ for (const h of [800, 700]) {
     await page.getByRole('option', { name: /Karimnagar district/ }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
     await check(page);
-    await page.getByRole('radio', { name: /Find heart care near me/ }).click();
+    await page.getByRole('radio', { name: /Find health care near me/ }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
     await check(page);
     await page.getByRole('button', { name: 'Continue' }).click();

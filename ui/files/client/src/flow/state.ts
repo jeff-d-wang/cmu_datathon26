@@ -1,6 +1,6 @@
 import type { SafetyChecks } from '../domain/redflags';
 import type { Conditions, Mode } from '../domain/types';
-import type { LabelCode } from '../domain/labels';
+import { isServiceKey } from '../domain/services';
 import type { Place } from '../domain/places';
 import type { Lang } from '../i18n';
 
@@ -28,7 +28,8 @@ export interface FlowState {
   /** Search radius in km chosen on the slider; null = automatic (25 -> 50 -> 100 -> 250). */
   radiusKm: number | null;
   unit: DistanceUnit;
-  serviceFilter: LabelCode | 'any';
+  /** A ServiceKey, or 'any' for no filter. */
+  serviceFilter: string;
   showN: 5 | 10 | 20;
   selectedId: string | null;
 }
@@ -122,6 +123,6 @@ export function fromFragment(hash: string, base: FlowState): FlowState {
     state: p.get('st') ?? '',
     ownership: own === 'private' || own === 'public' ? own : 'any',
     showN: n === 10 || n === 20 ? n : 5,
-    serviceFilter: svc && /^L(0[1-9]|1[0-2])$/.test(svc) ? (svc as LabelCode) : 'any',
+    serviceFilter: svc && isServiceKey(svc) ? svc : 'any',
   };
 }
