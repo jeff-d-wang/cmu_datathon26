@@ -41,14 +41,14 @@ test('full planned flow to results and detail', async ({ page }) => {
   await shot(page, '2-who');
   await page.getByRole('button', { name: 'Continue' }).click();
 
-  await expect(page.getByText('Describe your symptoms')).toBeVisible();
+  await expect(page.getByText('Please describe your needs or symptoms')).toBeVisible();
   // Symptom typeahead: an everyday phrase suggests the matching symptom.
-  await page.getByRole('combobox', { name: 'Describe your symptoms' }).fill('tight ch');
+  await page.getByRole('combobox', { name: 'Please describe your needs or symptoms' }).fill('tight ch');
   await page.getByRole('option', { name: /Chest pressure/ }).click();
   await expect(page.getByRole('button', { name: 'Remove Chest pressure' })).toBeVisible();
   await page.getByRole('button', { name: 'Unusual tiredness' }).click();
   // Symptoms outside the quick picks are found by typing; anything else can be added in your own words.
-  const box = page.getByRole('combobox', { name: 'Describe your symptoms' });
+  const box = page.getByRole('combobox', { name: 'Please describe your needs or symptoms' });
   await box.fill('cough');
   await page.getByRole('option', { name: 'Cough', exact: true }).click();
   await box.fill('itchy skin');
@@ -100,7 +100,7 @@ test('picking stroke signs opens the emergency screen', async ({ page }) => {
   await page.getByRole('radio', { name: /I have symptoms/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('combobox', { name: 'Describe your symptoms' }).fill('slurred');
+  await page.getByRole('combobox', { name: 'Please describe your needs or symptoms' }).fill('slurred');
   await page.getByRole('option', { name: /slurred speech/ }).click();
   await expect(page.getByRole('heading', { name: 'Call now. Do not wait for results.' })).toBeVisible();
 });
@@ -110,7 +110,7 @@ test('a worrying word warns but does not hijack the flow', async ({ page }) => {
   await page.getByRole('radio', { name: /I have symptoms/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('combobox', { name: 'Describe your symptoms' }).fill('sweating a lot');
+  await page.getByRole('combobox', { name: 'Please describe your needs or symptoms' }).fill('sweating a lot');
   await page.getByRole('option', { name: /in your own words/ }).click();
   await expect(page.getByText('Some of what you entered can be a sign of an emergency.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'It is happening now: get help' })).toBeVisible();
