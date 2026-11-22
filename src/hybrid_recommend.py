@@ -92,8 +92,11 @@ def classify_complaint(spark, symptoms, context=""):
         f"Patient symptoms: {symptoms}\n"
         f"Patient context: {context or 'none given'}\n\n"
         "Output ONLY JSON (no prose, no markdown): "
-        "{\"complaint_code\": <code or null>} -- null when the query does "
-        "not fit any category (e.g. dental, fertility, checkup queries)."
+        "{\"complaint_code\": <code or null>, \"explicit_services\": "
+        "[<services the patient explicitly needs or was advised, e.g. "
+        "'neurosurgery', 'dialysis', 'bypass surgery' -- empty list when "
+        "none>}. complaint_code is null when the query does not fit any "
+        "category (e.g. fertility, checkup queries)."
     )
     spark.createDataFrame([(prompt,)], "prompt STRING") \
          .createOrReplaceTempView("complaint_prompt")
@@ -110,7 +113,53 @@ def classify_complaint(spark, symptoms, context=""):
     i, j = text.find("{"), text.rfind("}")
     parsed = json.loads(text[i:j + 1] if i >= 0 else text)
     code = parsed.get("complaint_code")
-    return int(code) if code is not None else None
+    explicit = [str(s) for s in (parsed.get("explicit_services") or [])
+                if str(s).strip()]
+    return (int(code) if code is not None else None), explicit
+
+
+def _merge_explicit(needs, explicit):
+    """Patient-named services become critical needs (catalog-validated).
+
+    Fuzzy-matches free-text names to catalog services (normalized lowercase
+    alphanumerics, exact then unique containment); unmatched names are
+    reported, never trusted. Existing needs keep their survey provenance
+    and gain the explicit flag; new ones are expert-set weight 1.0,
+    critical, no CI -- a survey profile never overrides what the patient
+    explicitly asks for.
+    """
+    if not explicit:
+        return needs, []
+    from catalog import SERVICE_CATALOG
+    from features import CANONICAL_SPECIALTIES
+    norm = lambda s: "".join(ch for ch in s.lower() if ch.isalnum())
+    known = set(CANONICAL_SPECIALTIES) | {s[0] for s in SERVICE_CATALOG}
+    by_norm = {norm(k): k for k in known}
+    matched, dropped = [], []
+    for raw in explicit:
+        target = by_norm.get(norm(raw))
+        if target is None:
+            cands = [k for k in known
+                     if len(norm(raw)) >= 5 and (norm(raw) in norm(k)
+                                                 or norm(k) in norm(raw))]
+            target = cands[0] if len(cands) == 1 else None
+        if target is None:
+            dropped.append(raw)
+            continue
+        matched.append(target)
+        hit = next((n for n in needs if n["service"] == target), None)
+        if hit:
+            hit["critical"] = True
+            hit["weight"] = max(hit["weight"], 0.9)
+            hit["weight_source"] = ("explicitly requested by patient; "
+                                    + hit["weight_source"])
+        else:
+            needs = needs + [{"service": target, "weight": 1.0,
+                              "critical": True,
+                              "weight_source": "explicitly requested by "
+                              "patient (expert-set, no CI)"}]
+    needs = sorted(needs, key=lambda n: (-n["weight"], n["service"]))
+    return needs, dropped
 
 
 def hybrid_needs(spark, symptoms, context=""):
@@ -121,15 +170,17 @@ def hybrid_needs(spark, symptoms, context=""):
     (engine services with no catalog counterpart).
     """
     profiles, payload = load_profiles()
-    code = classify_complaint(spark, symptoms, context)
+    code, explicit = classify_complaint(spark, symptoms, context)
     if code is not None and code in profiles:
         needs, context_services = needs_vector(code, profiles)
-        return needs, {
+        merged, unmatched = _merge_explicit(needs, explicit)
+        return merged, {
             "needs_source": "survey", "complaint_code": code,
             "complaint_label": profiles[code]["label"],
             "n_visits": profiles[code]["n_visits"],
             "weight_source": {n["service"]: n["weight_source"]
-                              for n in needs},
+                              for n in merged},
+            "explicit_services_unmatched": unmatched,
             "context_no_catalog_counterpart": context_services,
         }
     needs, unknown = extract_needs(spark, symptoms, context)
