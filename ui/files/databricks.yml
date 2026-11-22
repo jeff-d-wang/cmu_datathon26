@@ -9,7 +9,7 @@ resources:
   apps:
     app:
       name: "heartcare-finder"
-      description: "Heart-care finder (read-only)"
+      description: "Health care finder (read-only)"
       source_code_path: ./
 
       # Start the app automatically on deploy.
