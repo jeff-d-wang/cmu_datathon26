@@ -139,8 +139,8 @@ def find_facilities_never_empty(spark, symptoms, context="", pin=None,
     banners = []
 
     for radius in RADIUS_LADDER_KM:
-        cands = geo_candidates(lat, lng, radius)
-        ranked = rank(needs, cands)
+        cands = geo_candidates(spark, lat, lng, radius)
+        ranked = rank(spark, needs, cands)
         n, rows = _n_rows(ranked)
         if n:
             return {"needs": needs, "needs_meta": meta, "rows": rows[:top_n],
@@ -152,8 +152,8 @@ def find_facilities_never_empty(spark, symptoms, context="", pin=None,
     banners.append("CRITICAL_UNAVAILABLE: no facility within 300 km documents "
                    "the critical service; showing best available without it")
     for radius in RADIUS_LADDER_KM:
-        cands = geo_candidates(lat, lng, radius)
-        ranked = rank(softened, cands)
+        cands = geo_candidates(spark, lat, lng, radius)
+        ranked = rank(spark, softened, cands)
         n, rows = _n_rows(ranked)
         if n:
             return {"needs": softened, "needs_meta": meta, "rows": rows[:top_n],
@@ -164,8 +164,8 @@ def find_facilities_never_empty(spark, symptoms, context="", pin=None,
                    "emergency care; LOW confidence by design")
     generic = [{"service": "emergencyCare", "weight": 1.0, "critical": False,
                "weight_source": "generic fallback (expert-set, no CI)"}]
-    cands = geo_candidates(lat, lng, RADIUS_LADDER_KM[-1])
-    ranked = rank(generic, cands)
+    cands = geo_candidates(spark, lat, lng, RADIUS_LADDER_KM[-1])
+    ranked = rank(spark, generic, cands)
     n, rows = _n_rows(ranked)
     if not n:
         rows = []
@@ -180,7 +180,7 @@ CASES = [
     ("chest pain and shortness of breath, sweating",
      "58-year-old male, smoker, diabetic", "302001"),      # Jaipur, survey
     ("severe toothache, swollen gum",
-     "35-year-old male", "500001"),                       # Hyderabad, LLM
+     "35-year-old male", "500001"),                       # Hyderabad, survey (1500)
     ("gibberish qwerty zzz",
      "", "110001"),                                       # Delhi, fallback
     ("kidney failure, needs regular dialysis",
