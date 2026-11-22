@@ -113,3 +113,9 @@ export function searchRequests(q: string, max = 8): ServiceRequest[] {
     .slice(0, max)
     .map((x) => x.r);
 }
+
+/** The one required (critical) service of a request, '' when there is no request. The candidates query filters on it. */
+export function requiredService(id: string | null | undefined): string {
+  if (!id) return '';
+  return requestById(id)?.needs.find((n) => n.critical)?.service ?? '';
+}

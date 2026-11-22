@@ -16,6 +16,8 @@ declare module "@databricks/appkit-ui/react" {
           min_lon: SQLNumberMarker;
           /** DOUBLE - use sql.double() */
           max_lon: SQLNumberMarker;
+          /** STRING - use sql.string() */
+          need_service: SQLStringMarker;
         };
         result: Array<{
           /** @sqlType STRING */

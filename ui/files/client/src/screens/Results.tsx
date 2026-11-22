@@ -11,7 +11,7 @@ import { assessLayerA, CARE_LEVEL_LABEL } from '../domain/severity';
 import { splitByRadius } from '../domain/radius';
 import { outsideBar, outsideReason } from '../domain/outside';
 import { WEIGHTS, type ComponentId } from '../domain/score';
-import { requestById } from '../domain/requests';
+import { requestById, requiredService } from '../domain/requests';
 import { LayerAPanel } from './CarePanels';
 import { parseAge } from '../domain/redflags';
 import type { Facility } from '../domain/types';
@@ -344,7 +344,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               ))}
             </div>
             <p className="mt-1 text-[15px] text-[var(--hc-muted)]">
-              {suggestedChips.length > 0 && <>The first {suggestedChips.length === 1 ? 'one is' : `${suggestedChips.length} are`} suggested from your symptoms. </>}
+              {suggestedChips.length > 0 && <>The first {suggestedChips.length === 1 ? 'one is' : `${suggestedChips.length} are`} {request ? 'from the service you asked for' : 'suggested from your symptoms'}. </>}
               Numbers are places within {d(radiusKm)} that list it. {t('truncation_note')}
             </p>
           </div>
@@ -356,6 +356,10 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               <Notice status="unknown">
                 No places within {d(radiusKm)}. The nearest ones are listed under Outside your radius.{' '}
                 <LinkButton onClick={() => set({ radiusKm: null })}>Widen automatically</LinkButton>
+              </Notice>
+            ) : request ? (
+              <Notice status="unknown">
+                No place within {d(radiusKm)} has medium or high evidence for {request.name.toLowerCase()} in our data. That does not prove none offers it: the data covers about 10,000 places and its lists are incomplete. Ask the nearest district hospital, and in an emergency call 108 or 112.
               </Notice>
             ) : (
               <Notice status="unknown">{t('no_results')} {t('no_results_hint')}</Notice>
@@ -414,7 +418,7 @@ export function ResultsScreen() {
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
   if (DATA_SOURCE === 'engine_clean') return <EngineResults />;
-  return <Candidates bbox={bbox}>{(l) => <ResultsBody facilities={l.rows} loading={l.loading} error={l.error} warming={l.warming} sample={l.sample} />}</Candidates>;
+  return <Candidates bbox={bbox} service={s.intent === 'service' ? requiredService(s.service) : ''}>{(l) => <ResultsBody facilities={l.rows} loading={l.loading} error={l.error} warming={l.warming} sample={l.sample} />}</Candidates>;
 }
 
 

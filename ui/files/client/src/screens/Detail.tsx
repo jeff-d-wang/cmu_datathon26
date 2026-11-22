@@ -7,6 +7,7 @@ import { coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point } from '../doma
 import { isRelevant, type Ranked } from '../domain/ranking';
 import type { Facility } from '../domain/types';
 import { Candidates, DATA_SOURCE, FacilityRecordQuery } from '../data/source';
+import { requiredService } from '../domain/requests';
 import { channelsFor, FIELD_LABEL, quotesFor, sourceDomains, type FacilityRecord, type Quote } from '../domain/citations';
 import { EngineDetail } from './EngineDetail';
 import { Shell } from '../components/Shell';
@@ -192,5 +193,5 @@ export function DetailScreen() {
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
   if (DATA_SOURCE === 'engine_clean') return <EngineDetail />;
-  return <Candidates bbox={bbox}>{(l) => <DetailFromData facilities={l.rows} loading={l.loading} sample={l.sample} />}</Candidates>;
+  return <Candidates bbox={bbox} service={s.intent === 'service' ? requiredService(s.service) : ''}>{(l) => <DetailFromData facilities={l.rows} loading={l.loading} sample={l.sample} />}</Candidates>;
 }

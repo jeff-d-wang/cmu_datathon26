@@ -72,8 +72,8 @@ const warmingState = (s: { state: string } | null) => s !== null && s.state !== 
 
 // ---- Live components: mounted only in live mode, so the hooks never run against sample data. ----
 
-function LiveCandidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
-  const params = useMemo(() => bboxParams(bbox), [bbox]);
+function LiveCandidates({ bbox, service, children }: { bbox: BBox; service: string; children: (l: Loaded<Facility[]>) => ReactNode }) {
+  const params = useMemo(() => ({ ...bboxParams(bbox), need_service: sql.string(service) }), [bbox, service]);
   const { data, loading, error, warehouseStatus } = useAnalyticsQuery('candidates', params);
   useQueryTiming('candidates', loading, data?.length ?? 0);
   const rows = useMemo(() => (data ?? []).map((r) => toFacility(r)), [data]);
@@ -82,9 +82,13 @@ function LiveCandidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<F
 
 const NONE = { loading: false, error: null, warming: false, sample: false } as const;
 
-export function Candidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
+/**
+ * Facilities in the search box. `service` (a catalog key, service path only) keeps only places with high/medium
+ * evidence for it, so the row cap applies to places that can offer it; '' (default) loads any place.
+ */
+export function Candidates({ bbox, service = '', children }: { bbox: BBox; service?: string; children: (l: Loaded<Facility[]>) => ReactNode }) {
   if (DATA_SOURCE === 'engine_clean') return <>{children({ rows: [], ...NONE })}</>;
-  return <LiveCandidates bbox={bbox}>{children}</LiveCandidates>;
+  return <LiveCandidates bbox={bbox} service={service}>{children}</LiveCandidates>;
 }
 
 export interface EmergencyPlace {
