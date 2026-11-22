@@ -209,8 +209,10 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   // Places inside the radius with little or no evidence for this care: behind a toggle, nearest first.
   const weak = useMemo(() => insideAll.filter((r) => !isRelevant(r)).sort((a, b) => a.km - b.km), [insideAll]);
   const shown = inside.slice(0, BATCH * (1 + more));
-  // Grey list = good fits (tier A/B) just beyond the radius, nearest first. Weaker places beyond the radius are not listed.
-  const outside = useMemo(() => outsideAll.filter(isRelevant).slice(0, 10), [outsideAll]);
+  // Beyond the radius: only places with strong evidence for this case (tier A) get a lettered grey pin and a row in the
+  // grey list, nearest first. Moderate-evidence places (tier B) are only small grey dots on the map; weaker ones are not shown.
+  const outside = useMemo(() => outsideAll.filter((r) => r.tier === 'A').slice(0, 10), [outsideAll]);
+  const outsideDots = useMemo(() => outsideAll.filter((r) => r.tier === 'B').slice(0, 60), [outsideAll]);
   const origin = s.place as Point;
   const symptomIds = detectSymptoms(s.freeText, s.chips);
   const ageNum = parseAge(s.ageRaw).age;
@@ -227,6 +229,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const pins = [
     ...inside.map((r, i) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: String(i + 1), name: r.facility.name, warn: r.warnings.length > 0, dot: i >= shown.length })),
     ...outside.map((r, i) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: letter(i), name: r.facility.name, muted: true })),
+    ...outsideDots.map((r) => ({ id: r.facility.unique_id, lat: r.facility.lat, lon: r.facility.lon, label: 'Outside your radius', name: r.facility.name, muted: true, dot: true })),
   ].filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon));
   const toSelect = (id: string) => set({ selectedId: id, screen: 'detail' });
   const left = !showMap ? (
@@ -356,13 +359,13 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
             </div>
           )}
           {outside.length > 0 && shown.length < inside.length && (
-            <p className="text-[14px] text-[var(--hc-muted)]">{outside.length} good {outside.length === 1 ? 'match is' : 'matches are'} just beyond {d(radiusKm)}: grey pins {letter(0)}{outside.length > 1 ? `–${letter(outside.length - 1)}` : ''} on the map. They are listed after the places inside your radius.</p>
+            <p className="text-[14px] text-[var(--hc-muted)]">{outside.length} strong {outside.length === 1 ? 'match is' : 'matches are'} just beyond {d(radiusKm)}: grey pins {letter(0)}{outside.length > 1 ? `–${letter(outside.length - 1)}` : ''} on the map. They are listed after the places inside your radius.</p>
           )}
           {/* Places beyond the radius are listed only after the whole in-radius list, so they never jump ahead of unseen closer options. */}
           {outside.length > 0 && shown.length >= inside.length && (
             <>
               <h2 className="text-[18px] font-bold">Outside your radius</h2>
-              <p className="-mt-2 text-[14px] text-[var(--hc-muted)]">Good matches just beyond {d(radiusKm)} (strong or moderate evidence), nearest first. Letters, not ranks.</p>
+              <p className="-mt-2 text-[14px] text-[var(--hc-muted)]">Strong matches for your case just beyond {d(radiusKm)}, nearest first. Letters, not ranks. Other places beyond the radius are small grey dots on the map.</p>
               <ul className="flex flex-col gap-2">
                 {outside.map((r, i) => (
                   <li key={r.facility.unique_id}>

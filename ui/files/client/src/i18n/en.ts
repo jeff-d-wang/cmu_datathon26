@@ -22,7 +22,7 @@ export const en = {
   intent_now: 'Emergency: get help now',
   intent_now_sub: 'Shows 112 and 108 straight away.',
   intent_soon: 'Find health care near me',
-  intent_soon_sub: 'Hospitals and clinics that list heart services',
+  intent_soon_sub: 'Ordered by emergency readiness and distance',
   intent_surgery: 'My doctor referred me for a procedure',
   intent_surgery_sub: 'For example angiography, bypass surgery or a pacemaker',
   intent_other: 'Help someone else',
@@ -51,7 +51,7 @@ export const en = {
 
   // Step 2
   details_intro: 'Good. A few quick details help me pick the right kind of care.',
-  who_title: 'Who is this for?',
+  who_title: 'About the patient',
   i_am_patient: 'I am the patient',
   someone_else: 'It is for someone else',
   age_label: 'Patient’s age in years',

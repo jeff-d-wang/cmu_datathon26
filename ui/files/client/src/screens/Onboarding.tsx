@@ -94,10 +94,6 @@ export function WhoScreen() {
           <StepHeader step={3} />
           <Bubble>{t('details_intro')}</Bubble>
           <ScreenTitle>{t('who_title')}</ScreenTitle>
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={t('who_title')}>
-            <OptionCard selected={s.forSelf === true} onClick={() => set({ forSelf: true })} title={t('i_am_patient')} />
-            <OptionCard selected={s.forSelf === false} onClick={() => set({ forSelf: false })} title={t('someone_else')} />
-          </div>
           <div>
             <label htmlFor="age" className="block text-[16px] font-semibold">{t('age_label')}</label>
             <input

@@ -35,8 +35,7 @@ test('full planned flow to results and detail', async ({ page }) => {
   await toIntent(page);
   await page.getByRole('radio', { name: /Find health care near me/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('heading', { name: 'Who is this for?' })).toBeVisible();
-  await page.getByRole('radio', { name: 'I am the patient' }).click();
+  await expect(page.getByRole('heading', { name: 'About the patient' })).toBeVisible();
   await page.getByLabel('Patient’s age in years').fill('52');
   await page.getByRole('radio', { name: 'Woman' }).click();
   await shot(page, '2-who');
