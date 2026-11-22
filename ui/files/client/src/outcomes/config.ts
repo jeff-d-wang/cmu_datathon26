@@ -1,5 +1,4 @@
 import symptomMap from '../../../config/symptom_map.json';
-import fixture from './fixture.sample.json';
 import { adaptRows } from './adapter';
 import { validateOutcomes, type Validation } from './validate';
 import type { OutcomeRow } from './contract';
@@ -34,8 +33,8 @@ export function loadOutcomes(): LoadedOutcomes | null {
   if (cache !== undefined) return cache;
   const isDev = import.meta.env.DEV;
   const isFixture = REAL_ROWS.length === 0;
-  if (!OUTCOMES_ENABLED || (isFixture && !isDev)) return (cache = null);
-  const rows = adaptRows(isFixture ? fixture.rows : REAL_ROWS);
+  if (!OUTCOMES_ENABLED || isFixture) return (cache = null); // no real outcome rows yet: Layer B stays hidden
+  const rows = adaptRows(REAL_ROWS);
   const validation = validateOutcomes(rows, KNOWN_SYMPTOMS, MIN_CASES);
   if (isDev) {
     console.groupCollapsed(`[Layer B] outcome data quality report${isFixture ? ' (SAMPLE FIXTURE, NOT REAL DATA)' : ''}`);

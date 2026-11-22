@@ -10,54 +10,84 @@ declare module "@databricks/appkit-ui/react" {
         parameters: {
           /** DOUBLE - use sql.double() */
           min_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
           max_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
           min_lon: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
           max_lon: SQLNumberMarker;
         };
         result: Array<{
           /** @sqlType STRING */
           unique_id: string;
+          /** @sqlType STRING */
           name: string;
+          /** @sqlType STRING */
           facility_class: string;
+          /** @sqlType STRING */
           ownership: string;
+          /** @sqlType STRING */
           city: string;
+          /** @sqlType STRING */
           state: string;
+          /** @sqlType STRING */
           district: string;
+          /** @sqlType STRING */
           pin: string;
           /** @sqlType DOUBLE */
           lat: number;
+          /** @sqlType DOUBLE */
           lon: number;
           /** @sqlType BOOLEAN */
           loc_approx: boolean;
           /** @sqlType STRING */
           services: string;
-          emergency_quote: string;
-          icu_quote: string;
-          nabh_quote: string;
-          official_phone: string;
-          alt_phone: string;
-          website: string;
-          address: string;
-          source_class: string;
-          /** @sqlType BOOLEAN */
-          list_truncated: boolean;
-          merge_suspect: boolean;
-          small_facility: boolean;
-          single_specialty_name: boolean;
-          claims_247: boolean;
-          ambulance: boolean;
-          icu_equipment: boolean;
-          equipment_listed: boolean;
-          says_nabh: boolean;
           /** @sqlType BIGINT */
           n_services: number;
+          /** @sqlType BIGINT */
           n_high: number;
-          official_phone_shared_by: number;
+          /** @sqlType BOOLEAN */
+          list_truncated: boolean;
+          /** @sqlType BOOLEAN */
+          merge_suspect: boolean;
           /** @sqlType INT */
           merge_signals: number;
-          /** @sqlType INT (nullable) */
-          doctors: number | null;
-          beds: number | null;
+          /** @sqlType STRING */
+          source_class: string;
+          /** @sqlType BOOLEAN */
+          small_facility: boolean;
+          /** @sqlType BOOLEAN */
+          single_specialty_name: boolean;
+          /** @sqlType INT */
+          doctors: number;
+          /** @sqlType INT */
+          beds: number;
+          /** @sqlType BOOLEAN */
+          claims_247: boolean;
+          /** @sqlType BOOLEAN */
+          ambulance: boolean;
+          /** @sqlType BOOLEAN */
+          icu_equipment: boolean;
+          /** @sqlType BOOLEAN */
+          equipment_listed: boolean;
+          /** @sqlType BOOLEAN */
+          says_nabh: boolean;
+          /** @sqlType STRING */
+          emergency_quote: string;
+          /** @sqlType STRING */
+          icu_quote: string;
+          /** @sqlType STRING */
+          nabh_quote: string;
+          /** @sqlType STRING */
+          official_phone: string;
+          /** @sqlType BIGINT */
+          official_phone_shared_by: number;
+          /** @sqlType STRING */
+          alt_phone: string;
+          /** @sqlType STRING */
+          website: string;
+          /** @sqlType STRING */
+          address: string;
         }>;
       };
     emergency_candidates: {
@@ -151,19 +181,27 @@ declare module "@databricks/appkit-ui/react" {
         parameters: {
           /** DOUBLE - use sql.double() */
           min_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
           max_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
           min_lon: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
           max_lon: SQLNumberMarker;
         };
         result: Array<{
           /** @sqlType STRING */
           unique_id: string;
+          /** @sqlType STRING */
           name: string;
+          /** @sqlType STRING */
           facility_class: string;
+          /** @sqlType STRING */
           city: string;
+          /** @sqlType STRING */
           state: string;
           /** @sqlType DOUBLE */
           lat: number;
+          /** @sqlType DOUBLE */
           lon: number;
           /** @sqlType BOOLEAN */
           loc_approx: boolean;
@@ -171,12 +209,73 @@ declare module "@databricks/appkit-ui/react" {
           emergency_band: string;
           /** @sqlType BOOLEAN */
           claims_247: boolean;
+          /** @sqlType BOOLEAN */
           ambulance: boolean;
           /** @sqlType STRING */
           emergency_quote: string;
+          /** @sqlType STRING */
           official_phone: string;
           /** @sqlType BIGINT */
           official_phone_shared_by: number;
+        }>;
+      };
+    engine_candidates_clean: {
+        name: "engine_candidates_clean";
+        parameters: {
+          /** DOUBLE - use sql.double() */
+          min_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          min_lon: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lon: SQLNumberMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          id: string;
+          /** @sqlType STRING */
+          name: string;
+          /** @sqlType STRING */
+          city: string;
+          /** @sqlType STRING */
+          state: string;
+          /** @sqlType STRING */
+          pin: string;
+          /** @sqlType STRING */
+          facility_type: string;
+          /** @sqlType STRING */
+          organization_type: string;
+          /** @sqlType DOUBLE */
+          capacity: number;
+          /** @sqlType DOUBLE */
+          lat: number;
+          /** @sqlType DOUBLE */
+          lon: number;
+          /** @sqlType DOUBLE */
+          centroid_lat: number;
+          /** @sqlType DOUBLE */
+          centroid_lon: number;
+          /** @sqlType STRING */
+          coord_source: string;
+          /** @sqlType STRING */
+          pincode_valid: string;
+          /** @sqlType STRING */
+          pincode_matched: string;
+          /** @sqlType STRING */
+          phone: string;
+          /** @sqlType STRING */
+          website: string;
+          /** @sqlType STRING */
+          specialties: string;
+          /** @sqlType STRING */
+          procedure: string;
+          /** @sqlType STRING */
+          equipment: string;
+          /** @sqlType STRING */
+          capability: string;
+          /** @sqlType STRING */
+          description: string;
         }>;
       };
     heart_candidates: {

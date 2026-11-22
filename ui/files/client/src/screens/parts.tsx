@@ -21,7 +21,7 @@ export function WarningList({ warnings }: { warnings: DataWarning[] }) {
   const [open, setOpen] = useState<string | null>(null);
   if (warnings.length === 0) return null;
   return (
-    <ul className="divide-y divide-[var(--hc-warn-border)] overflow-hidden rounded-xl border-[1.5px] border-[var(--hc-warn-border)] bg-[var(--hc-warn-bg)]">
+    <ul className="divide-y divide-[var(--hc-warn-border)] overflow-hidden rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-warn-border)] bg-[var(--hc-warn-bg)]">
       {warnings.map((w) => (
         <li key={w.id} className="px-3 py-2 text-[15px] text-[var(--hc-warn-text)]">
           <div className="flex items-start gap-2">
@@ -91,7 +91,7 @@ export function ConfidenceBars({ level, small }: { level: 'High' | 'Medium' | 'L
  * Match score as a number plus a 0-100 track: the shaded band is the score range
  * (what is listed .. what may also exist), the tick is the score. Not a statistical interval.
  */
-export function ScoreMeter({ score, lo, hi, confidence, compact }: { score: number; lo: number; hi: number; confidence: 'High' | 'Medium' | 'Low'; compact?: boolean }) {
+export function ScoreMeter({ score, lo, hi, confidence, compact, rangeText }: { score: number; lo: number; hi: number; confidence: 'High' | 'Medium' | 'Low'; compact?: boolean; rangeText?: string }) {
   const s = Math.round(score);
   const l = Math.round(lo);
   const h = Math.round(hi);
@@ -120,7 +120,7 @@ export function ScoreMeter({ score, lo, hi, confidence, compact }: { score: numb
       <div aria-hidden className="min-w-0 flex-1 pt-1">
         {track}
         <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[13px] text-[var(--hc-muted)]">
-          <span className="tabular-nums">{l !== h ? `Range ${l}–${h}` : 'Exact: nothing unknown'}</span>
+          <span className="tabular-nums">{rangeText ?? (l !== h ? `Range ${l}–${h}` : 'Exact: nothing unknown')}</span>
           <ConfidenceBars level={confidence} small />
         </div>
       </div>

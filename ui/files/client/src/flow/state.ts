@@ -1,6 +1,6 @@
 import type { SafetyChecks } from '../domain/redflags';
 import type { Conditions, Mode } from '../domain/types';
-import { isServiceKey, type ServiceKey } from '../domain/services';
+import { isServiceKey } from '../domain/services';
 import type { Place } from '../domain/places';
 import type { Lang } from '../i18n';
 
@@ -28,7 +28,8 @@ export interface FlowState {
   /** Search radius in km chosen on the slider; null = automatic (25 -> 50 -> 100 -> 250). */
   radiusKm: number | null;
   unit: DistanceUnit;
-  serviceFilter: ServiceKey | 'any';
+  /** A ServiceKey, or 'any' for no filter. */
+  serviceFilter: string;
   showN: 5 | 10 | 20;
   selectedId: string | null;
 }

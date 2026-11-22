@@ -43,7 +43,7 @@ export const REGISTRY_STATUS: string = registry.status;
 export type ServiceKey = string;
 
 export function isServiceKey(value: string): value is ServiceKey {
-  return (SERVICE_KEYS as readonly string[]).includes(value);
+  return SERVICE_KEYS.includes(value);
 }
 
 export function serviceName(key: ServiceKey): string {

@@ -4,9 +4,10 @@ import type { FlowState } from '../flow/state';
 import { useT } from '../i18n';
 import { BAND_LABEL, parseServices, serviceName, type Need } from '../domain/services';
 import { coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point } from '../domain/geo';
-import type { Ranked } from '../domain/ranking';
+import { isRelevant, type Ranked } from '../domain/ranking';
 import type { Facility } from '../domain/types';
-import { Candidates } from '../data/source';
+import { Candidates, DATA_SOURCE } from '../data/source';
+import { EngineDetail } from './EngineDetail';
 import { Shell } from '../components/Shell';
 import { StreetMap } from '../components/StreetMap';
 import { Clock, Info, MapPin, Phone as PhoneIcon } from 'lucide-react';
@@ -31,7 +32,7 @@ function PhoneValue({ number, sharedBy, name }: { number: string; sharedBy: numb
   );
 }
 
-function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number; total: number; sample: boolean; needs: readonly Need[] }) {
+function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number | null; total: number; sample: boolean; needs: readonly Need[] }) {
   const { s, dispatch } = useFlow();
   const t = useT();
   const f = r.facility;
@@ -65,12 +66,12 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
   return (
     <Shell
       footer={t('not_advice')}
-      left={<StreetMap origin={origin} ariaLabel={t('map_name', { n: 1, d: formatDistance(r.km, s.unit) })} youLabel={t('you')} points={[{ id: f.unique_id, lat: f.lat, lon: f.lon, label: String(rank), name: f.name, warn: r.warnings.length > 0 }]} selectedId={f.unique_id} />}
+      left={<StreetMap origin={origin} ariaLabel={t('map_name', { n: 1, d: formatDistance(r.km, s.unit) })} youLabel={t('you')} points={[{ id: f.unique_id, lat: f.lat, lon: f.lon, label: rank !== null ? String(rank) : '•', name: f.name, warn: r.warnings.length > 0 }]} selectedId={f.unique_id} />}
       right={
         <>
           <LinkButton className="self-start" onClick={() => set({ screen: 'results' })}>{t('back_to_matches', { n: total })}</LinkButton>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[15px] font-semibold text-[var(--hc-muted)]">{t('rank_short', { r: rank, n: total })}</span>
+            {rank !== null && <span className="text-[15px] font-semibold text-[var(--hc-muted)]">{t('rank_short', { r: rank, n: total })}</span>}
             <TierTag tier={r.tier} />
             {sample && <SampleBadge />}
           </div>
@@ -79,15 +80,15 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
             {titleCase(f.facility_class)} · {own} · {[f.city, titleCase(f.state)].filter(Boolean).join(', ')} · {t('km_straight', { d: formatDistance(r.km, s.unit) })}
             {f.loc_approx ? ` · ${t('approx_location')}` : ''}
           </p>
-          {(f.doctors !== null || f.beds !== null) && <p className="text-[15px]">{t('doctors_beds', { d: f.doctors ?? '?', b: f.beds ?? '?' })}</p>}
+          {(f.doctors !== null || f.beds !== null) && <p className="text-[15px]">{[f.doctors !== null ? `${f.doctors} doctors` : null, f.beds !== null ? `${f.beds} beds` : null].filter(Boolean).join(' · ')} (as listed)</p>}
           <div className="flex flex-wrap gap-2 hc-no-print">
-            {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={`${t('call')} ${f.official_phone}`} className="flex min-h-[46px] items-center justify-center rounded-xl bg-[var(--hc-primary)] px-4 text-[16px] font-semibold text-white" />}
-            <a href={`https://www.google.com/maps/dir/?api=1&destination=${f.lat},${f.lon}`} target="_blank" rel="noreferrer noopener" title={t('directions_note')} className="grid min-h-[46px] place-items-center rounded-xl border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('directions')} ↗</a>
-            {f.website && <a href={f.website.startsWith('http') ? f.website : `https://${f.website}`} target="_blank" rel="noreferrer noopener" className="grid min-h-[46px] place-items-center rounded-xl border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('website')} ↗</a>}
+            {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={`${t('call')} ${f.official_phone}`} className="flex min-h-[46px] items-center justify-center rounded-[var(--hc-r-control)] bg-[var(--hc-primary)] px-4 text-[16px] font-semibold text-white" />}
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${f.lat},${f.lon}`} target="_blank" rel="noreferrer noopener" title={t('directions_note')} className="grid min-h-[46px] place-items-center rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('directions')} ↗</a>
+            {f.website && <a href={f.website.startsWith('http') ? f.website : `https://${f.website}`} target="_blank" rel="noreferrer noopener" className="grid min-h-[46px] place-items-center rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)]">{t('website')} ↗</a>}
           </div>
           <p className="text-[15px] text-[var(--hc-muted)]">{t('directions_note')}</p>
 
-          <Section title={t('why_listed', { r: rank })}>
+          <Section title={rank !== null ? t('why_listed', { r: rank }) : 'Why it was found'}>
             <p className="mb-1 text-[15px] text-[var(--hc-muted)]">{t('why_listed_sub')}</p>
             <WhyList r={r} unit={s.unit} />
             <div className="mt-1"><HowOrdered mode={r.mode} /></div>
@@ -160,17 +161,21 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
 function DetailFromData({ facilities, loading, sample }: { facilities: Facility[]; loading: boolean; sample: boolean }) {
   const { s } = useFlow();
   const t = useT();
-  const { ranked, needs } = useRankedResults(s, facilities);
-  const shown = ranked.slice(0, s.showN);
-  const idx = shown.findIndex((r) => r.facility.unique_id === s.selectedId);
+  const { ranked, needs, radiusKm } = useRankedResults(s, facilities);
+  // Same list as the results page: places inside the radius with evidence (tier A/B), in ranked order.
+  const listed = ranked.filter((r) => r.km <= radiusKm && isRelevant(r));
+  // Any loaded place can be opened (the list, map dots, outside-radius and weak places), not only the first few.
+  const r = ranked.find((x) => x.facility.unique_id === s.selectedId);
   if (loading) return <div className="p-6"><Spinner label={t('loading_results')} /></div>;
-  if (idx < 0) return <div className="p-6"><Notice status="unknown">{t('no_results')}</Notice></div>;
-  return <DetailBody r={shown[idx]} rank={idx + 1} total={shown.length} sample={sample} needs={needs} />;
+  if (!r) return <div className="p-6"><Notice status="unknown">{t('no_results')}</Notice></div>;
+  const idx = listed.indexOf(r);
+  return <DetailBody r={r} rank={idx >= 0 ? idx + 1 : null} total={listed.length} sample={sample} needs={needs} />;
 }
 
 export function DetailScreen() {
   const { s } = useFlow();
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
+  if (DATA_SOURCE === 'engine_clean') return <EngineDetail />;
   return <Candidates bbox={bbox}>{(l) => <DetailFromData facilities={l.rows} loading={l.loading} sample={l.sample} />}</Candidates>;
 }

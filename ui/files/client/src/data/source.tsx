@@ -4,25 +4,15 @@ import { sql } from '@databricks/appkit-ui/js';
 import type { Facility } from '../domain/types';
 import type { Place } from '../domain/places';
 import type { BBox } from '../domain/geo';
-import { SAMPLE_FACILITIES, SAMPLE_PLACES, SAMPLE_STATES } from '../sample/sampleData';
 
 /**
- * Data source switch (client env VITE_DATA_SOURCE):
- *   sample   (default) - bundled fictional places, runs offline
- *   platinum - live read-only queries backed by the team's platinum evidence tables
- *              (gold.facility_district_health_indicators + platinum.facility_service_confidence)
- * Legacy values 'raw' and 'clean', and VITE_USE_SAMPLE_DATA=false, now mean platinum:
- * the platinum-backed candidates query replaced the old heart/raw/clean ones.
+ * Data source switch (client env VITE_DATA_SOURCE). Every mode reads the team's datasets; there is no sample data.
+ *   platinum     (default) - live read-only queries on gold.facility_district_health_indicators
+ *                            + platinum.facility_service_confidence (labuser_jdw2)
+ *   engine_clean           - engine method (client/src/engine/method.ts) on the gold table, query engine_candidates_clean
  */
-export type DataSource = 'sample' | 'platinum';
-const envSource = String(import.meta.env.VITE_DATA_SOURCE ?? '');
-export const DATA_SOURCE: DataSource =
-  envSource === 'sample' || envSource === 'platinum'
-    ? envSource
-    : import.meta.env.VITE_USE_SAMPLE_DATA === 'false' || envSource === 'raw' || envSource === 'clean'
-      ? 'platinum'
-      : 'sample';
-export const USE_SAMPLE: boolean = DATA_SOURCE === 'sample';
+export type DataSource = 'platinum' | 'engine_clean';
+export const DATA_SOURCE: DataSource = String(import.meta.env.VITE_DATA_SOURCE ?? '') === 'engine_clean' ? 'engine_clean' : 'platinum';
 
 /** Layer B LLM needs extraction: runs inside the workspace (ai_query via needs_extract.sql), off by default. */
 export const LLM_EXTRACTION: boolean = DATA_SOURCE === 'platinum' && String(import.meta.env.VITE_LLM_EXTRACTION ?? '') === 'true';
@@ -89,8 +79,10 @@ function LiveCandidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<F
   return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
 }
 
+const NONE = { loading: false, error: null, warming: false, sample: false } as const;
+
 export function Candidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
-  if (USE_SAMPLE) return <>{children({ rows: SAMPLE_FACILITIES, loading: false, error: null, warming: false, sample: true })}</>;
+  if (DATA_SOURCE === 'engine_clean') return <>{children({ rows: [], ...NONE })}</>;
   return <LiveCandidates bbox={bbox}>{children}</LiveCandidates>;
 }
 
@@ -124,14 +116,6 @@ function LiveEmergency({ bbox, children }: { bbox: BBox; children: (l: Loaded<Em
 }
 
 export function EmergencyPlaces({ bbox, children }: { bbox: BBox; children: (l: Loaded<EmergencyPlace[]>) => ReactNode }) {
-  if (USE_SAMPLE) {
-    const rows = SAMPLE_FACILITIES.filter((f) => f.services.includes('emergencyCare:')).map((f) => ({
-      unique_id: f.unique_id, name: f.name, lat: f.lat, lon: f.lon, loc_approx: f.loc_approx,
-      emergency_band: f.services.split('|').find((s) => s.startsWith('emergencyCare:'))?.split(':')[1] ?? '',
-      ambulance: f.ambulance, claims_247: f.claims_247, emergency_quote: f.emergency_quote, official_phone: f.official_phone,
-    }));
-    return <>{children({ rows, loading: false, error: null, warming: false, sample: true })}</>;
-  }
   return <LiveEmergency bbox={bbox}>{children}</LiveEmergency>;
 }
 
@@ -143,7 +127,6 @@ function LiveStates({ children }: { children: (l: Loaded<string[]>) => ReactNode
 }
 
 export function States({ children }: { children: (l: Loaded<string[]>) => ReactNode }) {
-  if (USE_SAMPLE) return <>{children({ rows: SAMPLE_STATES, loading: false, error: null, warming: false, sample: true })}</>;
   return <LiveStates>{children}</LiveStates>;
 }
 
@@ -156,7 +139,6 @@ function LivePlaces({ state, children }: { state: string; children: (l: Loaded<P
 }
 
 export function Places({ state, children }: { state: string; children: (l: Loaded<Place[]>) => ReactNode }) {
-  if (USE_SAMPLE) return <>{children({ rows: SAMPLE_PLACES.filter((p) => p.state === state), loading: false, error: null, warming: false, sample: true })}</>;
   return <LivePlaces state={state}>{children}</LivePlaces>;
 }
 
@@ -181,3 +163,4 @@ export function Needs({ prompt, children }: { prompt: string; children: (l: Load
   );
   return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
 }
+

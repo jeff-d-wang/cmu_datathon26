@@ -9,7 +9,6 @@ import { PlaceScreen, SymptomsScreen } from './screens/Symptoms';
 import { PrefetchForPlace, ResultsScreen } from './screens/Results';
 import { DetailScreen } from './screens/Detail';
 import { HowScoreScreen } from './screens/HowScore';
-import { USE_SAMPLE } from './data/source';
 
 /**
  * Heart care finder: a state machine with no accounts.
@@ -62,7 +61,7 @@ export default function App() {
   return (
     <FlowCtx.Provider value={{ s, dispatch }}>
       <I18nProvider lang={s.lang}>
-        <div className="hc-app" data-sample={USE_SAMPLE ? 'true' : 'false'}>
+        <div className="hc-app">
           {screen}
           {/* Keeps the place's search running across Symptoms → Results → Detail. */}
           {s.place && <PrefetchForPlace />}
