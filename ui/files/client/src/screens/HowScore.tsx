@@ -74,6 +74,17 @@ export function HowScoreScreen() {
             </p>
           </section>
 
+          <section aria-labelledby="about-data" className="rounded-[var(--hc-r-card)] border-[1.5px] border-[var(--hc-border)] p-4">
+            <h2 id="about-data" className="text-[17px] font-bold">About the data</h2>
+            <p className="mt-1 text-[15px]">Built by the team pipeline (src/ in the project repository) from the Virtue Foundation dataset. Numbers from its QA report (QA_REPORT.md, 22 Nov 2026):</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px]">
+              <li><strong>10,077</strong> facilities; <strong>9,987</strong> (99.1%) have at least one service backed by evidence.</li>
+              <li>201,395 facility–service pairs are banded: high 53,330 · medium 143,651 · unverified 2,318 · low 2,096.</li>
+              <li>Evidence comes from each record&apos;s specialty list, procedures, capabilities, equipment and description (279,626 evidence rows).</li>
+              <li>Only 1% of pairs are &quot;low&quot;: a claim that contradicts the facility&apos;s size, such as neurosurgery at a small clinic.</li>
+              <li>Big claims are often not fully corroborated: heart and valve surgery 9.8%, bypass 9.5%, transplant 8.5%, neurosurgery 34.4%. That is why the app shows evidence levels instead of taking a claim as fact.</li>
+            </ul>
+          </section>
           <p className="text-[15px] text-[var(--hc-muted)]">{t('not_advice')} Our data has no patient outcomes, so we never show how often a symptom leads to hospital.</p>
         </>
       }

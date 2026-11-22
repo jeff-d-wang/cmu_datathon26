@@ -12,6 +12,12 @@ export interface FacilityRecord {
   source_urls: string;
   /** "service:channel,channel|service:channel" from platinum.facility_service_evidence. */
   channels: string;
+  /** Catalog service keys from platinum.facility_specialty, joined by '|'. */
+  specialties_canon: string;
+}
+
+export function canonicalSpecialties(record: FacilityRecord): string[] {
+  return record.specialties_canon.split('|').filter(Boolean);
 }
 
 export type RecordField = 'description' | 'procedures' | 'capability' | 'equipment' | 'specialties';

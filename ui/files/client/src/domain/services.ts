@@ -95,6 +95,34 @@ export function parseServices(raw: string): Map<ServiceKey, ServiceEvidence> {
   return out;
 }
 
+export interface CorroborationRule { required: string[]; supporting: string[]; minFacilityClass: string | null; minDoctors: number | null }
+
+export function corroborationRule(key: ServiceKey): CorroborationRule | null {
+  const e = registryEntry(key);
+  if (!e) return null;
+  const required = e.required ?? [];
+  const supporting = e.supporting ?? [];
+  const minFacilityClass = e.minFacilityClass || null;
+  const minDoctors = e.minDoctors ?? null;
+  if (!required.length && !supporting.length && !minFacilityClass && minDoctors === null) return null;
+  return { required, supporting, minFacilityClass, minDoctors };
+}
+
+/** Plain-words corroboration rule for a service; '' when it has none. */
+export function ruleText(key: ServiceKey, missing = 0): string {
+  const r = corroborationRule(key);
+  if (!r) return '';
+  const names = (ks: string[]) => ks.map(serviceName).join(', ');
+  const parts = [
+    r.required.length ? `Needs to also list: ${names(r.required)}` : '',
+    r.supporting.length ? `Supported by: ${names(r.supporting)}` : '',
+    r.minFacilityClass ? `Expected at a ${r.minFacilityClass.replace(/_/g, ' ')} or larger` : '',
+    r.minDoctors !== null ? `with at least ${r.minDoctors} doctors` : '',
+  ].filter(Boolean);
+  const text = parts.join('. ');
+  return missing > 0 ? `${text} (${missing} required item(s) missing in this record)` : text;
+}
+
 /** Band score helper: absent service scores 0 (unknown is never negative). */
 export function confScore(band: Band | undefined): number {
   return band === undefined ? 0 : CONF_SCORE[band];

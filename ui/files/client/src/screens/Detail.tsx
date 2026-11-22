@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 import { useFlow } from '../flow/context';
 import type { FlowState } from '../flow/state';
 import { useT } from '../i18n';
-import { BAND_LABEL, parseServices, serviceName, type Need } from '../domain/services';
+import { BAND_LABEL, parseServices, ruleText, serviceName, type Need } from '../domain/services';
 import { coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point } from '../domain/geo';
 import { isRelevant, type Ranked } from '../domain/ranking';
 import type { Facility } from '../domain/types';
 import { Candidates, DATA_SOURCE, FacilityRecordQuery } from '../data/source';
 import { requiredService } from '../domain/requests';
-import { channelsFor, FIELD_LABEL, quotesFor, sourceDomains, type FacilityRecord, type Quote } from '../domain/citations';
+import { canonicalSpecialties, channelsFor, FIELD_LABEL, quotesFor, sourceDomains, type FacilityRecord, type Quote } from '../domain/citations';
 import { EngineDetail } from './EngineDetail';
 import { Shell } from '../components/Shell';
 import { StreetMap } from '../components/StreetMap';
@@ -43,7 +43,7 @@ function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank
   const origin = s.place as Point;
   // Needed services first (band status; a missing need shows as unknown), then ICU/emergency/NABH rows.
   const emergencyClaimed = f.emergency_quote !== '' || f.claims_247 || svcs.has('emergencyCare');
-  const rows: { name: string; status: Status; statusText: string; evidence: string; quotes?: Quote[]; found?: string[] }[] = [
+  const rows: { name: string; status: Status; statusText: string; evidence: string; quotes?: Quote[]; found?: string[]; rule?: string }[] = [
     ...needs.slice(0, 8).map((n) => {
       const ev = svcs.get(n.service);
       const good = ev !== undefined && (ev.band === 'high' || ev.band === 'medium');
@@ -55,6 +55,7 @@ function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank
         // The facility's own words for this service, and which record fields the evidence came from.
         quotes: record ? quotesFor(record, n.service, serviceName(n.service)) : undefined,
         found: record ? channelsFor(record, n.service) : undefined,
+        rule: ruleText(n.service, ev?.missing ?? 0) || undefined,
       };
     }),
     f.icu_quote
@@ -123,6 +124,7 @@ function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank
                       )}
                       {row.quotes && row.quotes.length === 0 && row.status !== 'unknown' && <p className="mt-1 text-[var(--hc-muted)]">No sentence in this record&apos;s text names it directly{row.found && row.found.length > 0 ? '' : '; the evidence comes from its tags'}.</p>}
                       {row.found && row.found.length > 0 && <p className="mt-1 text-[var(--hc-muted)]">Found in its {row.found.join(', ')}.</p>}
+                      {row.rule && <p className="mt-1 text-[14px] text-[var(--hc-muted)]">{row.rule}</p>}
                     </td>
                   </tr>
                 ))}
@@ -131,8 +133,9 @@ function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank
             {f.list_truncated && <p className="mt-2 flex items-start gap-1.5 text-[15px] text-[var(--hc-muted)]"><Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{t('data_note_truncated')}</p>}
           </Section>
 
-          {record && (record.description || sourceDomains(record).length > 0) && (
+          {record && (record.description || canonicalSpecialties(record).length > 0 || sourceDomains(record).length > 0) && (
             <Section title="From the facility's record">
+              {canonicalSpecialties(record).length > 0 && <p className="mb-2 text-[15px]">Specialties it lists: {canonicalSpecialties(record).map((k) => serviceName(k)).join(', ')}</p>}
               {record.description && <blockquote className="border-l-4 border-[var(--hc-border)] pl-3 text-[15px] italic">{record.description}</blockquote>}
               {sourceDomains(record).length > 0 && (
                 <p className="mt-2 text-[14px] text-[var(--hc-muted)]">Collected from: {sourceDomains(record).join(', ')}. These are claims taken from the web, not verified by us.</p>

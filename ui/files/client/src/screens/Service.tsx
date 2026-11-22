@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import { useFlow } from '../flow/context';
 import { useT } from '../i18n';
 import { QUICK_REQUESTS, requestById, searchRequests } from '../domain/requests';
-import { serviceName } from '../domain/services';
+import { ruleText, serviceName } from '../domain/services';
 import { Shell } from '../components/Shell';
 import { Chip, LinkButton, PrimaryButton, ScreenTitle, StepHeader } from '../components/ui';
 import { PlaceCountPanel } from './Onboarding';
@@ -104,7 +104,7 @@ export function ServiceScreen() {
               <p className="text-[15px] font-semibold">We look for:</p>
               <ul className="list-disc pl-5 text-[15px]">
                 {req.needs.map((n) => (
-                  <li key={n.service}>{serviceName(n.service)}{n.critical ? ' (required)' : ''}</li>
+                  <li key={n.service}>{serviceName(n.service)}{n.critical ? ' (required)' : ''}{n.critical && ruleText(n.service) ? <span className="block text-[14px] text-[var(--hc-muted)]">How we check a claim: {ruleText(n.service)}</span> : null}</li>
                 ))}
               </ul>
             </section>

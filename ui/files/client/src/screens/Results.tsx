@@ -16,6 +16,7 @@ import { LayerAPanel } from './CarePanels';
 import { parseAge } from '../domain/redflags';
 import type { Facility } from '../domain/types';
 import { Candidates, DATA_SOURCE } from '../data/source';
+import { DistrictPanel } from './DistrictPanel';
 import { EngineResults } from './EngineResults';
 import { EngineCandidates } from '../engine/live';
 import { Shell } from '../components/Shell';
@@ -301,6 +302,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               { label: 'What changed the order', value: `Mostly ${top2.join(' and ')}.${condNotes.length ? ` ${condNotes.join('; ')}.` : ''}`, screen: null },
             ]}
           />
+          <DistrictPanel state={s.place?.state ?? ''} district={s.place?.district ?? ''} />
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-3">
               <ScreenTitle>{(inside.length === 1 ? t('match_title_one') : t('matches_title', { n: inside.length }))}</ScreenTitle>
@@ -331,7 +333,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           <p className="text-[15px] text-[var(--hc-muted)]">{t('matches_note', { order: request ? `evidence that they offer ${request.name.toLowerCase()}` : t(mode === 'urgent' ? 'order_urgent' : 'order_planned') })}</p>
           <HowOrdered mode={mode} />
           {capped && <Notice status="info">{t('capped_note')}</Notice>}
-          {!request && <LayerAPanel a={layerA} tier={layerA.tier} />}
+          {!request && <LayerAPanel a={layerA} tier={layerA.tier} chips={symptomIds} />}
           <div role="group" aria-label={t('filter_title')}>
             <p className="mb-1 text-[16px] font-semibold">{t('filter_title')}</p>
             <div className="flex flex-wrap gap-2">

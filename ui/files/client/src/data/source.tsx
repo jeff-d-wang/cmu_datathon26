@@ -182,6 +182,7 @@ export function FacilityRecordQuery({ id, children }: { id: string; children: (r
     return r ? {
       description: str(r.description), specialties: str(r.specialties), procedures: str(r.procedures), equipment: str(r.equipment),
       capability: str(r.capability), source_urls: str(r.source_urls), channels: str(r.channels),
+      specialties_canon: str(r.specialties_canon),
     } : null;
   }, [data]);
   return <>{children(record)}</>;

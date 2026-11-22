@@ -214,7 +214,7 @@ export const en = {
   st_claimed: 'Claimed only',
   st_unknown: 'Unknown',
   unknown_evidence: 'Not in our record. Our lists are cut at 50 items, so it may exist. Ask.',
-  mentioned_n: 'found in {n} parts of this record',
+  mentioned_n: 'record fields with evidence: {n}',
   icu_row: 'Intensive care (ICU)',
   emergency_row: 'Emergency care',
   nabh_row: 'Accreditation',

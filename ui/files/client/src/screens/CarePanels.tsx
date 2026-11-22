@@ -2,11 +2,12 @@ import { ClipboardList } from 'lucide-react';
 import { useT } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { CARE_LEVEL_LABEL, type LayerAAssessment, type SeverityTier } from '../domain/severity';
+import { SurveyPanel } from './SurveyPanel';
 import { StatusTag, type Status } from '../components/ui';
 
 const TIER_STATUS: Record<SeverityTier, Status> = { EMERGENCY_NOW: 'bad', URGENT: 'warn', ROUTINE: 'info' };
 
-export function LayerAPanel({ a, tier }: { a: LayerAAssessment; tier: SeverityTier }) {
+export function LayerAPanel({ a, tier, chips }: { a: LayerAAssessment; tier: SeverityTier; chips?: readonly string[] }) {
   const t = useT();
   return (
     <section className="rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white px-4 py-3" aria-labelledby="next-title">
@@ -38,6 +39,7 @@ export function LayerAPanel({ a, tier }: { a: LayerAAssessment; tier: SeverityTi
       <p className="mt-2 text-[15px]"><strong>{t('care_looking_for')}</strong> {a.careLevels.map(CARE_LEVEL_LABEL).join(', ')}</p>
       <p className="mt-1 text-[14px] text-[var(--hc-muted)]">{t('next_draft')}</p>
       <p className="mt-1 text-[14px] font-semibold text-[var(--hc-text-2)]">Not medical advice. This tool cannot diagnose.</p>
+      {chips && <SurveyPanel chips={chips} />}
     </section>
   );
 }

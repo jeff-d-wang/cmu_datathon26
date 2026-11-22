@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { channelsFor, items, quotesFor, serviceTerms, sourceDomains, type FacilityRecord } from './citations';
+import { canonicalSpecialties, channelsFor, items, quotesFor, serviceTerms, sourceDomains, type FacilityRecord } from './citations';
 
 const rec: FacilityRecord = {
   description: 'Mars Specialty Clinic is a General Surgery Clinic in Patna. Some of the services provided are Obstetrician and treatment for IBS.',
@@ -8,6 +8,7 @@ const rec: FacilityRecord = {
   equipment: '[]',
   capability: '["Multi-speciality clinic","Has 4 doctors on staff"]',
   source_urls: '["https://www.practo.com/patna/clinic/mars","https://www.lybrate.com/patna/clinic/mars",null]',
+  specialties_canon: 'gynecologyAndObstetrics|nephrology',
   channels: 'gynecologyAndObstetrics:capability,description,procedure,specialty_claim|generalSurgery:capability',
 };
 
@@ -33,5 +34,12 @@ describe('citations', () => {
   });
   it('gives source domains as text', () => {
     expect(sourceDomains(rec)).toEqual(['practo.com', 'lybrate.com']);
+  });
+});
+
+describe('canonicalSpecialties', () => {
+  it('splits on | and drops empties', () => {
+    expect(canonicalSpecialties(rec)).toEqual(['gynecologyAndObstetrics', 'nephrology']);
+    expect(canonicalSpecialties({ ...rec, specialties_canon: '' })).toEqual([]);
   });
 });
