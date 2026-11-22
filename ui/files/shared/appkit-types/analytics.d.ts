@@ -92,6 +92,43 @@ declare module "@databricks/appkit-ui/react" {
           address: string;
         }>;
       };
+    district_rating: {
+        name: "district_rating";
+        parameters: {
+          /** STRING - use sql.string() */
+          state: SQLStringMarker;
+          /** STRING - use sql.string() */
+          district: SQLStringMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          district_name: string;
+          /** @sqlType STRING */
+          state_ut: string;
+          /** @sqlType STRING */
+          access_status: string;
+          /** @sqlType STRING */
+          band_equal: string;
+          /** @sqlType DOUBLE */
+          composite: number;
+          /** @sqlType BIGINT */
+          n_facilities: number;
+          /** @sqlType DOUBLE */
+          doctors_per_fac: number;
+          /** @sqlType DOUBLE */
+          critical_cov: number;
+          /** @sqlType DOUBLE */
+          score_maternal: number;
+          /** @sqlType DOUBLE */
+          score_immunisation: number;
+          /** @sqlType DOUBLE */
+          score_ncd: number;
+          /** @sqlType DOUBLE */
+          score_access: number;
+          /** @sqlType BIGINT */
+          n_districts: number;
+        }>;
+      };
     emergency_candidates: {
         name: "emergency_candidates";
         parameters: {
@@ -305,6 +342,8 @@ declare module "@databricks/appkit-ui/react" {
           source_urls: string;
           /** @sqlType STRING */
           channels: string;
+          /** @sqlType STRING */
+          specialties_canon: string;
         }>;
       };
     heart_candidates: {

@@ -18,10 +18,15 @@ WITH g AS (
     WHERE unique_id = :id
     GROUP BY service
   )
+), sp AS (
+  -- Canonical specialties for this facility (platinum.facility_specialty, from features.py).
+  SELECT concat_ws('|', sort_array(collect_set(canonical_specialty))) specialties_canon
+  FROM labuser_jdw2.platinum.facility_specialty
+  WHERE unique_id = :id
 )
 SELECT g.unique_id, g.name,
        coalesce(g.description, '') description, coalesce(g.specialties, '') specialties,
        coalesce(g.`procedure`, '') procedures, coalesce(g.equipment, '') equipment,
        coalesce(g.capability, '') capability, coalesce(g.source_urls, '') source_urls,
-       coalesce(ch.channels, '') channels
-FROM g CROSS JOIN ch
+       coalesce(ch.channels, '') channels, coalesce(sp.specialties_canon, '') specialties_canon
+FROM g CROSS JOIN ch CROSS JOIN sp
