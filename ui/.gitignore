@@ -1,0 +1,3 @@
+# Databricks deploy records for the heartcare-finder app (written on every deploy). Do not commit.
+state/
+artifacts/

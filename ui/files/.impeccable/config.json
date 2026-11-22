@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-21T20:03:28.671Z",
+        "reason": "design reference: user-supplied design/*.dc.html mockups specify Inter as the app font"
+      }
+    ]
+  }
+}

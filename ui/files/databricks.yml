@@ -1,0 +1,47 @@
+bundle:
+  name: heartcare-finder
+
+variables:
+  sql_warehouse_id:
+    description: SQL Warehouse ID
+
+resources:
+  apps:
+    app:
+      name: "heartcare-finder"
+      description: "Heart-care finder (read-only)"
+      source_code_path: ./
+
+      # Start the app automatically on deploy.
+      lifecycle:
+        started: true
+      # Uncomment to enable on behalf of user API scopes. Available scopes: sql, genie, files, model-serving
+      # user_api_scopes:
+      #   - sql
+
+      # The resources which this app has access to.
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.sql_warehouse_id}
+            permission: CAN_USE
+
+targets:
+  default:
+    default: true
+    workspace:
+      host: https://dbc-dbd35697-fb0d.cloud.databricks.com
+
+    variables:
+      sql_warehouse_id: 77508c86864ebc9e
+
+  # Team workspace (cmu-datathon profile). The dataset is not attached there, so this target runs on SAMPLE data
+  # and the cloud build reuses the committed query types in shared/appkit-types/.
+  team:
+    workspace:
+      host: https://dbc-4b8f5b5b-58be.cloud.databricks.com
+      # Team location inside the Git folder cmu_datathon26 (user decision). ui/.gitignore keeps deploy state out of Git.
+      root_path: /Workspace/Users/jdw2@andrew.cmu.edu/cmu_datathon26/ui
+
+    variables:
+      sql_warehouse_id: 5106c82e61c66fb3

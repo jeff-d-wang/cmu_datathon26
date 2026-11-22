@@ -1,0 +1,9 @@
+command: ['npm', 'run', 'start']
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  # Privacy: no AppKit usage telemetry (see `npx @databricks/appkit docs ./docs/privacy.md`).
+  - name: DISABLE_APPKIT_INTERNAL_TELEMETRY
+    value: "true"
+  - name: DO_NOT_TRACK
+    value: "1"

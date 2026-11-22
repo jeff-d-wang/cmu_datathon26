@@ -1,0 +1,536 @@
+{
+  "status": "DRAFT: needs clinician review",
+  "note": "Layer A (always on). Keyword rules map symptoms to a severity tier, a care level and service labels. Every tier, care level, treatment sentence and threshold is a DRAFT that a clinician must review. Guideline references name real published guidelines; the exact recommendation must be verified by a clinician.",
+  "symptoms": [
+    {
+      "id": "chest_pressure",
+      "keywords": [
+        "chest pain",
+        "chest pressure",
+        "chest tightness",
+        "tight chest",
+        "pain in chest",
+        "heaviness in chest",
+        "angina",
+        "chest discomfort",
+        "burning in chest",
+        "squeezing",
+        "seene mein dard",
+        "seene me dard",
+        "chhati mein dard",
+        "chhati me dard"
+      ],
+      "labels": [
+        "L04",
+        "L05",
+        "L09",
+        "L01"
+      ],
+      "emergency_banner_first": true,
+      "advice": "advice_chest",
+      "severity": "URGENT",
+      "care_levels": [
+        "checkup_tests",
+        "cath_lab"
+      ],
+      "treatment": "Tight chest on exertion usually starts with a heart check-up and tests (ECG, echo, stress test); a heart scan lab (cath lab) may be needed next.",
+      "guideline": {
+        "name": "2021 AHA/ACC/ASE/CHEST/SAEM/SCCT/SCMR Guideline for the Evaluation and Diagnosis of Chest Pain",
+        "year": 2021,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": true,
+      "warning_sign": "a heart attack or narrowed heart arteries (angina)",
+      "evidence_source": null
+    },
+    {
+      "id": "breathless",
+      "keywords": [
+        "breathless",
+        "short of breath",
+        "shortness of breath",
+        "can't catch my breath",
+        "breathing difficulty",
+        "saans phoolna",
+        "saans fulna",
+        "saans lene mein dikkat"
+      ],
+      "labels": [
+        "L01",
+        "L03",
+        "L10",
+        "L02"
+      ],
+      "advice": "advice_soon",
+      "severity": "URGENT",
+      "care_levels": [
+        "checkup_tests"
+      ],
+      "treatment": "New breathlessness usually starts with a heart check-up and tests (ECG, echo); the cause may also be the lungs.",
+      "guideline": {
+        "name": "2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure",
+        "year": 2021,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": true,
+      "warning_sign": "heart failure or a heart valve problem; it can also come from the lungs",
+      "evidence_source": null
+    },
+    {
+      "id": "fainting",
+      "keywords": [
+        "faint",
+        "fainted",
+        "passed out",
+        "blackout",
+        "black out",
+        "syncope"
+      ],
+      "labels": [
+        "L01",
+        "L02",
+        "L08",
+        "L03"
+      ],
+      "advice": "advice_soon",
+      "severity": "URGENT",
+      "care_levels": [
+        "checkup_tests",
+        "rhythm_care"
+      ],
+      "treatment": "Fainting usually starts with a heart check-up and rhythm tests (ECG, Holter); some people need heart rhythm care.",
+      "guideline": {
+        "name": "2018 ESC Guidelines for the diagnosis and management of syncope",
+        "year": 2018,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": true,
+      "warning_sign": "a heart rhythm problem or a valve problem",
+      "evidence_source": null
+    },
+    {
+      "id": "racing_heartbeat",
+      "keywords": [
+        "palpitation",
+        "racing heart",
+        "heart racing",
+        "fluttering",
+        "irregular heartbeat",
+        "pounding heart",
+        "ghabrahat",
+        "dhadkan tez"
+      ],
+      "labels": [
+        "L01",
+        "L02",
+        "L08"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests",
+        "rhythm_care"
+      ],
+      "treatment": "A racing or irregular heartbeat usually starts with an ECG or Holter test; some people need heart rhythm care.",
+      "guideline": {
+        "name": "2020 ESC Guidelines for the diagnosis and management of atrial fibrillation",
+        "year": 2020,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": true,
+      "warning_sign": "a heart rhythm problem such as atrial fibrillation",
+      "evidence_source": null
+    },
+    {
+      "id": "swollen_legs",
+      "keywords": [
+        "swollen legs",
+        "swollen ankles",
+        "leg swelling",
+        "ankle swelling",
+        "oedema",
+        "edema"
+      ],
+      "labels": [
+        "L01",
+        "L03",
+        "L10"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests"
+      ],
+      "treatment": "Swollen legs usually start with a check-up and a heart scan (echo); the cause may also be the kidneys or veins.",
+      "guideline": {
+        "name": "2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure",
+        "year": 2021,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": true,
+      "warning_sign": "heart failure; it can also come from the kidneys or veins",
+      "evidence_source": null
+    },
+    {
+      "id": "unusual_tiredness",
+      "keywords": [
+        "tired",
+        "tiredness",
+        "fatigue",
+        "exhausted",
+        "no energy"
+      ],
+      "labels": [
+        "L01",
+        "L02",
+        "L03"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests"
+      ],
+      "treatment": "Unusual tiredness usually starts with a general check-up and basic heart tests.",
+      "guideline": {
+        "name": "2021 AHA/ACC/ASE/CHEST/SAEM/SCCT/SCMR Guideline for the Evaluation and Diagnosis of Chest Pain",
+        "year": 2021,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": true,
+      "warning_sign": "heart failure or reduced heart pumping, among many other causes",
+      "evidence_source": null
+    },
+    {
+      "id": "dizziness",
+      "keywords": [
+        "dizzy",
+        "dizziness",
+        "lightheaded",
+        "light headed",
+        "light-headed",
+        "giddy",
+        "giddiness",
+        "chakkar",
+        "chakkar aana",
+        "sar ghoomna"
+      ],
+      "labels": [
+        "L01",
+        "L08",
+        "L02"
+      ],
+      "advice": "advice_soon",
+      "severity": "URGENT",
+      "care_levels": [
+        "checkup_tests",
+        "rhythm_care"
+      ],
+      "treatment": "Dizziness or light-headedness usually starts with a heart check-up and an ECG to look at the heart rhythm; it can also have causes outside the heart.",
+      "guideline": {
+        "name": "2018 ESC Guidelines for the diagnosis and management of syncope",
+        "year": 2018,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": false,
+      "warning_sign": "a heart rhythm problem or low blood pressure",
+      "evidence_source": null
+    },
+    {
+      "id": "cough",
+      "keywords": [
+        "cough",
+        "coughing",
+        "cough at night",
+        "cough lying down",
+        "khansi",
+        "khaansi"
+      ],
+      "labels": [
+        "L01",
+        "L03"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests"
+      ],
+      "treatment": "A cough is most often a chest or lung problem. If it comes with breathlessness, swollen legs, or is worse lying down, a heart check-up (ECG, echo) can help find the cause.",
+      "guideline": {
+        "name": "2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure",
+        "year": 2021,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": false,
+      "warning_sign": "fluid on the lungs from heart failure, when it comes with breathlessness or swelling",
+      "evidence_source": null
+    },
+    {
+      "id": "high_bp",
+      "keywords": [
+        "high bp",
+        "high blood pressure",
+        "blood pressure",
+        "hypertension",
+        "bp high",
+        "bp badha",
+        "bp zyada"
+      ],
+      "labels": [
+        "L01",
+        "L03"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests"
+      ],
+      "treatment": "A high blood pressure reading usually starts with a check-up to confirm it and look for effects on the heart (ECG, echo).",
+      "guideline": {
+        "name": "2023 ESH Guidelines for the management of arterial hypertension",
+        "year": 2023,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": false,
+      "warning_sign": "strain on the heart and arteries over time",
+      "evidence_source": null
+    },
+    {
+      "id": "leg_pain_walking",
+      "keywords": [
+        "leg pain when walking",
+        "calf pain",
+        "pain in legs while walking",
+        "legs hurt walking",
+        "cramp when walking",
+        "claudication"
+      ],
+      "labels": [
+        "L01",
+        "L03"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests"
+      ],
+      "treatment": "Leg pain that comes on with walking and eases with rest can be a circulation problem; it usually starts with a check-up and simple tests of blood flow.",
+      "guideline": {
+        "name": "2024 ESC Guidelines for the management of peripheral arterial and aortic diseases",
+        "year": 2024,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": false,
+      "warning_sign": "narrowed leg arteries (peripheral artery disease)",
+      "evidence_source": null
+    },
+    {
+      "id": "valve_murmur",
+      "keywords": [
+        "murmur",
+        "heart murmur",
+        "valve",
+        "valve problem",
+        "leaky valve",
+        "narrow valve"
+      ],
+      "labels": [
+        "L01",
+        "L03",
+        "L06"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests",
+        "heart_surgery"
+      ],
+      "treatment": "A murmur or valve problem is usually checked with an echo; some people later need a valve procedure or surgery.",
+      "guideline": {
+        "name": "2021 ESC/EACTS Guidelines for the management of valvular heart disease",
+        "year": 2021,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": false,
+      "warning_sign": "a heart valve that leaks or is narrowed",
+      "evidence_source": null
+    },
+    {
+      "id": "known_heart_followup",
+      "keywords": [
+        "follow up",
+        "follow-up",
+        "known heart",
+        "heart patient",
+        "after stent",
+        "after bypass",
+        "heart failure"
+      ],
+      "labels": [
+        "L01",
+        "L03",
+        "L04"
+      ],
+      "advice": "advice_soon",
+      "severity": "ROUTINE",
+      "care_levels": [
+        "checkup_tests"
+      ],
+      "treatment": "Follow-up for a known heart condition is usually a check-up with tests (ECG, echo) at a place that can also do further heart care if needed.",
+      "guideline": {
+        "name": "2024 ESC Guidelines for the management of chronic coronary syndromes",
+        "year": 2024,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": false,
+      "warning_sign": "a change in a known heart condition",
+      "evidence_source": null
+    },
+    {
+      "id": "stroke_signs",
+      "keywords": [
+        "face drooping",
+        "face droop",
+        "slurred speech",
+        "can't speak",
+        "weak arm",
+        "one side weak",
+        "numb one side",
+        "stroke",
+        "lakwa",
+        "paralysis"
+      ],
+      "labels": [
+        "L09"
+      ],
+      "advice": "advice_soon",
+      "severity": "EMERGENCY_NOW",
+      "care_levels": [
+        "emergency_department"
+      ],
+      "treatment": "Face drooping, arm weakness or slurred speech can be a stroke. Call 112 or 108 now.",
+      "guideline": {
+        "name": "2019 AHA/ASA Guidelines for the early management of acute ischemic stroke",
+        "year": 2019,
+        "verify": "to verify by clinician"
+      },
+      "quick_pick": false,
+      "warning_sign": "a stroke",
+      "evidence_source": null
+    }
+  ],
+  "red_flag_keywords": [
+    "crushing",
+    "pain at rest",
+    "at rest",
+    "more than 15 minutes",
+    "over 15 minutes",
+    "cannot breathe",
+    "can't breathe",
+    "unconscious",
+    "collapsed",
+    "sweating",
+    "sweaty",
+    "nausea",
+    "vomiting",
+    "jaw",
+    "left arm",
+    "arm pain",
+    "back pain",
+    "blue lips",
+    "face drooping",
+    "slurred speech"
+  ],
+  "known_heart_disease_keywords": [
+    "heart disease",
+    "heart attack",
+    "had a stent",
+    "stent",
+    "bypass surgery",
+    "angioplasty",
+    "heart failure"
+  ],
+  "planned_surgery_labels": [
+    "L06",
+    "L07",
+    "L05",
+    "L04"
+  ],
+  "default_labels": [
+    "L01",
+    "L02",
+    "L03"
+  ],
+  "version": 2,
+  "severity_tiers": {
+    "EMERGENCY_NOW": {
+      "label": "Emergency now",
+      "order": 3
+    },
+    "URGENT": {
+      "label": "Urgent: within 24 to 48 hours",
+      "order": 2
+    },
+    "ROUTINE": {
+      "label": "Routine: book a visit",
+      "order": 1
+    }
+  },
+  "care_levels": {
+    "checkup_tests": {
+      "label": "Heart check-up and tests",
+      "labels": [
+        "L01",
+        "L02",
+        "L03"
+      ]
+    },
+    "cath_lab": {
+      "label": "Heart scan lab (cath lab)",
+      "labels": [
+        "L04",
+        "L05"
+      ]
+    },
+    "heart_surgery": {
+      "label": "Heart surgery",
+      "labels": [
+        "L06",
+        "L07"
+      ]
+    },
+    "rhythm_care": {
+      "label": "Heart rhythm care",
+      "labels": [
+        "L08",
+        "L02"
+      ]
+    },
+    "childrens_heart": {
+      "label": "Children's heart care",
+      "labels": [
+        "L11"
+      ]
+    },
+    "emergency_department": {
+      "label": "Emergency department",
+      "labels": [
+        "L09",
+        "L04",
+        "L05"
+      ]
+    }
+  },
+  "planned_care_levels": [
+    "cath_lab",
+    "heart_surgery"
+  ],
+  "emergency_care_level": "emergency_department",
+  "outcome_thresholds": {
+    "status": "DRAFT: needs clinician review",
+    "urgent_min_emergency_rate": 0.1,
+    "emergency_min_emergency_rate": 0.5,
+    "note": "Layer B may only RAISE the tier: if the lower bound of the 95% Wilson interval of the emergency-visit rate reaches a threshold."
+  },
+  "outcomes_min_cases": 30,
+  "evidence_source_note": "evidence_source is deliberately empty. Our dataset has no patient outcomes, so the app shows no percentages. Fill this only with a cited external clinical source."
+}
