@@ -1,5 +1,5 @@
 import symptomMap from '../../../config/symptom_map.json';
-import { isLabelCode, type LabelCode } from './labels';
+import { isServiceKey, type ServiceKey } from './services';
 
 /**
  * LAYER A (always on): clinician-reviewed rules. DRAFT: needs clinician review.
@@ -42,7 +42,7 @@ export const SYMPTOM_RULES: SymptomRule[] = symptomMap.symptoms.map((s) => ({
 }));
 
 export const CARE_LEVEL_LABEL = (c: CareLevel): string => symptomMap.care_levels[c].label;
-export const CARE_LEVEL_SERVICES = (c: CareLevel): LabelCode[] => symptomMap.care_levels[c].labels.filter(isLabelCode);
+export const CARE_LEVEL_SERVICES = (c: CareLevel): ServiceKey[] => symptomMap.care_levels[c].labels.filter(isServiceKey);
 export const TIER_LABEL = (t: SeverityTier): string => symptomMap.severity_tiers[t].label;
 
 export interface LayerAAssessment {

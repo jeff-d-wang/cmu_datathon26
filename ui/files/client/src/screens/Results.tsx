@@ -3,11 +3,11 @@ import { useFlow } from '../flow/context';
 import { modeFor, shareFragment, type FlowState } from '../flow/state';
 import { symptomLabel, useT } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { FILTER_LABELS, parseLabelFields } from '../domain/labels';
+import { parseServices, serviceName, type Need } from '../domain/services';
 import { chooseRadius, coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point, haversineKm } from '../domain/geo';
 import { isRelevant, rankFacilities, type Ranked } from '../domain/ranking';
-import { detectSymptoms, showsEmergencyBannerFirst } from '../domain/symptoms';
-import { assessLayerA, CARE_LEVEL_LABEL, CARE_LEVEL_SERVICES } from '../domain/severity';
+import { detectSymptoms, needsForSymptoms, showsEmergencyBannerFirst } from '../domain/symptoms';
+import { assessLayerA, CARE_LEVEL_LABEL } from '../domain/severity';
 import { splitByRadius } from '../domain/radius';
 import { WEIGHTS, type ComponentId } from '../domain/score';
 import { LayerAPanel } from './CarePanels';
@@ -19,28 +19,31 @@ import { IndiaInset } from '../components/MapPanel';
 import { StreetMap } from '../components/StreetMap';
 import { Building2, ChevronDown, Info, Ruler, ShieldCheck, Siren } from 'lucide-react';
 import { CallLink, Chip, LinkButton, Notice, SampleBadge, ScreenTitle, SecondaryButton, Spinner, titleCase } from '../components/ui';
-import { HowOrdered, labelName, TierTag, WarningList, ConfidenceBars, ScoreMeter } from './parts';
+import { HowOrdered, TierTag, WarningList, ConfidenceBars, ScoreMeter } from './parts';
 import { COMPONENT_TEXT } from './HowScore';
 
 export const FETCH_LIMIT = 400;
 
+/** Common general services shown as filter chips beyond the symptom-suggested ones. */
+const DEFAULT_CHIPS: readonly string[] = ['healthCheckupPackages', 'diagnosticServices', 'emergencyCare', 'icu'];
+
 export function useRankedResults(s: FlowState, facilities: Facility[]) {
   return useMemo(() => {
-    if (!s.place) return { ranked: [] as Ranked[], radiusKm: 25, widened: false, auto: true };
+    if (!s.place) return { ranked: [] as Ranked[], needs: [] as Need[], radiusKm: 25, widened: false, auto: true };
     const origin: Point = s.place;
     const age = parseAge(s.ageRaw).age;
     const mode = modeFor(s.intent);
-    // Layer A treatment mapping -> care levels -> service labels to match.
-    const layerA = assessLayerA(detectSymptoms(s.freeText, s.chips), false, mode, age !== null && age < 18);
-    const wanted = s.serviceFilter !== 'any' ? [s.serviceFilter] : [...new Set(layerA.careLevels.flatMap(CARE_LEVEL_SERVICES))];
+    // Symptom rules -> weighted needs vector over the 192-service catalog, built in the
+    // browser (Layer A). Critical needs hard-filter; the rest only order.
+    const needs = needsForSymptoms(detectSymptoms(s.freeText, s.chips), mode);
     const pool = facilities.filter(
-      (f) => (s.ownership === 'any' || f.ownership === s.ownership) && (s.serviceFilter === 'any' || parseLabelFields(f.label_fields).has(s.serviceFilter)),
+      (f) => (s.ownership === 'any' || f.ownership === s.ownership) && (s.serviceFilter === 'any' || parseServices(f.services).has(s.serviceFilter)),
     );
-    const all = rankFacilities(pool, { mode, origin, wantedLabels: wanted, conditions: s.conditions, age, unit: s.unit });
+    const all = rankFacilities(pool, { mode, origin, needs, conditions: s.conditions, age, unit: s.unit });
     // Widen until enough places WITH EVIDENCE (tier A/B) are in range, not just any place.
     const auto = chooseRadius(all.filter(isRelevant).map((r) => r.km), s.showN);
     const radiusKm = s.radiusKm ?? auto.radiusKm;
-    return { ranked: all, radiusKm, widened: s.radiusKm === null && auto.widened, auto: s.radiusKm === null };
+    return { ranked: all, needs, radiusKm, widened: s.radiusKm === null && auto.widened, auto: s.radiusKm === null };
   }, [s.radiusKm, s.place, s.ageRaw, s.intent, s.freeText, s.chips, s.serviceFilter, s.ownership, s.conditions, s.showN, s.unit, facilities]);
 }
 
@@ -106,7 +109,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
             {f.name}
           </h3>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[15px] text-[var(--hc-muted)]">
-            <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" aria-hidden />{titleCase(f.facility_type)}, {own}</span>
+            <span className="inline-flex items-center gap-1"><Building2 className="h-4 w-4" aria-hidden />{titleCase(f.facility_class)}, {own}</span>
             <span aria-hidden>·</span>
             <span className="inline-flex items-center gap-1 whitespace-nowrap"><Ruler className="h-4 w-4" aria-hidden />{distText(r.km, unit)} (straight line)</span>
           </p>
@@ -122,7 +125,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
       <p className="text-[15px]"><span className="font-semibold">Why it is here:</span> {sc.why}</p>
       <dl className="grid grid-cols-[20px_1fr] gap-x-2 gap-y-1.5 text-[16px]">
         <dt><ShieldCheck className="mt-0.5 h-5 w-5 text-[var(--hc-primary)]" aria-label={t('evidence_word')} /></dt>
-        <dd>{r.matched.length > 0 ? r.matched.slice(0, 3).map((m) => labelName(t, m.label)).join(', ') : t('why_D')}</dd>
+        <dd>{r.matched.length > 0 ? r.matched.slice(0, 3).map((m) => serviceName(m.service)).join(', ') : t('why_D')}</dd>
         <dt><Siren className="mt-0.5 h-5 w-5 text-[var(--hc-em-btn)]" aria-label={t('emergency_row')} /></dt>
         <dd>{t(r.emergency === 'backed' ? 'em_backed_short' : r.emergency === 'claimed' ? 'em_claimed_short' : 'em_none')}</dd>
       </dl>
@@ -191,7 +194,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const { s, dispatch } = useFlow();
   const t = useT();
   const [showMap, setShowMap] = useState(true);
-  const { ranked, radiusKm, widened, auto } = useRankedResults(s, facilities);
+  const { ranked, needs, radiusKm, widened, auto } = useRankedResults(s, facilities);
   const { inside, outside: outsideAll } = useMemo(() => splitByRadius(ranked, radiusKm), [ranked, radiusKm]);
   const shown = inside.slice(0, s.showN);
   const outside = outsideAll.slice(0, 10);
@@ -230,19 +233,19 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
 
   const top2 = Object.entries(WEIGHTS[mode]).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([id]) => COMPONENT_TEXT[id as ComponentId].name.toLowerCase());
   const condNotes = (Object.keys(CONDITION_TEXT) as (keyof typeof s.conditions)[]).filter((k) => s.conditions[k]).map((k) => CONDITION_TEXT[k]);
-  if (ageNum !== null && ageNum < 18) condNotes.push("places listing children's heart care get extra points");
+  if (ageNum !== null && ageNum < 18) condNotes.push("places listing children's care get extra points");
   const condNames = (Object.keys(CONDITION_TEXT) as (keyof typeof s.conditions)[]).filter((k) => s.conditions[k]);
   const patient = [ageNum !== null ? `age ${ageNum}` : null, s.sex ? t(s.sex === 'other' ? 'sex_other' : s.sex) : null, ...condNames].filter(Boolean).join(', ');
 
-  // Service chips: those suggested by the symptoms first, then the usual procedures, each with a count inside the radius.
-  const suggestedChips = useMemo(() => [...new Set(layerA.careLevels.flatMap(CARE_LEVEL_SERVICES))].slice(0, 4), [layerA]);
-  const chipOrder = useMemo(() => [...suggestedChips, ...FILTER_LABELS.filter((l) => !suggestedChips.includes(l))], [suggestedChips]);
+  // Service chips: the needs suggested by the symptoms first, then common general services, each with a count inside the radius.
+  const suggestedChips = useMemo(() => [...new Set(needs.map((n) => n.service))].slice(0, 4), [needs]);
+  const chipOrder = useMemo(() => [...suggestedChips, ...DEFAULT_CHIPS.filter((l) => !suggestedChips.includes(l))], [suggestedChips]);
   const chipCounts = useMemo(() => {
     const m = new Map<string, number>();
     for (const f of facilities) {
       if (s.ownership !== 'any' && f.ownership !== s.ownership) continue;
       if (haversineKm(origin, f) > radiusKm) continue;
-      for (const l of parseLabelFields(f.label_fields).keys()) m.set(l, (m.get(l) ?? 0) + 1);
+      for (const l of parseServices(f.services).keys()) m.set(l, (m.get(l) ?? 0) + 1);
     }
     return m;
   }, [facilities, s.ownership, origin, radiusKm]);
@@ -307,10 +310,10 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           <div role="group" aria-label={t('filter_title')}>
             <p className="mb-1 text-[16px] font-semibold">{t('filter_title')}</p>
             <div className="flex flex-wrap gap-2">
-              <Chip radio on={s.serviceFilter === 'any'} onClick={() => set({ serviceFilter: 'any' })}>{t('any_heart_care')}</Chip>
+              <Chip radio on={s.serviceFilter === 'any'} onClick={() => set({ serviceFilter: 'any' })}>{t('any_care')}</Chip>
               {chipOrder.map((l) => (
                 <Chip radio key={l} on={s.serviceFilter === l} onClick={() => set({ serviceFilter: l })}>
-                  {labelName(t, l)}
+                  {serviceName(l)}
                   <span className={`ml-1 rounded-full px-1.5 text-[13px] tabular-nums ${chipCount(l) === 0 ? 'text-[var(--hc-muted)]' : 'bg-[var(--hc-bg)] text-[var(--hc-text)]'}`}>{chipCount(l)}</span>
                 </Chip>
               ))}

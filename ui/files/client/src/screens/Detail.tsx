@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useFlow } from '../flow/context';
 import type { FlowState } from '../flow/state';
 import { useT } from '../i18n';
-import { LABEL_CODES, parseLabelFields, parseLabelQuotes } from '../domain/labels';
+import { BAND_LABEL, parseServices, serviceName, type Need } from '../domain/services';
 import { coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point } from '../domain/geo';
 import type { Ranked } from '../domain/ranking';
 import type { Facility } from '../domain/types';
@@ -12,7 +12,7 @@ import { StreetMap } from '../components/StreetMap';
 import { Clock, Info, MapPin, Phone as PhoneIcon } from 'lucide-react';
 import { CallLink, LinkButton, Notice, SampleBadge, ScreenTitle, Section, Spinner, StatusTag, titleCase, type Status } from '../components/ui';
 import { useRankedResults } from './Results';
-import { HowOrdered, labelName, TierTag, WarningList, WhyList } from './parts';
+import { HowOrdered, TierTag, WarningList, WhyList } from './parts';
 
 const CENTRAL_LINE_MIN = 10;
 
@@ -31,25 +31,30 @@ function PhoneValue({ number, sharedBy, name }: { number: string; sharedBy: numb
   );
 }
 
-function DetailBody({ r, rank, total, sample }: { r: Ranked; rank: number; total: number; sample: boolean }) {
+function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number; total: number; sample: boolean; needs: readonly Need[] }) {
   const { s, dispatch } = useFlow();
   const t = useT();
   const f = r.facility;
-  const fields = parseLabelFields(f.label_fields);
-  const quotes = parseLabelQuotes(f.label_quotes);
+  const svcs = parseServices(f.services);
   const set = (patch: Partial<FlowState>) => dispatch({ type: 'set', patch });
   const origin = s.place as Point;
+  // Needed services first (band status; a missing need shows as unknown), then ICU/emergency/NABH rows.
+  const emergencyClaimed = f.emergency_quote !== '' || f.claims_247 || svcs.has('emergencyCare');
   const rows: { name: string; status: Status; statusText: string; evidence: string }[] = [
-    ...LABEL_CODES.filter((l) => fields.has(l)).map((l) => ({
-      name: labelName(t, l),
-      status: 'ok' as Status,
-      statusText: t('st_listed'),
-      evidence: `${quotes.get(l) ? `“${quotes.get(l)}” · ` : ''}${t('mentioned_n', { n: fields.get(l) ?? 1 })}`,
-    })),
-    f.icu_claim
+    ...needs.slice(0, 8).map((n) => {
+      const ev = svcs.get(n.service);
+      const good = ev !== undefined && (ev.band === 'high' || ev.band === 'medium');
+      return {
+        name: serviceName(n.service),
+        status: (ev ? (good ? 'ok' : 'warn') : 'unknown') as Status,
+        statusText: ev ? (good ? t('st_listed') : t('st_claimed')) : t('st_unknown'),
+        evidence: ev ? `${BAND_LABEL[ev.band]} · ${t('mentioned_n', { n: ev.channels || 1 })}` : t('unknown_evidence'),
+      };
+    }),
+    f.icu_quote
       ? { name: t('icu_row'), status: f.icu_equipment ? 'ok' : 'warn', statusText: f.icu_equipment ? t('st_listed') : t('st_claimed'), evidence: f.icu_quote ? `“${f.icu_quote.trim()}”` : '' }
       : { name: t('icu_row'), status: 'unknown', statusText: t('st_unknown'), evidence: t('unknown_evidence') },
-    f.emergency_claim
+    emergencyClaimed
       ? { name: t('emergency_row'), status: f.ambulance || f.icu_equipment ? 'ok' : 'warn', statusText: f.ambulance || f.icu_equipment ? t('st_listed') : t('st_claimed'), evidence: f.emergency_quote ? `“${f.emergency_quote.trim()}”` : '' }
       : { name: t('emergency_row'), status: 'unknown', statusText: t('st_unknown'), evidence: t('unknown_evidence') },
     f.says_nabh
@@ -71,7 +76,7 @@ function DetailBody({ r, rank, total, sample }: { r: Ranked; rank: number; total
           </div>
           <ScreenTitle>{f.name}</ScreenTitle>
           <p className="text-[15px] text-[var(--hc-muted)]">
-            {titleCase(f.facility_type)} · {own} · {[f.city, titleCase(f.state)].filter(Boolean).join(', ')} · {t('km_straight', { d: formatDistance(r.km, s.unit) })}
+            {titleCase(f.facility_class)} · {own} · {[f.city, titleCase(f.state)].filter(Boolean).join(', ')} · {t('km_straight', { d: formatDistance(r.km, s.unit) })}
             {f.loc_approx ? ` · ${t('approx_location')}` : ''}
           </p>
           {(f.doctors !== null || f.beds !== null) && <p className="text-[15px]">{t('doctors_beds', { d: f.doctors ?? '?', b: f.beds ?? '?' })}</p>}
@@ -155,12 +160,12 @@ function DetailBody({ r, rank, total, sample }: { r: Ranked; rank: number; total
 function DetailFromData({ facilities, loading, sample }: { facilities: Facility[]; loading: boolean; sample: boolean }) {
   const { s } = useFlow();
   const t = useT();
-  const { ranked } = useRankedResults(s, facilities);
+  const { ranked, needs } = useRankedResults(s, facilities);
   const shown = ranked.slice(0, s.showN);
   const idx = shown.findIndex((r) => r.facility.unique_id === s.selectedId);
   if (loading) return <div className="p-6"><Spinner label={t('loading_results')} /></div>;
   if (idx < 0) return <div className="p-6"><Notice status="unknown">{t('no_results')}</Notice></div>;
-  return <DetailBody r={shown[idx]} rank={idx + 1} total={shown.length} sample={sample} />;
+  return <DetailBody r={shown[idx]} rank={idx + 1} total={shown.length} sample={sample} needs={needs} />;
 }
 
 export function DetailScreen() {

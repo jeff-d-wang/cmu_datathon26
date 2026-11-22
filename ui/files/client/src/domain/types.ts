@@ -1,8 +1,9 @@
-// Row shape shared by the live heart_candidates query and the sample data.
+// Row shape shared by the live candidates query (config/queries/candidates.sql)
+// and the sample data. The 35 columns are the verified platinum-backed contract.
 export interface Facility {
   unique_id: string;
   name: string;
-  facility_type: string;
+  facility_class: string;
   ownership: string;
   city: string;
   state: string;
@@ -11,9 +12,11 @@ export interface Facility {
   lat: number;
   lon: number;
   loc_approx: boolean;
-  label_fields: string;
-  label_quotes: string;
-  has_service_text: boolean;
+  /** Compact per-service evidence map: "cardiology:high:3:0|dialysis:medium:1:2". Parsed by domain/services.ts. */
+  services: string;
+  /** Number of services with any evidence; number with band 'high'. */
+  n_services: number;
+  n_high: number;
   list_truncated: boolean;
   merge_suspect: boolean;
   merge_signals: number;
@@ -22,18 +25,10 @@ export interface Facility {
   single_specialty_name: boolean;
   doctors: number | null;
   beds: number | null;
-  emergency_claim: boolean;
   claims_247: boolean;
   ambulance: boolean;
   icu_equipment: boolean;
   equipment_listed: boolean;
-  icu_claim: boolean;
-  cath_equipment: boolean;
-  has_obgyn: boolean;
-  has_nicu: boolean;
-  has_dialysis: boolean;
-  has_neuro_stroke: boolean;
-  has_diabetes_care: boolean;
   says_nabh: boolean;
   emergency_quote: string;
   icu_quote: string;
