@@ -9,6 +9,7 @@ import { isRelevant, rankFacilities, type Ranked } from '../domain/ranking';
 import { detectSymptoms, needsForSymptoms, showsEmergencyBannerFirst } from '../domain/symptoms';
 import { assessLayerA, CARE_LEVEL_LABEL } from '../domain/severity';
 import { splitByRadius } from '../domain/radius';
+import { outsideBar, outsideReason } from '../domain/outside';
 import { WEIGHTS, type ComponentId } from '../domain/score';
 import { LayerAPanel } from './CarePanels';
 import { parseAge } from '../domain/redflags';
@@ -151,7 +152,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
   );
 }
 
-function OutsideRow({ r, num, onOpen, unit }: { r: Ranked; num: string | null; onOpen: () => void; unit: 'km' | 'mi' }) {
+function OutsideRow({ r, num, onOpen, unit, reason }: { r: Ranked; num: string | null; onOpen: () => void; unit: 'km' | 'mi'; reason?: string }) {
   const sc = r.score;
   const f = r.facility;
   return (
@@ -166,6 +167,7 @@ function OutsideRow({ r, num, onOpen, unit }: { r: Ranked; num: string | null; o
           <ConfidenceBars small level={sc.confidence} />
           {f.loc_approx && <span className="rounded-full border border-[var(--hc-warn-border)] bg-[var(--hc-warn-bg)] px-2 text-[13px] font-medium text-[var(--hc-warn-text)]">Approximate location</span>}
         </span>
+        {reason && <span className="mt-1 block text-[14px] text-[var(--hc-text-2)]">{reason}</span>}
       </span>
     </button>
   );
@@ -209,10 +211,12 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   // Places inside the radius with little or no evidence for this care: behind a toggle, nearest first.
   const weak = useMemo(() => insideAll.filter((r) => !isRelevant(r)).sort((a, b) => a.km - b.km), [insideAll]);
   const shown = inside.slice(0, BATCH * (1 + more));
-  // Beyond the radius: only places with strong evidence for this case (tier A) get a lettered grey pin and a row in the
-  // grey list, nearest first. Moderate-evidence places (tier B) are only small grey dots on the map; weaker ones are not shown.
-  const outside = useMemo(() => outsideAll.filter((r) => r.tier === 'A').slice(0, 10), [outsideAll]);
-  const outsideDots = useMemo(() => outsideAll.filter((r) => r.tier === 'B').slice(0, 60), [outsideAll]);
+  // Beyond the radius: a lettered grey pin and a row in the grey list only for places that are really relevant: strong
+  // evidence for this case (tier A) AND a match score close to the best places inside the radius (outsideBar), nearest
+  // first. Other places with strong or moderate evidence (tier A/B) are small grey dots on the map; weaker ones are hidden.
+  const bar = useMemo(() => outsideBar(inside), [inside]);
+  const outside = useMemo(() => outsideAll.filter((r) => r.tier === 'A' && r.score.score >= bar).slice(0, 10), [outsideAll, bar]);
+  const outsideDots = useMemo(() => outsideAll.filter((r) => (r.tier === 'A' || r.tier === 'B') && !outside.includes(r)).slice(0, 60), [outsideAll, outside]);
   const origin = s.place as Point;
   const symptomIds = detectSymptoms(s.freeText, s.chips);
   const ageNum = parseAge(s.ageRaw).age;
@@ -365,11 +369,11 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           {outside.length > 0 && shown.length >= inside.length && (
             <>
               <h2 className="text-[18px] font-bold">Outside your radius</h2>
-              <p className="-mt-2 text-[14px] text-[var(--hc-muted)]">Strong matches for your case just beyond {d(radiusKm)}, nearest first. Letters, not ranks. Other places beyond the radius are small grey dots on the map.</p>
+              <p className="-mt-2 text-[14px] text-[var(--hc-muted)]">Places beyond {d(radiusKm)} that still score {Math.round(bar)} or more, close to the best inside your radius, nearest first. Letters, not ranks. Other places beyond the radius are small grey dots on the map.</p>
               <ul className="flex flex-col gap-2">
                 {outside.map((r, i) => (
                   <li key={r.facility.unique_id}>
-                    <OutsideRow r={r} num={letter(i)} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} />
+                    <OutsideRow r={r} num={letter(i)} unit={unit} reason={outsideReason(r, inside, radiusKm, unit)} onOpen={() => toSelect(r.facility.unique_id)} />
                   </li>
                 ))}
               </ul>
