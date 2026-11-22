@@ -86,7 +86,7 @@ function ScoreDetails({ r }: { r: Ranked }) {
               <li key={i} className={e.flag ? 'rounded bg-[var(--hc-warn-bg)] px-1 text-[var(--hc-warn-text)]' : ''}>
                 {e.text}
                 {e.quote && <> <em>“{e.quote}”</em></>}
-                {e.source && <> <a className="underline" href={e.source} target="_blank" rel="noopener noreferrer">source</a></>}
+                {e.source && <span className="text-[var(--hc-muted)]"> · Source: {e.source}</span>}
                 {e.unknown && <span className="ml-1 rounded border border-[var(--hc-control)] px-1 text-[13px] text-[var(--hc-muted)]">unknown</span>}
               </li>
             ))}

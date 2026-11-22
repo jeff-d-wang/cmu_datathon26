@@ -91,7 +91,7 @@ function bandHi(band: ServiceEvidence['band'] | undefined, truncated: boolean): 
 }
 
 function needEvidence(f: Facility, keys: readonly ServiceKey[], svcs: Map<ServiceKey, ServiceEvidence>): Evidence[] {
-  const src = f.website || undefined;
+  const src = 'facility record';
   const truncated = f.list_truncated;
   return keys.map((k) => {
     const ev = svcs.get(k);
@@ -115,7 +115,7 @@ export function scoreBreakdown(f: Facility, input: ScoreInput): ScoreResult {
     : DEFAULT_NEED_KEYS.map((k) => ({ service: k, weight: 1, critical: false }));
   const wSum = needs.reduce((s, n) => s + Math.max(0.001, n.weight), 0);
   const needKeys = needs.map((n) => n.service);
-  const src = f.website || undefined;
+  const src = 'facility record';
   const comps: ScoreComponent[] = [];
   const add = (id: ComponentId, lo: number, hi: number, evidence: Evidence[]) =>
     comps.push({ id, weight: w[id], lo: w[id] * clamp01(lo), hi: w[id] * clamp01(Math.max(lo, hi)), evidence });
@@ -169,7 +169,7 @@ export function scoreBreakdown(f: Facility, input: ScoreInput): ScoreResult {
   const repEv: Evidence[] = [];
   if (f.says_nabh) repEv.push({ text: 'Mentions NABH accreditation (self-reported)', quote: f.nabh_quote || undefined, source: src });
   if (indep) repEv.push({ text: f.source_class === 'gov' ? 'Found on a government source' : 'Found on a source other than a directory' });
-  if (f.website) repEv.push({ text: 'Has its own website', source: f.website });
+  if (f.website) repEv.push({ text: 'Has its own website', source: f.website.replace(/^https?:\/\//i, '').replace(/\/$/, '') });
   if (!repEv.length) repEv.push({ text: 'No accreditation or independent source found in the data' });
   const rep = (f.says_nabh ? 0.5 : 0) + (indep ? 0.3 : 0) + (f.website ? 0.2 : 0);
   add('reputation', rep, rep, repEv);
