@@ -24,6 +24,7 @@ import { IndiaInset } from '../components/MapPanel';
 import { StreetMap } from '../components/StreetMap';
 import { Building2, ChevronDown, Info, Ruler, ShieldCheck, Siren } from 'lucide-react';
 import { CallLink, Chip, LinkButton, Notice, SampleBadge, ScreenTitle, SecondaryButton, Spinner, titleCase } from '../components/ui';
+import { TeamResults } from './TeamResults';
 import { HowOrdered, TierTag, WarningList, ConfidenceBars, ScoreMeter } from './parts';
 import { COMPONENT_TEXT } from './HowScore';
 
@@ -207,6 +208,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const [showMap, setShowMap] = useState(true);
   const [more, setMore] = useState(0);
   const [showWeak, setShowWeak] = useState(false);
+  const [order, setOrder] = useState<'app' | 'team'>('app');
   const { ranked, needs, radiusKm, widened, auto } = useRankedResults(s, facilities);
   const { inside: insideAll, outside: outsideAll } = useMemo(() => splitByRadius(ranked, radiusKm), [ranked, radiusKm]);
   // The list is every place inside the radius with evidence for this care (tier A/B), in ranked order, paged by "Show more".
@@ -334,6 +336,13 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           <HowOrdered mode={mode} />
           {capped && <Notice status="info">{t('capped_note')}</Notice>}
           {!request && <LayerAPanel a={layerA} tier={layerA.tier} chips={symptomIds} />}
+          <div role="radiogroup" aria-label="Order by">
+            <p className="mb-1 text-[16px] font-semibold">Order by</p>
+            <div className="flex flex-wrap gap-2">
+              <Chip radio on={order === 'app'} onClick={() => setOrder('app')}>Match score</Chip>
+              <Chip radio on={order === 'team'} onClick={() => setOrder('team')}>Team evidence ranking</Chip>
+            </div>
+          </div>
           <div role="group" aria-label={t('filter_title')}>
             <p className="mb-1 text-[16px] font-semibold">{t('filter_title')}</p>
             <div className="flex flex-wrap gap-2">
@@ -350,6 +359,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               Numbers are places within {d(radiusKm)} that list it. {t('truncation_note')}
             </p>
           </div>
+          {order === 'team' ? <TeamResults needs={needs} facilities={facilities} onOpen={toSelect} unit={unit} /> : <>
           {warming && <Spinner label={t('warehouse_starting')} />}
           {loading && !warming && <Spinner label={t('loading_results')} />}
           {error && <Notice status="bad">{t('error_data')} ({error})</Notice>}
@@ -408,6 +418,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               )}
             </>
           )}
+          </>}
           <ShareBar />
         </>
       }

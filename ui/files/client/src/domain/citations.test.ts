@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalSpecialties, channelsFor, items, quotesFor, serviceTerms, sourceDomains, type FacilityRecord } from './citations';
+import { canonicalSpecialties, channelsFor, items, pipelinePhrases, quotesFor, serviceTerms, sourceDomains, type FacilityRecord } from './citations';
 
 const rec: FacilityRecord = {
   description: 'Mars Specialty Clinic is a General Surgery Clinic in Patna. Some of the services provided are Obstetrician and treatment for IBS.',
@@ -9,6 +9,7 @@ const rec: FacilityRecord = {
   capability: '["Multi-speciality clinic","Has 4 doctors on staff"]',
   source_urls: '["https://www.practo.com/patna/clinic/mars","https://www.lybrate.com/patna/clinic/mars",null]',
   specialties_canon: 'gynecologyAndObstetrics|nephrology',
+  matched_phrases: '{"gynecologyAndObstetrics":["procedure~Offers obstetric care services","capability~Centre of excellence for Maternity","bogus~x"]}',
   channels: 'gynecologyAndObstetrics:capability,description,procedure,specialty_claim|generalSurgery:capability',
 };
 
@@ -34,6 +35,21 @@ describe('citations', () => {
   });
   it('gives source domains as text', () => {
     expect(sourceDomains(rec)).toEqual(['practo.com', 'lybrate.com']);
+  });
+});
+
+describe('pipelinePhrases', () => {
+  it('parses phrases', () => {
+    expect(pipelinePhrases(rec, 'gynecologyAndObstetrics')).toEqual([
+      { text: 'Offers obstetric care services', field: 'procedures' },
+      { text: 'Centre of excellence for Maternity', field: 'capability' },
+    ]);
+  });
+  it('returns [] for bad JSON', () => {
+    expect(pipelinePhrases({ ...rec, matched_phrases: '{nope' }, 'gynecologyAndObstetrics')).toEqual([]);
+  });
+  it('returns [] for unknown key', () => {
+    expect(pipelinePhrases(rec, 'dialysis')).toEqual([]);
   });
 });
 

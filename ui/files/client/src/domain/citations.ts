@@ -14,6 +14,8 @@ export interface FacilityRecord {
   channels: string;
   /** Catalog service keys from platinum.facility_specialty, joined by '|'. */
   specialties_canon: string;
+  /** JSON object: service key -> up to 4 "<channel>~<record phrase>" strings the team pipeline matched. */
+  matched_phrases: string;
 }
 
 export function canonicalSpecialties(record: FacilityRecord): string[] {
@@ -125,4 +127,27 @@ export function channelsFor(record: FacilityRecord, key: string): string[] {
 /** Website domains the record was built from, as plain text references (not links). */
 export function sourceDomains(record: FacilityRecord): string[] {
   return [...new Set(items(record.source_urls).map((u) => u.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split(/[/?#]/)[0]).filter(Boolean))];
+}
+
+const PHRASE_FIELD: Record<string, RecordField> = { procedure: 'procedures', equipment: 'equipment', capability: 'capability' };
+
+/** The exact record phrases the team pipeline matched to this service (from facility_record.sql); [] when none or unparsable. */
+export function pipelinePhrases(record: FacilityRecord, key: string): Quote[] {
+  try {
+    const v: unknown = JSON.parse(record.matched_phrases || '{}');
+    const arr = v && typeof v === 'object' ? (v as Record<string, unknown>)[key] : undefined;
+    if (!Array.isArray(arr)) return [];
+    const out: Quote[] = [];
+    for (const s of arr) {
+      if (typeof s !== 'string') continue;
+      const i = s.indexOf('~');
+      const field = PHRASE_FIELD[s.slice(0, i)];
+      const text = s.slice(i + 1).trim();
+      if (i < 0 || !field || !text) continue;
+      out.push({ text: text.length > 220 ? `${text.slice(0, 217)}…` : text, field });
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }

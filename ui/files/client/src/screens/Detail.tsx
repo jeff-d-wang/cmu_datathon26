@@ -8,7 +8,7 @@ import { isRelevant, type Ranked } from '../domain/ranking';
 import type { Facility } from '../domain/types';
 import { Candidates, DATA_SOURCE, FacilityRecordQuery } from '../data/source';
 import { requiredService } from '../domain/requests';
-import { canonicalSpecialties, channelsFor, FIELD_LABEL, quotesFor, sourceDomains, type FacilityRecord, type Quote } from '../domain/citations';
+import { canonicalSpecialties, channelsFor, FIELD_LABEL, pipelinePhrases, quotesFor, sourceDomains, type FacilityRecord, type Quote } from '../domain/citations';
 import { EngineDetail } from './EngineDetail';
 import { Shell } from '../components/Shell';
 import { StreetMap } from '../components/StreetMap';
@@ -43,9 +43,10 @@ function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank
   const origin = s.place as Point;
   // Needed services first (band status; a missing need shows as unknown), then ICU/emergency/NABH rows.
   const emergencyClaimed = f.emergency_quote !== '' || f.claims_247 || svcs.has('emergencyCare');
-  const rows: { name: string; status: Status; statusText: string; evidence: string; quotes?: Quote[]; found?: string[]; rule?: string }[] = [
+  const rows: { name: string; status: Status; statusText: string; evidence: string; quotes?: Quote[]; matchedByPipeline?: boolean; found?: string[]; rule?: string }[] = [
     ...needs.slice(0, 8).map((n) => {
       const ev = svcs.get(n.service);
+      const pp = record ? pipelinePhrases(record, n.service) : [];
       const good = ev !== undefined && (ev.band === 'high' || ev.band === 'medium');
       return {
         name: serviceName(n.service),
@@ -53,7 +54,8 @@ function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank
         statusText: ev ? (good ? t('st_listed') : t('st_claimed')) : t('st_unknown'),
         evidence: ev ? `${BAND_LABEL[ev.band]} · ${t('mentioned_n', { n: ev.channels || 1 })}` : t('unknown_evidence'),
         // The facility's own words for this service, and which record fields the evidence came from.
-        quotes: record ? quotesFor(record, n.service, serviceName(n.service)) : undefined,
+        quotes: record ? (pp.length ? pp : quotesFor(record, n.service, serviceName(n.service))) : undefined,
+        matchedByPipeline: pp.length > 0,
         found: record ? channelsFor(record, n.service) : undefined,
         rule: ruleText(n.service, ev?.missing ?? 0) || undefined,
       };
@@ -117,6 +119,7 @@ function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank
                     <td className="py-1.5 pr-2"><StatusTag status={row.status}>{row.statusText}</StatusTag></td>
                     <td className="py-1.5 text-[14px]">
                       {row.evidence}
+                      {row.matchedByPipeline && <p className="mt-1 text-[13px] text-[var(--hc-muted)]">Phrases the team pipeline matched to this service:</p>}
                       {row.quotes && row.quotes.length > 0 && (
                         <ul className="mt-1 flex flex-col gap-1">
                           {row.quotes.map((q) => <li key={q.text}><q className="italic">{q.text}</q> <span className="text-[var(--hc-muted)]">· from its {FIELD_LABEL[q.field]}</span></li>)}

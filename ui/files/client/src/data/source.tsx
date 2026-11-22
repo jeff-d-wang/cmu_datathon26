@@ -28,6 +28,7 @@ export interface Loaded<T> {
 
 const bool = (v: unknown) => v === true || v === 'true';
 const num = (v: unknown): number | null => (v === null || v === undefined || v === '' ? null : Number(v));
+const jtext = (v: unknown): string => (v === null || v === undefined ? '' : typeof v === 'object' ? JSON.stringify(v) : str(v));
 const str = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' || typeof v === 'boolean' ? String(v) : '');
 
 /** Typed mapper for the 35-column platinum contract (config/queries/candidates.sql). */
@@ -180,9 +181,10 @@ export function FacilityRecordQuery({ id, children }: { id: string; children: (r
   const record = useMemo<FacilityRecord | null>(() => {
     const r = data?.[0];
     return r ? {
-      description: str(r.description), specialties: str(r.specialties), procedures: str(r.procedures), equipment: str(r.equipment),
-      capability: str(r.capability), source_urls: str(r.source_urls), channels: str(r.channels),
-      specialties_canon: str(r.specialties_canon),
+      // The server parses JSON-looking text into arrays/objects; turn those back into JSON text for the parsers.
+      description: jtext(r.description), specialties: jtext(r.specialties), procedures: jtext(r.procedures), equipment: jtext(r.equipment),
+      capability: jtext(r.capability), source_urls: jtext(r.source_urls), channels: jtext(r.channels),
+      specialties_canon: jtext(r.specialties_canon), matched_phrases: jtext(r.matched_phrases),
     } : null;
   }, [data]);
   return <>{children(record)}</>;
