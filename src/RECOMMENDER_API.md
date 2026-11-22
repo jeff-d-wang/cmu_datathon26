@@ -1,9 +1,9 @@
-# Recommender Integration Guide — web app / AI onboarding
+# Recommender Integration Guide — backend wiring for the web app
 
-This document is the single source of truth for wiring a frontend (or an AI
-assistant) to the hybrid recommender. It assumes no prior context: read top
-
-to bottom and you know what to build.
+This document is the single source of truth for **integrating the recommender
+logic and data into an existing frontend**. It assumes the UI is already
+designed; it covers the call, the inputs, the response schema, the data
+semantics, and nothing about visual design.
 
 ## 1. What this layer is
 
@@ -113,8 +113,7 @@ result = evidence_card(spark, symptoms, context, pin, top_n)
 Quote `evidence_status` values (facility-side evidence grading):
 `documented_multi` (verbatim text in 2+ source fields — strongest) >
 `documented_single` (verbatim text in one field) > `structured_field` (from a
-structured column) > `tag_only` (tokenized match only — weakest, consider
-showing as "weakly documented").
+structured column) > `tag_only` (tokenized match only — weakest evidence grade).
 
 Confidence `band` values: `high` (1.0) > `medium` (0.5) > `unverified` (0.3) >
 `low` (0.05). A need missing from a facility appears in `unmet`, not with a
@@ -129,16 +128,17 @@ band — never render silence as absence.
 * **No matches anywhere**: still returns cards or an explicit banner — the
   response is never empty without an explanation.
 
-## 4. What the UI must render (rubric-critical)
+## 4. Content obligations (not design)
 
-1. Per facility: score, distance, class, NABH — plus per-need band chips and
-   the **verbatim quotes** (the rubric requires citing facility text).
-2. The **unmet section** with the unknown-not-disproven note — missing data is
-   a feature of the answer, not an error.
-3. **Banners** verbatim — they are the honest disclosure of every fallback.
-4. Provenance labels next to weights (CI vs LLM-estimated vs expert-set).
-5. Fixed disclaimer: **routing aid, not a diagnosis**; emergencies call 112
-   (national) / 108 (ambulance).
+The response already carries everything the rubric requires; these are the
+items that must stay visible somewhere in whatever UI exists:
+
+* the **verbatim quotes** (rubric: cite the facility text for important claims)
+* the **uncertainty labels** (CI vs LLM-estimated vs expert-set)
+* the **unmet list** — missing services are part of the answer, not an error
+* the **banners** — every fallback is disclosed in them
+* the fixed disclaimer: **routing aid, not a diagnosis**; emergencies call
+  112 (national) / 108 (ambulance)
 
 ## 5. Data dependencies
 
