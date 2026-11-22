@@ -2,7 +2,9 @@ import { useRef, useState } from 'react';
 import { Search } from 'lucide-react';
 import { useFlow } from '../flow/context';
 import { useT } from '../i18n';
-import { QUICK_REQUESTS, requestById, searchRequests } from '../domain/requests';
+import { QUICK_REQUESTS, requestById, requiredService, searchRequests } from '../domain/requests';
+import { Candidates } from '../data/source';
+import { coarseBBox, FETCH_RADIUS_KM } from '../domain/geo';
 import { ruleText, serviceName } from '../domain/services';
 import { Shell } from '../components/Shell';
 import { Chip, LinkButton, PrimaryButton, ScreenTitle, StepHeader } from '../components/ui';
@@ -110,6 +112,8 @@ export function ServiceScreen() {
             </section>
           )}
           <PrimaryButton disabled={!req} onClick={() => dispatch({ type: 'go', screen: 'results' })}>{t('continue')}</PrimaryButton>
+          {/* Start the service-filtered search as soon as a service is picked, so results are ready on Continue. */}
+          {req && s.place && <Candidates bbox={coarseBBox(s.place, FETCH_RADIUS_KM)} service={requiredService(s.service)}>{() => null}</Candidates>}
           <LinkButton className="self-start" onClick={() => dispatch({ type: 'go', screen: 'who' })}>Add patient details (optional)</LinkButton>
         </>
       }

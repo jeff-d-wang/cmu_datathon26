@@ -15,7 +15,7 @@ import { requestById, requiredService } from '../domain/requests';
 import { LayerAPanel } from './CarePanels';
 import { parseAge } from '../domain/redflags';
 import type { Facility } from '../domain/types';
-import { Candidates, DATA_SOURCE } from '../data/source';
+import { Candidates, DATA_SOURCE, FacilityRecordQuery } from '../data/source';
 import { DistrictPanel } from './DistrictPanel';
 import { EngineResults } from './EngineResults';
 import { EngineCandidates } from '../engine/live';
@@ -102,7 +102,7 @@ function ScoreDetails({ r }: { r: Ranked }) {
   );
 }
 
-function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number; onOpen: () => void; muted?: boolean; unit: 'km' | 'mi' }) {
+function ResultCard({ r, rank, onOpen, onPrefetch, muted, unit }: { r: Ranked; rank: number; onOpen: () => void; onPrefetch?: () => void; muted?: boolean; unit: 'km' | 'mi' }) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const sc = r.score;
@@ -150,7 +150,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
       )}
       <div className="flex gap-2">
         {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={t('call')} className="flex min-h-11 flex-1 items-center justify-center rounded-[var(--hc-r-control)] bg-[var(--hc-primary)] px-3 text-[16px] font-semibold text-white hover:bg-[var(--hc-primary-dark)]" />}
-        <SecondaryButton className="flex-1" onClick={onOpen} aria-label={`${t('full_details')}: ${f.name}`}>{t('full_details')}</SecondaryButton>
+        <span className="flex flex-1" onMouseEnter={onPrefetch} onFocus={onPrefetch}><SecondaryButton className="flex-1" onClick={onOpen} aria-label={`${t('full_details')}: ${f.name}`}>{t('full_details')}</SecondaryButton></span>
       </div>
     </article>
   );
@@ -207,6 +207,9 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const t = useT();
   const [showMap, setShowMap] = useState(true);
   const [more, setMore] = useState(0);
+  // Details-page records load in the background: the first 3 results, plus any place whose 'Full details' is hovered or focused.
+  const [warm, setWarm] = useState<string[]>([]);
+  const warmRecord = (id: string) => setWarm((w) => (w.includes(id) ? w : [...w, id].slice(-8)));
   const [showWeak, setShowWeak] = useState(false);
   const [order, setOrder] = useState<'app' | 'team'>('app');
   const { ranked, needs, radiusKm, widened, auto } = useRankedResults(s, facilities);
@@ -379,7 +382,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           )}
           <h2 className="sr-only">{t('matches_heading')}</h2>
           {shown.map((r, i) => (
-            <ResultCard key={r.facility.unique_id} r={r} rank={i + 1} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} />
+            <ResultCard key={r.facility.unique_id} r={r} rank={i + 1} unit={unit} onOpen={() => toSelect(r.facility.unique_id)} onPrefetch={() => warmRecord(r.facility.unique_id)} />
           ))}
           {(inside.length > shown.length || more > 0) && (
             <div className="flex gap-2">
@@ -419,6 +422,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
             </>
           )}
           </>}
+          {[...new Set([...shown.slice(0, 3).map((r) => r.facility.unique_id), ...warm])].map((id) => <FacilityRecordQuery key={id} id={id}>{() => null}</FacilityRecordQuery>)}
           <ShareBar />
         </>
       }
