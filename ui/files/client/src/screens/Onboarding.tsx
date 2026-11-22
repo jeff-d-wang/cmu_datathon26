@@ -14,8 +14,8 @@ import { FETCH_LIMIT } from './Results';
 
 const INTENTS: { id: Intent; title: StringKey; sub: StringKey; Icon: typeof Phone }[] = [
   { id: 'now', title: 'intent_now', sub: 'intent_now_sub', Icon: Phone },
+  { id: 'service', title: 'intent_service', sub: 'intent_service_sub', Icon: ClipboardList },
   { id: 'soon', title: 'intent_soon', sub: 'intent_soon_sub', Icon: MapPin },
-  { id: 'surgery', title: 'intent_surgery', sub: 'intent_surgery_sub', Icon: ClipboardList },
 ];
 
 export function IntentScreen() {
@@ -30,7 +30,7 @@ export function IntentScreen() {
     }
     dispatch({ type: 'set', patch: { intent: id } });
   };
-  const next = () => dispatch({ type: 'go', screen: 'who' });
+  const next = () => dispatch({ type: 'go', screen: s.intent === 'service' ? 'service' : 'who' });
   return (
     <Shell
       left={<IntroPanel note={t('map_intro')} />}
@@ -58,7 +58,7 @@ export function IntentScreen() {
 const GENERIC_NOTE = 'Your answers narrow down the places near you to the ones that fit.';
 
 /** Count comes from the shared, already-cached candidates query (same bbox as Results). */
-function PlaceCountPanel() {
+export function PlaceCountPanel() {
   const { s } = useFlow();
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!s.place || !bbox) return <IntroPanel note={GENERIC_NOTE} />;
@@ -79,6 +79,7 @@ export function WhoScreen() {
   const { s, dispatch } = useFlow();
   const t = useT();
   const age = parseAge(s.ageRaw);
+  const after = s.intent === 'service' ? 'results' : 'symptoms';
   const set = (patch: Partial<FlowState>) => dispatch({ type: 'set', patch });
   const conds: { key: keyof typeof s.conditions; label: StringKey }[] = [
     { key: 'pregnant', label: 'cond_pregnant' },
@@ -132,8 +133,8 @@ export function WhoScreen() {
           <p className="text-[15px] text-[var(--hc-muted)]">
             <strong>{t('why_we_ask')}</strong> {t('who_why')}
           </p>
-          <PrimaryButton disabled={!age.ok} onClick={() => dispatch({ type: 'go', screen: 'symptoms' })}>{t('continue')}</PrimaryButton>
-          <LinkButton className="self-start" onClick={() => dispatch({ type: 'go', screen: 'symptoms' })}>{t('skip')}</LinkButton>
+          <PrimaryButton disabled={!age.ok} onClick={() => dispatch({ type: 'go', screen: after })}>{t('continue')}</PrimaryButton>
+          <LinkButton className="self-start" onClick={() => dispatch({ type: 'go', screen: after })}>{t('skip')}</LinkButton>
         </>
       }
     />

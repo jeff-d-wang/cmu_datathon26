@@ -11,6 +11,7 @@ import { assessLayerA, CARE_LEVEL_LABEL } from '../domain/severity';
 import { splitByRadius } from '../domain/radius';
 import { outsideBar, outsideReason } from '../domain/outside';
 import { WEIGHTS, type ComponentId } from '../domain/score';
+import { requestById } from '../domain/requests';
 import { LayerAPanel } from './CarePanels';
 import { parseAge } from '../domain/redflags';
 import type { Facility } from '../domain/types';
@@ -39,10 +40,11 @@ export function useRankedResults(s: FlowState, facilities: Facility[]) {
     if (!s.place) return { ranked: [] as Ranked[], needs: [] as Need[], radiusKm: 25, widened: false, auto: true };
     const origin: Point = s.place;
     const age = parseAge(s.ageRaw).age;
-    const mode = modeFor(s.intent);
+    const mode = modeFor(s.intent, s.service);
+    const request = s.intent === 'service' && s.service ? requestById(s.service) : undefined;
     // Symptom rules -> weighted needs vector over the 192-service catalog, built in the
     // browser (Layer A). Critical needs hard-filter; the rest only order.
-    const needs = needsForSymptoms(detectSymptoms(s.freeText, s.chips), mode);
+    const needs = request ? request.needs : needsForSymptoms(detectSymptoms(s.freeText, s.chips), mode);
     const pool = facilities.filter(
       (f) => (s.ownership === 'any' || f.ownership === s.ownership) && (s.serviceFilter === 'any' || parseServices(f.services).has(s.serviceFilter)),
     );
@@ -51,7 +53,7 @@ export function useRankedResults(s: FlowState, facilities: Facility[]) {
     const auto = chooseRadius(all.filter(isRelevant).map((r) => r.km), s.showN);
     const radiusKm = s.radiusKm ?? auto.radiusKm;
     return { ranked: all, needs, radiusKm, widened: s.radiusKm === null && auto.widened, auto: s.radiusKm === null };
-  }, [s.radiusKm, s.place, s.ageRaw, s.intent, s.freeText, s.chips, s.serviceFilter, s.ownership, s.conditions, s.showN, s.unit, facilities]);
+  }, [s.radiusKm, s.place, s.ageRaw, s.intent, s.service, s.freeText, s.chips, s.serviceFilter, s.ownership, s.conditions, s.showN, s.unit, facilities]);
 }
 
 function ShareBar() {
@@ -220,9 +222,10 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
   const origin = s.place as Point;
   const symptomIds = detectSymptoms(s.freeText, s.chips);
   const ageNum = parseAge(s.ageRaw).age;
-  const mode = modeFor(s.intent);
+  const mode = modeFor(s.intent, s.service);
+  const request = s.intent === 'service' && s.service ? requestById(s.service) : undefined;
   const layerA = useMemo(() => assessLayerA(symptomIds, false, mode, ageNum !== null && ageNum < 18), [symptomIds, mode, ageNum]);
-  const chestFirst = showsEmergencyBannerFirst(symptomIds);
+  const chestFirst = !request && showsEmergencyBannerFirst(symptomIds);
   const capped = !sample && facilities.length >= FETCH_LIMIT;
   const set = (patch: Partial<FlowState>) => dispatch({ type: 'set', patch });
   const unit = s.unit;
@@ -282,11 +285,18 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
           <Assumed
             rows={[
               { label: 'Place', value: s.place ? [s.place.district, s.place.state].filter(Boolean).map(titleCase).join(', ') : '', screen: 'place' },
-              { label: 'Need', value: s.intent === 'surgery' ? t('intent_surgery') : t('intent_soon'), screen: 'intent' },
-              { label: 'Patient', value: patient, screen: 'who' },
-              { label: 'Symptoms', value: symptomIds.map((id) => symptomLabel(t, id)).join(', '), screen: 'symptoms' },
-              { label: 'Severity', value: t(`tier_${layerA.tier}` as StringKey), screen: null },
-              { label: 'Care level', value: layerA.careLevels.map(CARE_LEVEL_LABEL).join(', '), screen: null },
+              ...(request
+                ? [
+                    { label: 'Service', value: request.name, screen: 'service' as const },
+                    { label: 'Patient', value: patient, screen: 'who' as const },
+                  ]
+                : [
+                    { label: 'Need', value: t('intent_soon'), screen: 'intent' as const },
+                    { label: 'Patient', value: patient, screen: 'who' as const },
+                    { label: 'Symptoms', value: symptomIds.map((id) => symptomLabel(t, id)).join(', '), screen: 'symptoms' as const },
+                    { label: 'Severity', value: t(`tier_${layerA.tier}` as StringKey), screen: null },
+                    { label: 'Care level', value: layerA.careLevels.map(CARE_LEVEL_LABEL).join(', '), screen: null },
+                  ]),
               { label: 'Radius', value: `${d(radiusKm)}${auto ? ' (automatic)' : ''}`, screen: null },
               { label: 'What changed the order', value: `Mostly ${top2.join(' and ')}.${condNotes.length ? ` ${condNotes.join('; ')}.` : ''}`, screen: null },
             ]}
@@ -296,6 +306,7 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               <ScreenTitle>{(inside.length === 1 ? t('match_title_one') : t('matches_title', { n: inside.length }))}</ScreenTitle>
               {sample && <SampleBadge />}
             </div>
+            {request?.note && <Notice status="info">{request.note}</Notice>}
             <p role="status" className="sr-only">{(inside.length === 1 ? t('match_title_one') : t('matches_title', { n: inside.length }))}</p>
             <p className="text-[15px] text-[var(--hc-muted)]">Scores have a range. The range is wide when we do not know much about this place.</p>
             <LinkButton className="self-start" onClick={() => dispatch({ type: 'go', screen: 'howscore' })}>How we score</LinkButton>
@@ -317,10 +328,10 @@ function ResultsBody({ facilities, loading, error, warming, sample }: { faciliti
               <p className="flex items-start gap-1.5 text-[15px] text-[var(--hc-primary-dark)]"><Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{t('widened', { from: d(25), to: d(radiusKm) })}</p>
             )}
           </div>
-          <p className="text-[15px] text-[var(--hc-muted)]">{t('matches_note', { order: t(mode === 'urgent' ? 'order_urgent' : 'order_planned') })}</p>
+          <p className="text-[15px] text-[var(--hc-muted)]">{t('matches_note', { order: request ? `evidence that they offer ${request.name.toLowerCase()}` : t(mode === 'urgent' ? 'order_urgent' : 'order_planned') })}</p>
           <HowOrdered mode={mode} />
           {capped && <Notice status="info">{t('capped_note')}</Notice>}
-          <LayerAPanel a={layerA} tier={layerA.tier} />
+          {!request && <LayerAPanel a={layerA} tier={layerA.tier} />}
           <div role="group" aria-label={t('filter_title')}>
             <p className="mb-1 text-[16px] font-semibold">{t('filter_title')}</p>
             <div className="flex flex-wrap gap-2">

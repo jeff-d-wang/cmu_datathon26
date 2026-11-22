@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import type { FacilityRecord } from '../domain/citations';
 import { useAnalyticsQuery } from '@databricks/appkit-ui/react';
 import { sql } from '@databricks/appkit-ui/js';
 import type { Facility } from '../domain/types';
@@ -164,3 +165,20 @@ export function Needs({ prompt, children }: { prompt: string; children: (l: Load
   return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
 }
 
+
+/**
+ * One facility's own record text (config/queries/facility_record.sql), loaded only on the details page so every
+ * service claim there can quote the facility's text. Null while loading or if the query fails (the page still works).
+ */
+export function FacilityRecordQuery({ id, children }: { id: string; children: (record: FacilityRecord | null) => ReactNode }) {
+  const params = useMemo(() => ({ id: sql.string(id) }), [id]);
+  const { data } = useAnalyticsQuery('facility_record', params);
+  const record = useMemo<FacilityRecord | null>(() => {
+    const r = data?.[0];
+    return r ? {
+      description: str(r.description), specialties: str(r.specialties), procedures: str(r.procedures), equipment: str(r.equipment),
+      capability: str(r.capability), source_urls: str(r.source_urls), channels: str(r.channels),
+    } : null;
+  }, [data]);
+  return <>{children(record)}</>;
+}

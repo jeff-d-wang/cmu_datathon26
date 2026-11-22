@@ -3,10 +3,11 @@ import type { Conditions, Mode } from '../domain/types';
 import { isServiceKey } from '../domain/services';
 import type { Place } from '../domain/places';
 import type { Lang } from '../i18n';
+import { requestById } from '../domain/requests';
 
-export type Screen = 'place' | 'intent' | 'emergency' | 'who' | 'symptoms' | 'results' | 'detail' | 'howscore';
+export type Screen = 'place' | 'intent' | 'service' | 'emergency' | 'who' | 'symptoms' | 'results' | 'detail' | 'howscore';
 export type DistanceUnit = 'km' | 'mi';
-export type Intent = 'now' | 'soon' | 'surgery';
+export type Intent = 'now' | 'soon' | 'service';
 export type Ownership = 'any' | 'private' | 'public';
 
 /** All state lives in memory only. Nothing is written to cookies or localStorage. */
@@ -15,6 +16,8 @@ export interface FlowState {
   returnTo: Screen | null;
   lang: Lang;
   intent: Intent | null;
+  /** A ServiceRequest id (domain/requests.ts) when intent is 'service'. */
+  service: string | null;
   forSelf: boolean | null;
   ageRaw: string;
   sex: 'woman' | 'man' | 'other' | null;
@@ -39,6 +42,7 @@ export const initialState = (lang: Lang = 'en'): FlowState => ({
   returnTo: null,
   lang,
   intent: null,
+  service: null,
   forSelf: null,
   ageRaw: '',
   sex: null,
@@ -56,7 +60,8 @@ export const initialState = (lang: Lang = 'en'): FlowState => ({
   selectedId: null,
 });
 
-export const modeFor = (intent: Intent | null): Mode => (intent === 'surgery' ? 'planned' : 'urgent');
+export const modeFor = (intent: Intent | null, serviceId?: string | null): Mode =>
+  intent === 'service' ? (serviceId && requestById(serviceId)?.urgent ? 'urgent' : 'planned') : 'urgent';
 
 export type Action =
   | { type: 'go'; screen: Screen }
@@ -118,7 +123,7 @@ export function fromFragment(hash: string, base: FlowState): FlowState {
   return {
     ...next,
     screen: 'results',
-    intent: need === 'surgery' ? 'surgery' : 'soon',
+    intent: need === 'service' || need === 'surgery' ? 'service' : 'soon',
     place: { kind: 'shared', code: p.get('place') ?? '', district: p.get('place') ?? '', state: p.get('st') ?? '', towns: '', lat, lon },
     state: p.get('st') ?? '',
     ownership: own === 'private' || own === 'public' ? own : 'any',

@@ -10,7 +10,7 @@ test('engine clean: Jaipur 302001, chest pressure shows heading, needs, real pin
   await page.getByLabel('District, town or PIN').fill('302001');
   await page.getByRole('option', { name: /302001/ }).first().click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: /Find health care near me/ }).click();
+  await page.getByRole('radio', { name: /I have symptoms/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Chest pressure' }).click();
@@ -35,7 +35,7 @@ test('engine clean: Delhi shows all places, outside rows, details, no forbidden 
   await page.getByLabel('District, town or PIN').fill('110001');
   await page.getByRole('option', { name: /110001/ }).first().click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: /Find health care near me/ }).click();
+  await page.getByRole('radio', { name: /I have symptoms/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Chest pressure' }).click();
@@ -105,7 +105,7 @@ test('engine clean: mobile 390x844 hides the map on step 1 and shows a strip on 
   await page.getByRole('option', { name: /110001/ }).first().click();
   await expect(page.locator('.leaflet-container')).toHaveCount(0);
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: /Find health care near me/ }).click();
+  await page.getByRole('radio', { name: /I have symptoms/ }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Chest pressure' }).click();

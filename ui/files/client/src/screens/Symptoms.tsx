@@ -6,6 +6,7 @@ import { symptomLabel, useT } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { checkRedFlags, isHardFlag, parseAge, redFlagWordsIn, type SafetyChecks } from '../domain/redflags';
 import { detectSymptoms, isOwnWords, normalise, OWN_PREFIX, ownWordsText, QUICK_PICK_IDS, suggestSymptoms } from '../domain/symptoms';
+import { requestById } from '../domain/requests';
 import { placeLabel, placeTowns, searchPlaces, type Place } from '../domain/places';
 import { Candidates, Places, States } from '../data/source';
 import { coarseBBox, FETCH_RADIUS_KM } from '../domain/geo';
@@ -238,7 +239,7 @@ export function SymptomsScreen() {
   const t = useT();
   const set = (patch: Partial<FlowState>) => dispatch({ type: 'set', patch });
   const age = parseAge(s.ageRaw).age;
-  const needText = s.intent === 'surgery' ? t('intent_surgery') : t('intent_soon');
+  const needText = s.intent === 'service' ? (requestById(s.service ?? '')?.name ?? t('intent_service')) : t('intent_soon');
   const patientText = [s.sex ? t(s.sex === 'other' ? 'sex_other' : s.sex) : null, age !== null ? String(age) : null].filter(Boolean).join(', ') || '—';
 
   const liveFlags = checkRedFlags({ safety: s.safety, freeText: [s.freeText, ...s.chips.filter(isOwnWords).map(ownWordsText)].join(' '), symptomIds: detectSymptoms(s.freeText, s.chips), age, diabetes: s.conditions.diabetes });

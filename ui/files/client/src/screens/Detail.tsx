@@ -6,7 +6,8 @@ import { BAND_LABEL, parseServices, serviceName, type Need } from '../domain/ser
 import { coarseBBox, FETCH_RADIUS_KM, formatDistance, type Point } from '../domain/geo';
 import { isRelevant, type Ranked } from '../domain/ranking';
 import type { Facility } from '../domain/types';
-import { Candidates, DATA_SOURCE } from '../data/source';
+import { Candidates, DATA_SOURCE, FacilityRecordQuery } from '../data/source';
+import { channelsFor, FIELD_LABEL, quotesFor, sourceDomains, type FacilityRecord, type Quote } from '../domain/citations';
 import { EngineDetail } from './EngineDetail';
 import { Shell } from '../components/Shell';
 import { StreetMap } from '../components/StreetMap';
@@ -32,7 +33,7 @@ function PhoneValue({ number, sharedBy }: { number: string; sharedBy: number }) 
   );
 }
 
-function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number | null; total: number; sample: boolean; needs: readonly Need[] }) {
+function DetailBody({ r, rank, total, sample, needs, record }: { r: Ranked; rank: number | null; total: number; sample: boolean; needs: readonly Need[]; record: FacilityRecord | null }) {
   const { s, dispatch } = useFlow();
   const t = useT();
   const f = r.facility;
@@ -41,7 +42,7 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
   const origin = s.place as Point;
   // Needed services first (band status; a missing need shows as unknown), then ICU/emergency/NABH rows.
   const emergencyClaimed = f.emergency_quote !== '' || f.claims_247 || svcs.has('emergencyCare');
-  const rows: { name: string; status: Status; statusText: string; evidence: string }[] = [
+  const rows: { name: string; status: Status; statusText: string; evidence: string; quotes?: Quote[]; found?: string[] }[] = [
     ...needs.slice(0, 8).map((n) => {
       const ev = svcs.get(n.service);
       const good = ev !== undefined && (ev.band === 'high' || ev.band === 'medium');
@@ -50,6 +51,9 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
         status: (ev ? (good ? 'ok' : 'warn') : 'unknown') as Status,
         statusText: ev ? (good ? t('st_listed') : t('st_claimed')) : t('st_unknown'),
         evidence: ev ? `${BAND_LABEL[ev.band]} · ${t('mentioned_n', { n: ev.channels || 1 })}` : t('unknown_evidence'),
+        // The facility's own words for this service, and which record fields the evidence came from.
+        quotes: record ? quotesFor(record, n.service, serviceName(n.service)) : undefined,
+        found: record ? channelsFor(record, n.service) : undefined,
       };
     }),
     f.icu_quote
@@ -109,13 +113,31 @@ function DetailBody({ r, rank, total, sample, needs }: { r: Ranked; rank: number
                   <tr key={row.name} className="border-b border-[#e7eae8] align-top">
                     <td className="py-1.5 pr-2 font-medium">{row.name}</td>
                     <td className="py-1.5 pr-2"><StatusTag status={row.status}>{row.statusText}</StatusTag></td>
-                    <td className="py-1.5 text-[14px]">{row.evidence}</td>
+                    <td className="py-1.5 text-[14px]">
+                      {row.evidence}
+                      {row.quotes && row.quotes.length > 0 && (
+                        <ul className="mt-1 flex flex-col gap-1">
+                          {row.quotes.map((q) => <li key={q.text}><q className="italic">{q.text}</q> <span className="text-[var(--hc-muted)]">· from its {FIELD_LABEL[q.field]}</span></li>)}
+                        </ul>
+                      )}
+                      {row.quotes && row.quotes.length === 0 && row.status !== 'unknown' && <p className="mt-1 text-[var(--hc-muted)]">No sentence in this record&apos;s text names it directly{row.found && row.found.length > 0 ? '' : '; the evidence comes from its tags'}.</p>}
+                      {row.found && row.found.length > 0 && <p className="mt-1 text-[var(--hc-muted)]">Found in its {row.found.join(', ')}.</p>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {f.list_truncated && <p className="mt-2 flex items-start gap-1.5 text-[15px] text-[var(--hc-muted)]"><Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{t('data_note_truncated')}</p>}
           </Section>
+
+          {record && (record.description || sourceDomains(record).length > 0) && (
+            <Section title="From the facility's record">
+              {record.description && <blockquote className="border-l-4 border-[var(--hc-border)] pl-3 text-[15px] italic">{record.description}</blockquote>}
+              {sourceDomains(record).length > 0 && (
+                <p className="mt-2 text-[14px] text-[var(--hc-muted)]">Collected from: {sourceDomains(record).join(', ')}. These are claims taken from the web, not verified by us.</p>
+              )}
+            </Section>
+          )}
 
           <Section title={t('ask_title')}>
             <ul className="list-disc space-y-1 pl-5 text-[15px]">
@@ -162,7 +184,7 @@ function DetailFromData({ facilities, loading, sample }: { facilities: Facility[
   if (loading) return <div className="p-6"><Spinner label={t('loading_results')} /></div>;
   if (!r) return <div className="p-6"><Notice status="unknown">{t('no_results')}</Notice></div>;
   const idx = listed.indexOf(r);
-  return <DetailBody r={r} rank={idx >= 0 ? idx + 1 : null} total={listed.length} sample={sample} needs={needs} />;
+  return <FacilityRecordQuery id={r.facility.unique_id}>{(record) => <DetailBody r={r} rank={idx >= 0 ? idx + 1 : null} total={listed.length} sample={sample} needs={needs} record={record} />}</FacilityRecordQuery>;
 }
 
 export function DetailScreen() {

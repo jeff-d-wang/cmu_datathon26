@@ -278,6 +278,33 @@ declare module "@databricks/appkit-ui/react" {
           description: string;
         }>;
       };
+    facility_record: {
+        name: "facility_record";
+        parameters: {
+          /** STRING - use sql.string() */
+          id: SQLStringMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          unique_id: string;
+          /** @sqlType STRING */
+          name: string;
+          /** @sqlType STRING */
+          description: string;
+          /** @sqlType STRING */
+          specialties: string;
+          /** @sqlType STRING */
+          procedures: string;
+          /** @sqlType STRING */
+          equipment: string;
+          /** @sqlType STRING */
+          capability: string;
+          /** @sqlType STRING */
+          source_urls: string;
+          /** @sqlType STRING */
+          channels: string;
+        }>;
+      };
     heart_candidates: {
         name: "heart_candidates";
         parameters: {

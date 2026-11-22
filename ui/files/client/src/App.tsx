@@ -4,6 +4,7 @@ import { fromFragment, initialState, reducer } from './flow/state';
 import { I18nProvider, makeT } from './i18n';
 import type { StringKey } from './i18n/en';
 import { IntentScreen, WhoScreen } from './screens/Onboarding';
+import { ServiceScreen } from './screens/Service';
 import { EmergencyScreen } from './screens/Emergency';
 import { PlaceScreen, SymptomsScreen } from './screens/Symptoms';
 import { PrefetchForPlace, ResultsScreen } from './screens/Results';
@@ -43,6 +44,8 @@ export default function App() {
         return <PlaceScreen />;
       case 'intent':
         return <IntentScreen />;
+      case 'service':
+        return <ServiceScreen />;
       case 'emergency':
         return <EmergencyScreen />;
       case 'who':
