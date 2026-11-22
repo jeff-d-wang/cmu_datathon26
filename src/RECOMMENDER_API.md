@@ -38,9 +38,12 @@ evidence speaks.**
 ## 2. The one call the web app makes
 
 ```python
+import sys; sys.path.insert(0, "src")   # modules live in src/
 from hybrid_recommend import evidence_card
 
 result = evidence_card(spark, symptoms, context, pin, top_n)
+# defaults: context="", top_n=5; signature is
+# (spark, symptoms, context="", pin=None, top_n=5)
 ```
 
 ### Inputs
@@ -78,10 +81,12 @@ result = evidence_card(spark, symptoms, context, pin, top_n)
           "required_missing": [],      # corroboration gaps, e.g. CABG without ICU/blood bank
           "contribution": 0.48,  # weight × band value — the score's building block
           "weight_source": "survey share 0.961 (Wilson 95% CI [0.931, 0.978], category Kish n_eff 400; ...)",
-          "quote": {"source_field": "capability", "text": "Offers Emergency & Critical Care", "evidence_status": "direct"}
+          "quote": {"source_field": "capability", "text": "Offers Emergency & Critical Care",
+                    "evidence_status": "documented_single"}
         }
       ],
-      "unmet_detail": [        # needed services NOT documented — show, never hide
+      "unmet": ["ctScanner", "cathLab"],   # raw list from explain()
+      "unmet_detail": [        # same info, enriched — prefer rendering this
         {"service": "cathLab", "weight": 0.5, "weight_source": "pathway escalation ...",
          "note": "no evidence found (unknown, not disproven -- absence of evidence is not evidence of absence)"}
       ]
@@ -104,6 +109,16 @@ result = evidence_card(spark, symptoms, context, pin, top_n)
 * `LLM-estimated, no CI` — fallback weights, never presented as data
 * `explicitly requested by patient (expert-set, no CI)` — user-named service
 * `pathway escalation (expert-set, no CI); ...` — guideline rule (chest pain→cath lab, etc.)
+
+Quote `evidence_status` values (facility-side evidence grading):
+`documented_multi` (verbatim text in 2+ source fields — strongest) >
+`documented_single` (verbatim text in one field) > `structured_field` (from a
+structured column) > `tag_only` (tokenized match only — weakest, consider
+showing as "weakly documented").
+
+Confidence `band` values: `high` (1.0) > `medium` (0.5) > `unverified` (0.3) >
+`low` (0.05). A need missing from a facility appears in `unmet`, not with a
+band — never render silence as absence.
 
 ## 3. Error & performance contract
 
