@@ -13,7 +13,9 @@ import { WEIGHTS, type ComponentId } from '../domain/score';
 import { LayerAPanel } from './CarePanels';
 import { parseAge } from '../domain/redflags';
 import type { Facility } from '../domain/types';
-import { Candidates } from '../data/source';
+import { Candidates, DATA_SOURCE } from '../data/source';
+import { EngineResults } from './EngineResults';
+import { EngineCandidates } from '../engine/live';
 import { Shell } from '../components/Shell';
 import { IndiaInset } from '../components/MapPanel';
 import { StreetMap } from '../components/StreetMap';
@@ -97,7 +99,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
   const warn = r.warnings.length > 0;
   const titleId = `card-${f.unique_id}`;
   return (
-    <article aria-labelledby={titleId} className={`flex flex-col gap-3 rounded-2xl border-[1.5px] border-[var(--hc-border)] bg-white p-4${muted ? ' opacity-70' : ''}`}>
+    <article aria-labelledby={titleId} className={`flex flex-col gap-3 rounded-[var(--hc-r-card)] border-[1.5px] border-[var(--hc-border)] bg-white p-4${muted ? ' opacity-70' : ''}`}>
       <header className="flex items-start gap-3">
         <span aria-hidden className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-[15px] font-bold ${warn ? 'border-2 border-[#6a5400] bg-white text-[#6a5400]' : 'bg-[var(--hc-primary)] text-white'}`}>{rank}</span>
         <div className="min-w-0 flex-1">
@@ -116,7 +118,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
         <TierTag tier={r.tier} />
         {f.loc_approx && <span className="rounded-full border border-[var(--hc-warn-border)] bg-[var(--hc-warn-bg)] px-2 py-0.5 text-[14px] font-medium text-[var(--hc-warn-text)]">Approximate location</span>}
       </div>
-      <div className="rounded-xl bg-[var(--hc-bg)] px-3 py-3">
+      <div className="rounded-[var(--hc-r-control)] bg-[var(--hc-bg)] px-3 py-3">
         <ScoreMeter score={sc.score} lo={sc.lo} hi={sc.hi} confidence={sc.confidence} />
       </div>
       <p className="text-[15px]"><span className="font-semibold">Why it is here:</span> {sc.why}</p>
@@ -135,7 +137,7 @@ function ResultCard({ r, rank, onOpen, muted, unit }: { r: Ranked; rank: number;
         <p className="flex items-start gap-1.5 text-[15px] text-[var(--hc-muted)]"><Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{t('data_note_truncated')}</p>
       )}
       <div className="flex gap-2">
-        {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={t('call')} className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[var(--hc-primary)] px-3 text-[16px] font-semibold text-white hover:bg-[var(--hc-primary-dark)]" />}
+        {f.official_phone && <CallLink number={f.official_phone} placeName={f.name} label={t('call')} className="flex min-h-11 flex-1 items-center justify-center rounded-[var(--hc-r-control)] bg-[var(--hc-primary)] px-3 text-[16px] font-semibold text-white hover:bg-[var(--hc-primary-dark)]" />}
         <SecondaryButton className="flex-1" onClick={onOpen} aria-label={`${t('full_details')}: ${f.name}`}>{t('full_details')}</SecondaryButton>
       </div>
     </article>
@@ -146,7 +148,7 @@ function OutsideRow({ r, rank, onOpen, unit }: { r: Ranked; rank: number; onOpen
   const sc = r.score;
   const f = r.facility;
   return (
-    <button type="button" onClick={onOpen} aria-label={`Full details: ${f.name}`} className="flex min-h-14 w-full items-center gap-3 rounded-xl border-[1.5px] border-[var(--hc-border)] bg-white px-3 py-2 text-left opacity-70 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--hc-primary)]">
+    <button type="button" onClick={onOpen} aria-label={`Full details: ${f.name}`} className="flex min-h-14 w-full items-center gap-3 rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white px-3 py-2 text-left opacity-70 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--hc-primary)]">
       <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--hc-primary)] text-[15px] font-bold text-white">{rank}</span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[16px] font-bold">{f.name}</span>
@@ -172,7 +174,7 @@ const CONDITION_TEXT: Record<string, string> = {
 function Assumed({ rows }: { rows: { label: string; value: string; screen: FlowState['screen'] | null }[] }) {
   const { dispatch } = useFlow();
   return (
-    <section aria-labelledby="assumed-title" className="rounded-xl border-[1.5px] border-[var(--hc-border)] bg-white px-3 py-2">
+    <section aria-labelledby="assumed-title" className="rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white px-3 py-2">
       <h2 id="assumed-title" className="text-[17px] font-bold">What we assumed</h2>
       <dl className="mt-1 flex flex-col gap-1 text-[15px]">
         {rows.map((r) => (
@@ -360,6 +362,7 @@ export function ResultsScreen() {
   const { s } = useFlow();
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
+  if (DATA_SOURCE === 'engine_fixture' || DATA_SOURCE === 'engine_clean') return <EngineResults />;
   return <Candidates bbox={bbox}>{(l) => <ResultsBody facilities={l.rows} loading={l.loading} error={l.error} warming={l.warming} sample={l.sample} />}</Candidates>;
 }
 
@@ -374,5 +377,6 @@ export function PrefetchForPlace() {
   const { s } = useFlow();
   const bbox = useMemo(() => (s.place ? coarseBBox(s.place, FETCH_RADIUS_KM) : null), [s.place]);
   if (!bbox) return null;
+  if (DATA_SOURCE === 'engine_clean') return <EngineCandidates bbox={bbox}>{() => null}</EngineCandidates>;
   return <Candidates bbox={bbox}>{() => null}</Candidates>;
 }

@@ -10,13 +10,15 @@ import { SAMPLE_FACILITIES, SAMPLE_PLACES, SAMPLE_STATES } from '../sample/sampl
  * Data source switch (client env VITE_DATA_SOURCE):
  *   sample (default) - bundled fictional places, runs offline
  *   raw              - live read-only queries on the original Virtue Foundation tables
+ *   engine_fixture   - recommender-engine demo results from a local fixture (no queries); only 3 demo PINs
+ *   engine_clean     - Alvin's method (client/src/engine/method.ts) on the clean table, read-only query engine_candidates_clean; local copy only
  *   clean            - live read-only queries on the team's cleaned table labuser_jdw2.gold.facility_district_health_indicators
  * The legacy flag VITE_USE_SAMPLE_DATA=false still means "raw".
  */
-export type DataSource = 'sample' | 'raw' | 'clean';
+export type DataSource = 'sample' | 'raw' | 'clean' | 'engine_fixture' | 'engine_clean';
 const envSource = String(import.meta.env.VITE_DATA_SOURCE ?? '');
 export const DATA_SOURCE: DataSource =
-  envSource === 'clean' || envSource === 'raw' || envSource === 'sample'
+  envSource === 'clean' || envSource === 'raw' || envSource === 'sample' || envSource === 'engine_fixture' || envSource === 'engine_clean'
     ? envSource
     : import.meta.env.VITE_USE_SAMPLE_DATA === 'false'
       ? 'raw'
@@ -95,7 +97,10 @@ function LiveCandidatesClean({ bbox, children }: { bbox: BBox; children: (l: Loa
   return <>{children({ rows, loading, error, warming: warmingState(warehouseStatus), sample: false })}</>;
 }
 
+const NONE = { loading: false, error: null, warming: false, sample: true } as const;
+
 export function Candidates({ bbox, children }: { bbox: BBox; children: (l: Loaded<Facility[]>) => ReactNode }) {
+  if (DATA_SOURCE === 'engine_fixture' || DATA_SOURCE === 'engine_clean') return <>{children({ rows: [], ...NONE })}</>;
   if (DATA_SOURCE === 'sample') return <>{children({ rows: SAMPLE_FACILITIES, loading: false, error: null, warming: false, sample: true })}</>;
   if (DATA_SOURCE === 'clean') return <LiveCandidatesClean bbox={bbox}>{children}</LiveCandidatesClean>;
   return <LiveCandidates bbox={bbox}>{children}</LiveCandidates>;
@@ -133,7 +138,8 @@ function LiveEmergencyClean({ bbox, children }: { bbox: BBox; children: (l: Load
 }
 
 export function EmergencyPlaces({ bbox, children }: { bbox: BBox; children: (l: Loaded<EmergencyPlace[]>) => ReactNode }) {
-  if (DATA_SOURCE === 'clean') return <LiveEmergencyClean bbox={bbox}>{children}</LiveEmergencyClean>;
+  if (DATA_SOURCE === 'engine_fixture') return <>{children({ rows: [], ...NONE })}</>;
+  if (DATA_SOURCE === 'clean' || DATA_SOURCE === 'engine_clean') return <LiveEmergencyClean bbox={bbox}>{children}</LiveEmergencyClean>;
   if (USE_SAMPLE) {
     const rows = SAMPLE_FACILITIES.filter((f) => f.emergency_claim).map((f) => ({ unique_id: f.unique_id, name: f.name, lat: f.lat, lon: f.lon, claims_247: f.claims_247, official_phone: f.official_phone }));
     return <>{children({ rows, loading: false, error: null, warming: false, sample: true })}</>;
@@ -165,3 +171,10 @@ export function Places({ state, children }: { state: string; children: (l: Loade
   if (USE_SAMPLE) return <>{children({ rows: SAMPLE_PLACES.filter((p) => p.state === state), loading: false, error: null, warming: false, sample: true })}</>;
   return <LivePlaces state={state}>{children}</LivePlaces>;
 }
+
+/** engine_fixture mode: the only places the fixture has results for (approximate PIN centres). */
+export const ENGINE_PLACES: Place[] = [
+  { kind: 'pin', code: '302001', district: 'JAIPUR', state: 'RAJASTHAN', towns: 'Jaipur', lat: 26.92, lon: 75.82 },
+  { kind: 'pin', code: '411001', district: 'PUNE', state: 'MAHARASHTRA', towns: 'Pune', lat: 18.52, lon: 73.86 },
+  { kind: 'pin', code: '800001', district: 'PATNA', state: 'BIHAR', towns: 'Patna', lat: 25.61, lon: 85.14 },
+];

@@ -8,22 +8,23 @@ const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).jo
  * Persistent emergency banner (every screen). A labelled region, not a live alert, so it is not
  * re-announced on every screen change. Optional `extra` puts urgent advice inside it (one red box, not two).
  */
-export function EmergencyBanner({ onOpen, extra }: { onOpen: () => void; extra?: ReactNode }) {
+export function EmergencyBanner({ onOpen, extra, replaceText }: { onOpen: () => void; extra?: ReactNode; replaceText?: string }) {
   const t = useT();
   const [before, rest] = t('emergency_banner').split('{112}');
   const [mid, after] = (rest ?? '').split('{108}');
   return (
-    <aside aria-label={t('emergency_numbers')} className="rounded-xl border-[1.5px] border-[var(--hc-em-border)] bg-[var(--hc-em-bg)] px-3 py-2 text-[16px] text-[var(--hc-em-text)] hc-no-print">
+    <aside aria-label={t('emergency_numbers')} className="rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-em-border)] bg-[var(--hc-em-bg)] px-3 py-2 text-[16px] text-[var(--hc-em-text)] hc-no-print">
       <div className="flex items-start gap-2">
         <TriangleAlert className="mt-1 h-4 w-4 shrink-0" aria-hidden />
         <p className="flex-1">
+          {replaceText ? <strong className="font-extrabold">{replaceText.split(/(112|108)/).map((part, i) => (part === '112' || part === '108' ? <a key={i} href={`tel:${part}`} className="underline">{part}</a> : part))}</strong> : <>
           {before}
           <a href="tel:112" className="font-bold underline">112</a>
           {mid}
           <a href="tel:108" className="font-bold underline">108</a>
-          {after}
+          {after}</>}
         </p>
-        <button type="button" onClick={onOpen} aria-label={t('open_emergency')} className="min-h-11 shrink-0 rounded-lg px-2 text-[15px] font-semibold underline">
+        <button type="button" onClick={onOpen} aria-label={t('open_emergency')} className="min-h-11 shrink-0 rounded-[var(--hc-r-inner)] px-2 text-[15px] font-semibold underline">
           {t('what_to_do')} →
         </button>
       </div>
@@ -50,7 +51,7 @@ export function Bubble({ children }: { children: ReactNode }) {
       <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[var(--hc-tint)] text-[var(--hc-primary)]" aria-hidden>
         <HeartPulse className="h-6 w-6" />
       </div>
-      <p className="rounded-2xl rounded-tl-sm bg-[var(--hc-bg)] px-3 py-2 text-[16px] text-[var(--hc-text-2)]">{children}</p>
+      <p className="rounded-[var(--hc-r-card)] rounded-tl-sm bg-[var(--hc-bg)] px-3 py-2 text-[16px] text-[var(--hc-text-2)]">{children}</p>
     </div>
   );
 }
@@ -64,7 +65,7 @@ export function OptionCard({ selected, onClick, title, sub, icon, danger }: { se
       aria-checked={selected}
       onClick={onClick}
       className={cx(
-        'flex min-h-14 w-full items-center gap-3 rounded-[14px] border-[1.5px] px-3 py-2 text-left transition-colors',
+        'flex min-h-14 w-full items-center gap-3 rounded-[var(--hc-r-control)] border-[1.5px] px-3 py-2 text-left transition-colors',
         selected ? 'border-[var(--hc-primary)] bg-[var(--hc-tint)]' : danger ? 'border-[var(--hc-em-border)] bg-[var(--hc-em-bg)] hover:brightness-[0.98]' : 'border-[var(--hc-control)] bg-white hover:bg-[var(--hc-bg)]',
       )}
     >
@@ -99,7 +100,7 @@ export function PrimaryButton({ children, className, ...rest }: ButtonHTMLAttrib
     <button
       type="button"
       {...rest}
-      className={cx('min-h-[52px] w-full rounded-[14px] px-4 text-[17px] font-semibold text-white', rest.disabled ? 'cursor-not-allowed bg-[var(--hc-disabled)]' : 'bg-[var(--hc-primary)] hover:bg-[var(--hc-primary-dark)]', className)}
+      className={cx('min-h-[52px] w-full rounded-[var(--hc-r-control)] px-4 text-[17px] font-semibold', rest.disabled ? 'cursor-not-allowed border-[1.5px] border-[var(--hc-border)] bg-[var(--hc-bg)] text-[var(--hc-muted)]' : 'bg-[var(--hc-primary)] text-white hover:bg-[var(--hc-primary-dark)]', className)}
     >
       {children}
     </button>
@@ -108,7 +109,7 @@ export function PrimaryButton({ children, className, ...rest }: ButtonHTMLAttrib
 
 export function SecondaryButton({ children, className, ...rest }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button type="button" {...rest} className={cx('min-h-11 rounded-xl border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)] hover:bg-[var(--hc-tint)]', className)}>
+    <button type="button" {...rest} className={cx('min-h-11 rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-primary)] bg-white px-4 text-[16px] font-semibold text-[var(--hc-primary)] hover:bg-[var(--hc-tint)]', className)}>
       {children}
     </button>
   );
@@ -145,7 +146,7 @@ export function StatusTag({ status, children, noIcon }: { status: Status; childr
 export function Notice({ status, children }: { status: Status; children: ReactNode }) {
   const { cls, Icon } = statusStyle[status];
   return (
-    <div className={cx('flex items-start gap-2 rounded-xl border px-3 py-2 text-[16px]', cls, status === 'warn' ? 'border-[var(--hc-warn-border)]' : 'border-transparent')}>
+    <div className={cx('flex items-start gap-2 rounded-[var(--hc-r-control)] border px-3 py-2 text-[16px]', cls, status === 'warn' ? 'border-[var(--hc-warn-border)]' : 'border-transparent')}>
       <Icon className="mt-1 h-4 w-4 shrink-0" aria-hidden />
       <div>{children}</div>
     </div>
@@ -154,7 +155,7 @@ export function Notice({ status, children }: { status: Status; children: ReactNo
 
 export function Section({ title, children, className }: { title?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={cx('rounded-[14px] border-[1.5px] border-[var(--hc-border)] bg-white px-[18px] py-4', className)}>
+    <section className={cx('rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white px-[18px] py-4', className)}>
       {title && <h2 className="mb-2 text-[17px] font-bold">{title}</h2>}
       {children}
     </section>
@@ -199,7 +200,7 @@ export const titleCase = (s: string) => s.toLowerCase().replace(/\b\w/g, (c) => 
 /** Compact "what you told us" summary: label/value rows with one Change action, aligned to the right. */
 export function AnswerSummary({ rows, actionLabel, onAction }: { rows: { label: string; value: string }[]; actionLabel: string; onAction: () => void }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border-[1.5px] border-[var(--hc-border)] bg-white px-3 py-2">
+    <div className="flex items-center gap-3 rounded-[var(--hc-r-control)] border-[1.5px] border-[var(--hc-border)] bg-white px-3 py-2">
       <dl className="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-[15px]">
         {rows.filter((r) => r.value).map((r) => (
           <div key={r.label} className="contents">
@@ -209,6 +210,34 @@ export function AnswerSummary({ rows, actionLabel, onAction }: { rows: { label: 
         ))}
       </dl>
       <LinkButton onClick={onAction} className="shrink-0">{actionLabel}</LinkButton>
+    </div>
+  );
+}
+
+/** Animated expanding panel (grid-rows 0fr -> 1fr). Content stays in the DOM but is inert/hidden while closed. */
+export function Collapse({ open, children, id }: { open: boolean; children: ReactNode; id?: string }) {
+  return (
+    <div id={id} className="hc-collapse" data-open={open} aria-hidden={!open} inert={!open}>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+/** Placeholder cards while results load. Pair with a visible/sr text status (Spinner-style role="status"). */
+export function SkeletonCards({ n = 3, label }: { n?: number; label: string }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <p role="status" className="sr-only">{label}</p>
+      <div aria-hidden className="flex flex-col gap-3">
+        {Array.from({ length: n }, (_, i) => (
+          <div key={i} className="flex animate-pulse flex-col gap-3 rounded-[var(--hc-r-card)] border-[1.5px] border-[var(--hc-border)] bg-white p-4 motion-reduce:animate-none">
+            <div className="h-5 w-2/3 rounded-[var(--hc-r-inner)] bg-[var(--hc-unk-bg)]" />
+            <div className="h-4 w-1/3 rounded-[var(--hc-r-inner)] bg-[var(--hc-unk-bg)]" />
+            <div className="h-16 rounded-[var(--hc-r-inner)] bg-[var(--hc-bg)]" />
+            <div className="h-11 w-28 rounded-[var(--hc-r-control)] bg-[var(--hc-unk-bg)]" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -91,6 +91,65 @@ declare module "@databricks/appkit-ui/react" {
           official_phone_shared_by: number;
         }>;
       };
+    engine_candidates_clean: {
+        name: "engine_candidates_clean";
+        parameters: {
+          /** DOUBLE - use sql.double() */
+          min_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lat: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          min_lon: SQLNumberMarker;
+          /** DOUBLE - use sql.double() */
+          max_lon: SQLNumberMarker;
+        };
+        result: Array<{
+          /** @sqlType STRING */
+          id: string;
+          /** @sqlType STRING */
+          name: string;
+          /** @sqlType STRING */
+          city: string;
+          /** @sqlType STRING */
+          state: string;
+          /** @sqlType STRING */
+          pin: string;
+          /** @sqlType STRING */
+          facility_type: string;
+          /** @sqlType STRING */
+          organization_type: string;
+          /** @sqlType DOUBLE */
+          capacity: number;
+          /** @sqlType DOUBLE */
+          lat: number;
+          /** @sqlType DOUBLE */
+          lon: number;
+          /** @sqlType DOUBLE */
+          centroid_lat: number;
+          /** @sqlType DOUBLE */
+          centroid_lon: number;
+          /** @sqlType STRING */
+          coord_source: string;
+          /** @sqlType STRING */
+          pincode_valid: string;
+          /** @sqlType STRING */
+          pincode_matched: string;
+          /** @sqlType STRING */
+          phone: string;
+          /** @sqlType STRING */
+          website: string;
+          /** @sqlType STRING */
+          specialties: string;
+          /** @sqlType STRING */
+          procedure: string;
+          /** @sqlType STRING */
+          equipment: string;
+          /** @sqlType STRING */
+          capability: string;
+          /** @sqlType STRING */
+          description: string;
+        }>;
+      };
     heart_candidates: {
         name: "heart_candidates";
         parameters: {

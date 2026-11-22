@@ -5,7 +5,10 @@ import { isLabelCode, type LabelCode } from './labels';
 export const SYMPTOM_MAP_STATUS: string = symptomMap.status;
 export const SYMPTOM_IDS = symptomMap.symptoms.map((s) => s.id);
 /** The common symptoms shown as one-tap buttons; the rest are found by typing. */
-export const QUICK_PICK_IDS = symptomMap.symptoms.filter((s) => s.quick_pick).map((s) => s.id);
+export const QUICK_PICK_IDS = symptomMap.symptoms
+  .filter((s) => s.quick_pick)
+  .sort((a, b) => ((b as { survey_visits?: number }).survey_visits ?? 0) - ((a as { survey_visits?: number }).survey_visits ?? 0))
+  .map((s) => s.id);
 /** Symptoms that always open the Emergency screen when picked (e.g. stroke signs). */
 export const EMERGENCY_NOW_IDS: readonly string[] = symptomMap.symptoms.filter((s) => s.severity === 'EMERGENCY_NOW').map((s) => s.id);
 

@@ -5,7 +5,7 @@ export const en = {
   emergency_banner: 'Emergency? Call {112} (any emergency) or {108} (ambulance). Do not drive yourself.',
   any_emergency: 'any emergency',
   ambulance: 'ambulance',
-  start_over: 'Start over (new person)',
+  start_over: 'Start over',
   nothing_saved: 'No name, no account. Nothing is saved.',
   not_advice: 'Nothing is saved. Not medical advice. This tool cannot diagnose.',
   step_of: 'Step {n} of 4',

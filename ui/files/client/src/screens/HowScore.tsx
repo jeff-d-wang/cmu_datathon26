@@ -39,7 +39,7 @@ export function HowScoreScreen() {
             <li><strong>Confidence</strong> (High, Medium, Low) comes from how wide the range is and how many independent fields back the match.</li>
           </ul>
 
-          <section className="rounded-2xl border-[1.5px] border-[var(--hc-border)] p-4">
+          <section className="rounded-[var(--hc-r-card)] border-[1.5px] border-[var(--hc-border)] p-4">
             <h2 className="text-[17px] font-bold">Points for each part</h2>
             <p className="text-[15px] text-[var(--hc-muted)]">The weights change with how urgent the need is. When it is urgent, emergency readiness and distance count most. When it is a planned procedure, procedure evidence counts most.</p>
             <table className="mt-2 w-full text-left text-[15px]">

@@ -1,0 +1,806 @@
+{
+ "_note": "FIXTURE transcribed from Alvin's notebook 'find_facilities API demo' outputs (2026-11-21). Not live.",
+ "entries": [
+  {
+   "query": "chest pain",
+   "pin": "302001",
+   "label": "Chest pain and related symptoms",
+   "source": "NHAMCS 2022 survey-weighted shares",
+   "tolerance_km": 15,
+   "escalation": "cath_lab",
+   "alternates": [
+    "Stomach and abdominal pain, cramps an…",
+    "Headache, pain in head"
+   ],
+   "needs": [
+    [
+     "emergency",
+     0.96,
+     0.93,
+     0.98
+    ],
+    [
+     "ecg",
+     0.86,
+     0.83,
+     0.9
+    ],
+    [
+     "xray",
+     0.81,
+     0.78,
+     0.85
+    ],
+    [
+     "lab",
+     0.78,
+     0.74,
+     0.82
+    ],
+    [
+     "ct",
+     0.18,
+     0.15,
+     0.23
+    ],
+    [
+     "inpatient",
+     0.18,
+     0.15,
+     0.22
+    ]
+   ],
+   "meta": {
+    "advisory": "If this is sudden or severe, call 112 (or 108 for an ambulance) before travelling.",
+    "critical": true,
+    "source": "NHAMCS 2022 survey-weighted shares"
+   },
+   "results": [
+    {
+     "rank": 1,
+     "facility_id": "8de46ac7-edde-480b-96a9-fb39f8c3c8d9",
+     "name": "Shekhawati Hospital & Research Centre",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 5.6,
+     "score": 0.728,
+     "match": 0.83,
+     "relevance": 1.0,
+     "relevance_reason": "specialty tag fits",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)",
+      "tag-only evidence for ecg"
+     ],
+     "evidence": {
+      "c_section": "Caesarean section (C-section) delivery is offered",
+      "cath_lab": "Balloon Angioplasty",
+      "ct": "CT scan and MRI services available 24x7",
+      "dialysis": "nephrology",
+      "ecg": "cardiology",
+      "emergency": "Offers emergency care services",
+      "fracture_care": "orthopedicsurgery",
+      "icu": "Intensive Care Unit (ICU) available",
+      "inpatient": "Has 100-bed capacity",
+      "lab": "On-site Pathology laboratory",
+      "mri": "CT scan and MRI services available 24x7",
+      "operating_room": "2 modular operating theatres",
+      "ultrasound": "radiology",
+      "xray": "X-ray imaging equipment is available in Radiology"
+     }
+    },
+    {
+     "rank": 2,
+     "facility_id": "fixture-nims-heart-and-brain-hospital-nhbh",
+     "name": "Nims Heart And Brain Hospital - Nhbh",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.704,
+     "match": 0.72,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)",
+      "tag-only evidence for ecg, xray"
+     ],
+     "evidence": {
+      "emergency": "Offers 24/7 emergency services",
+      "ecg": "cardiology"
+     }
+    },
+    {
+     "rank": 3,
+     "facility_id": "fixture-soni-hospital",
+     "name": "Soni Hospital",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.695,
+     "match": 0.71,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)"
+     ],
+     "evidence": {
+      "emergency": "no evidence found",
+      "ecg": "ECG machine"
+     }
+    }
+   ]
+  },
+  {
+   "query": "stroke symptoms, face drooping",
+   "pin": "302001",
+   "label": "Stroke / suspected stroke",
+   "source": "expert guideline (no survey frequency data)",
+   "tolerance_km": 15,
+   "alternates": [],
+   "needs": [
+    [
+     "icu",
+     0.35,
+     null,
+     null
+    ],
+    [
+     "ct",
+     0.3,
+     null,
+     null
+    ],
+    [
+     "lab",
+     0.2,
+     null,
+     null
+    ],
+    [
+     "ecg",
+     0.15,
+     null,
+     null
+    ]
+   ],
+   "meta": {
+    "advisory": "Suspected stroke is time-critical. Call 112 (or 108 for an ambulance) NOW.",
+    "critical": true,
+    "source": "expert guideline (no survey frequency data)"
+   },
+   "results": [
+    {
+     "rank": 1,
+     "facility_id": "fixture-soni-hospital",
+     "name": "Soni Hospital",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.925,
+     "match": 0.95,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "icu": "Maintains a dedicated Neuro-ICU within the Neurosciences Centre and provides neurosurgical care",
+      "ct": "Performs CT scans and MRIs for diagnostic imaging"
+     }
+    },
+    {
+     "rank": 2,
+     "facility_id": "fixture-surya-hospitals-jaipur",
+     "name": "Surya Hospitals Jaipur",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 1.5,
+     "score": 0.846,
+     "match": 0.85,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "icu": "Paediatric Intensive Care Unit (PICU)",
+      "ct": "CT Scan"
+     }
+    },
+    {
+     "rank": 3,
+     "facility_id": "fixture-nims-heart-and-brain-hospital-nhbh",
+     "name": "Nims Heart And Brain Hospital - Nhbh",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.799,
+     "match": 0.82,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "icu": "Dedicated Intensive Care Unit (ICU)",
+      "ct": "NCCT, contrast-enhanced CT of Head, Head & Neck"
+     }
+    }
+   ]
+  },
+  {
+   "query": "child swallowed too many pills",
+   "pin": "302001",
+   "label": "Poisoning / overdose",
+   "source": "expert guideline (no survey frequency data)",
+   "tolerance_km": 15,
+   "alternates": [],
+   "needs": [
+    [
+     "emergency",
+     0.4,
+     null,
+     null
+    ],
+    [
+     "icu",
+     0.3,
+     null,
+     null
+    ],
+    [
+     "lab",
+     0.3,
+     null,
+     null
+    ]
+   ],
+   "meta": {
+    "advisory": "Poisoning is time-critical. Call 112 (or 108 for an ambulance) NOW.",
+    "critical": true,
+    "source": "expert guideline (no survey frequency data)"
+   },
+   "results": [
+    {
+     "rank": 1,
+     "facility_id": "fixture-nims-heart-and-brain-hospital-nhbh",
+     "name": "Nims Heart And Brain Hospital - Nhbh",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.884,
+     "match": 0.91,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "emergency": "Offers 24/7 emergency services",
+      "icu": "Dedicated Intensive Care Unit (ICU)"
+     }
+    },
+    {
+     "rank": 2,
+     "facility_id": "fixture-nav-imperial-hospital-and-research-centre",
+     "name": "NAV Imperial Hospital and Research Centre",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.8,
+     "score": 0.88,
+     "match": 0.91,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "emergency": "Emergency Services",
+      "icu": "Provides critical care services"
+     }
+    },
+    {
+     "rank": 3,
+     "facility_id": "fixture-shekhawati-hospital-research-centre",
+     "name": "Shekhawati Hospital & Research Centre",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 5.6,
+     "score": 0.878,
+     "match": 1.0,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "emergency": "Offers emergency care services",
+      "icu": "Intensive Care Unit (ICU) available"
+     }
+    }
+   ]
+  },
+  {
+   "query": "low back pain",
+   "pin": "411001",
+   "label": "Low back symptoms",
+   "source": "NHAMCS 2022 survey-weighted shares",
+   "tolerance_km": 40,
+   "alternates": [
+    "Stomach and abdominal pain, cramps an…",
+    "Chest pain and related symptoms (not …"
+   ],
+   "needs": [
+    [
+     "emergency",
+     0.48,
+     0.35,
+     0.62
+    ],
+    [
+     "lab",
+     0.46,
+     0.35,
+     0.58
+    ],
+    [
+     "ct",
+     0.34,
+     0.24,
+     0.46
+    ],
+    [
+     "xray",
+     0.22,
+     0.14,
+     0.34
+    ],
+    [
+     "mri",
+     0.11,
+     0.06,
+     0.21
+    ],
+    [
+     "inpatient",
+     0.1,
+     0.05,
+     0.2
+    ]
+   ],
+   "meta": {
+    "advisory": "",
+    "critical": false,
+    "source": "NHAMCS 2022 survey-weighted shares"
+   },
+   "results": [
+    {
+     "rank": 1,
+     "facility_id": "fixture-harsh-hospital",
+     "name": "Harsh Hospital",
+     "city": "Pune",
+     "type": "hospital",
+     "km": 3.4,
+     "score": 0.843,
+     "match": 0.85,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)"
+     ],
+     "evidence": {
+      "emergency": "Emergency and trauma-related care provided through the casualty department",
+      "lab": "Laboratory tests (blood and stool analyses)"
+     }
+    },
+    {
+     "rank": 2,
+     "facility_id": "fixture-n-m-wadia-institute-of-cardiology",
+     "name": "N M Wadia Institute of Cardiology",
+     "city": "Pune",
+     "type": "hospital",
+     "km": 2.1,
+     "score": 0.751,
+     "match": 0.75,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)"
+     ],
+     "evidence": {
+      "emergency": "Provides cardiac emergency services",
+      "lab": "Pathology Laboratory"
+     }
+    },
+    {
+     "rank": 3,
+     "facility_id": "fixture-mahaveer-hospital",
+     "name": "Mahaveer Hospital",
+     "city": "Chhatrapati Sambhajinagar",
+     "type": "hospital",
+     "km": 0.7,
+     "score": 0.75,
+     "match": 0.75,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)"
+     ],
+     "evidence": {
+      "emergency": "24/7 emergency care",
+      "lab": "Advanced Pathology and imaging services"
+     }
+    }
+   ]
+  },
+  {
+   "query": "need dialysis for kidney failure",
+   "pin": "800001",
+   "label": "Dialysis / kidney failure",
+   "source": "expert guideline (no survey frequency data)",
+   "tolerance_km": 40,
+   "alternates": [],
+   "needs": [
+    [
+     "dialysis",
+     0.5,
+     null,
+     null
+    ],
+    [
+     "lab",
+     0.3,
+     null,
+     null
+    ],
+    [
+     "inpatient",
+     0.2,
+     null,
+     null
+    ]
+   ],
+   "meta": {
+    "advisory": "If dialysis has been missed for days or symptoms are severe, call 112 (or 108).",
+    "critical": false,
+    "source": "expert guideline (no survey frequency data)"
+   },
+   "results": [
+    {
+     "rank": 1,
+     "facility_id": "fixture-indira-gandhi-institute-of-medical-sciences",
+     "name": "Indira Gandhi Institute of Medical Sciences",
+     "city": "Patna",
+     "type": "hospital",
+     "km": 3.6,
+     "score": 0.992,
+     "match": 1.0,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "dialysis": "Offers Nephrology and Urology including renal dialysis and renal transplantation",
+      "lab": "Supportive departments include Histopathology, Radiology, Microbiology and Biochemistry"
+     }
+    },
+    {
+     "rank": 2,
+     "facility_id": "fixture-samarpan-trauma-and-research-centre",
+     "name": "Samarpan Trauma and Research Centre",
+     "city": "Patna",
+     "type": "hospital",
+     "km": 4.8,
+     "score": 0.986,
+     "match": 1.0,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "dialysis": "Dialysis/haemodialysis",
+      "lab": "Pathology services"
+     }
+    },
+    {
+     "rank": 3,
+     "facility_id": "fixture-advanced-neuro-hospital",
+     "name": "Advanced Neuro Hospital",
+     "city": "Patna",
+     "type": "hospital",
+     "km": 1.3,
+     "score": 0.973,
+     "match": 0.97,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "expert guideline (no survey frequency data) - service shares are expert-set guideline value"
+     ],
+     "evidence": {
+      "dialysis": "Nephrology treatments including hemodialysis",
+      "lab": "Brain biopsy to obtain brain tissue for histopathological examination"
+     }
+    }
+   ]
+  },
+  {
+   "query": "1050",
+   "code": 1050,
+   "pin": "302001",
+   "label": "Chest pain and related symptoms",
+   "source": "NHAMCS 2022 survey-weighted shares",
+   "tolerance_km": 15,
+   "escalation": "cath_lab",
+   "alternates": [],
+   "needs": [
+    [
+     "emergency",
+     0.96,
+     0.93,
+     0.98
+    ],
+    [
+     "ecg",
+     0.86,
+     0.83,
+     0.9
+    ],
+    [
+     "xray",
+     0.81,
+     0.78,
+     0.85
+    ],
+    [
+     "lab",
+     0.78,
+     0.74,
+     0.82
+    ],
+    [
+     "ct",
+     0.18,
+     0.15,
+     0.23
+    ],
+    [
+     "inpatient",
+     0.18,
+     0.15,
+     0.22
+    ]
+   ],
+   "meta": {
+    "advisory": "If this is sudden or severe, call 112 (or 108 for an ambulance) before travelling.",
+    "critical": true,
+    "source": "NHAMCS 2022 survey-weighted shares"
+   },
+   "results": [
+    {
+     "rank": 1,
+     "facility_id": "8de46ac7-edde-480b-96a9-fb39f8c3c8d9",
+     "name": "Shekhawati Hospital & Research Centre",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 5.6,
+     "score": 0.728,
+     "match": 0.83,
+     "relevance": 1.0,
+     "relevance_reason": "specialty tag fits",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)",
+      "tag-only evidence for ecg"
+     ],
+     "evidence": {
+      "c_section": "Caesarean section (C-section) delivery is offered",
+      "cath_lab": "Balloon Angioplasty",
+      "ct": "CT scan and MRI services available 24x7",
+      "dialysis": "nephrology",
+      "ecg": "cardiology",
+      "emergency": "Offers emergency care services",
+      "fracture_care": "orthopedicsurgery",
+      "icu": "Intensive Care Unit (ICU) available",
+      "inpatient": "Has 100-bed capacity",
+      "lab": "On-site Pathology laboratory",
+      "mri": "CT scan and MRI services available 24x7",
+      "operating_room": "2 modular operating theatres",
+      "ultrasound": "radiology",
+      "xray": "X-ray imaging equipment is available in Radiology"
+     }
+    },
+    {
+     "rank": 2,
+     "facility_id": "fixture-nims-heart-and-brain-hospital-nhbh",
+     "name": "Nims Heart And Brain Hospital - Nhbh",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.704,
+     "match": 0.72,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)",
+      "tag-only evidence for ecg, xray"
+     ],
+     "evidence": {
+      "emergency": "Offers 24/7 emergency services",
+      "ecg": "cardiology"
+     }
+    },
+    {
+     "rank": 3,
+     "facility_id": "fixture-soni-hospital",
+     "name": "Soni Hospital",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.695,
+     "match": 0.71,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "complaint mapped to emergency-visit survey frequencies (data-backed)"
+     ],
+     "evidence": {
+      "emergency": "no evidence found",
+      "ecg": "ECG machine"
+     }
+    }
+   ]
+  },
+  {
+   "query": "uneasy since yesterday",
+   "pin": "302001",
+   "label": "Unrecognised problem",
+   "source": "generic fallback",
+   "tolerance_km": 40,
+   "alternates": [],
+   "needs": [
+    [
+     "emergency",
+     0.5,
+     null,
+     null
+    ],
+    [
+     "inpatient",
+     0.5,
+     null,
+     null
+    ]
+   ],
+   "meta": {
+    "advisory": "We could not map this description to a known complaint. If it feels urgent, call 112 (or 108).",
+    "critical": false,
+    "source": "generic fallback"
+   },
+   "results": [
+    {
+     "rank": 1,
+     "facility_id": "fixture-nims-heart-and-brain-hospital-nhbh",
+     "name": "Nims Heart And Brain Hospital - Nhbh",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 2.6,
+     "score": 0.996,
+     "match": 1.0,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "generic fallback - description not recognised",
+      "nearest general care, generic shares"
+     ],
+     "evidence": {
+      "emergency": "Offers 24/7 emergency services",
+      "inpatient": "Consultation: Outpatient & Inpatient"
+     }
+    },
+    {
+     "rank": 2,
+     "facility_id": "fixture-shekhawati-hospital-research-centre",
+     "name": "Shekhawati Hospital & Research Centre",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 5.6,
+     "score": 0.981,
+     "match": 1.0,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "generic fallback - description not recognised",
+      "nearest general care, generic shares"
+     ],
+     "evidence": {
+      "emergency": "Offers emergency care services",
+      "inpatient": "Has 100-bed capacity"
+     }
+    },
+    {
+     "rank": 3,
+     "facility_id": "fixture-tagore-hospital",
+     "name": "Tagore Hospital",
+     "city": "Jaipur",
+     "type": "hospital",
+     "km": 7.3,
+     "score": 0.968,
+     "match": 1.0,
+     "relevance": 1.0,
+     "relevance_reason": "not shown in demo output",
+     "trust": 1.0,
+     "location_flags": [],
+     "confidence": "HIGH",
+     "confidence_reasons": [
+      "generic fallback - description not recognised",
+      "nearest general care, generic shares"
+     ],
+     "evidence": {
+      "emergency": "Provides 24/7 emergency medical services",
+      "inpatient": "Provides diagnostic radiology imaging for outpatients and inpatients"
+     }
+    }
+   ]
+  }
+ ]
+}
